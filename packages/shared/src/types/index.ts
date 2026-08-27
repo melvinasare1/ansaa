@@ -1,0 +1,129 @@
+// Postgres data model (see supabase/migrations/). TypeScript stays camelCase;
+// snake_case columns are mapped at the query layer in mappers.ts.
+// Everything tenant-scoped is keyed by sellerId (= sellers.id). Once Auth is
+// wired, create seller rows with id = auth.uid().
+
+/**
+ * Product pricing: Website & Admin vs Fulfilment.
+ * Postgres `sellers.pricing_tier` still checks `early_bird | standard`
+ * (schema unchanged); mappers translate at the query layer.
+ */
+export type PricingTier = "website_admin" | "fulfilment";
+
+export const PRICING_TIER_BASE_FEE_CEDIS: Record<PricingTier, number> = {
+  website_admin: 250,
+  fulfilment: 400,
+};
+
+export type SellerUser = {
+  uid: string;
+  email: string | null;
+};
+
+export interface Seller {
+  id: string;
+  uid: string; // Intended auth uid of the seller who owns this tenant
+  businessName: string;
+  domain: string; // e.g. "makeup.com" — storefront lives here, dashboard at dashboard.makeup.com
+  storeSlug: string; // fallback path-based routing in dev: /store/[slug]
+  template: "template-a" | "template-b";
+  email: string;
+  phone: string;
+  pricingTier: PricingTier;
+  baseFeeCedis: number; // 250 Website & Admin, 400 Fulfilment intro
+  status: "onboarding" | "active" | "paused" | "offboarded";
+  createdAt: number;
+}
+
+export type ProductVariant = {
+  id: string;
+  name?: string;
+  values?: string[];
+  size?: string;
+  color?: string;
+  sku: string;
+  priceCedis: number;
+  stockQuantity: number;
+  images: string[];
+  imagesByValue?: Record<string, string[]>;
+};
+
+export interface Product {
+  id: string;
+  sellerId: string;
+  name: string;
+  description: string;
+  shortDescription?: string;
+  priceCedis: number;
+  compareAtPriceCedis?: number;
+  images: string[];
+  stockQuantity: number;
+  sku: string;
+  category: string;
+  active: boolean;
+  createdAt: number;
+  // Optional variant options the seller sets on the product. Buyer selections
+  // live on the cart item, not on this row.
+  sizes?: string[];
+  colors?: string[];
+  /** Named options the seller adds (e.g. Color with values Black, White). */
+  variants?: ProductVariant[];
+}
+
+export type OrderStatus =
+  | "pending_payment"
+  | "paid"
+  | "packed"
+  | "dispatched"
+  | "delivered"
+  | "return_requested"
+  | "returned"
+  | "cancelled"
+  | "refunded";
+
+export interface OrderItem {
+  productId: string;
+  name: string;
+  priceCedis: number;
+  quantity: number;
+}
+
+export interface Order {
+  id: string;
+  sellerId: string;
+  items: OrderItem[];
+  subtotalCedis: number;
+  buyerName: string;
+  buyerPhone: string;
+  deliveryAddress: string;
+  status: OrderStatus;
+  paymentReference?: string;
+  packagingPhotoUrl?: string;
+  packagingVideoUrl?: string;
+  riderService?: "yango" | "in_house";
+  createdAt: number;
+  packedAt?: number;
+  dispatchedAt?: number;
+}
+
+export interface DailyMetric {
+  date: string; // YYYY-MM-DD
+  sellerId: string;
+  impressions: number;
+  storeVisits: number;
+  ordersPlaced: number;
+  revenueCedis: number;
+}
+
+// Signup lead from the landing page — not yet a seller until onboarded/inspected
+export interface SignupLead {
+  id: string;
+  businessName: string;
+  contactName: string;
+  phone: string;
+  email: string;
+  productCategory: string;
+  estimatedMonthlyOrders?: number;
+  notes?: string;
+  createdAt: number;
+}

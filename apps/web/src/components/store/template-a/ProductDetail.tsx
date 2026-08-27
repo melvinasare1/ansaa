@@ -1,0 +1,278 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ShirtPlaceholder } from "@/components/store/template-a/ShirtPlaceholder";
+import { useCart } from "@/lib/cart-context";
+import { formatCedis } from "@/lib/price";
+import { fillFromId, isLightSwatch, swatchHex } from "@/lib/swatch";
+import type { Product } from "@ansaa/shared/types";
+
+const ACCENT = "#FF7A1A";
+
+type GalleryItem =
+  | { kind: "image"; src: string }
+  | { kind: "swatch"; fill: string };
+
+function uniqueUrls(urls: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const src of urls) {
+    if (!src || seen.has(src)) continue;
+    seen.add(src);
+    result.push(src);
+  }
+  return result;
+}
+
+function imagesForValue(product: Product, value: string): string[] {
+  const key = value.trim().toLowerCase();
+  if (!key) return [];
+  for (const variant of product.variants ?? []) {
+    const byValue = variant.imagesByValue;
+    if (byValue) {
+      for (const [label, list] of Object.entries(byValue)) {
+        if (label.toLowerCase() === key && list.length) return uniqueUrls(list);
+      }
+    }
+    const variantColor = (variant.color ?? "").trim().toLowerCase();
+    const variantSize = (variant.size ?? "").trim().toLowerCase();
+    if ((variantColor === key || variantSize === key) && variant.images.length) {
+      return uniqueUrls(variant.images);
+    }
+  }
+  return [];
+}
+
+function imagesForVariant(product: Product, color: string, size: string): string[] {
+  const colorImages = imagesForValue(product, color);
+  if (colorImages.length > 0) return colorImages;
+  const sizeImages = imagesForValue(product, size);
+  if (sizeImages.length > 0) return sizeImages;
+  return product.images;
+}
+
+function galleryFor(product: Product, color: string, size: string): GalleryItem[] {
+  const urls = imagesForVariant(product, color, size);
+  if (urls.length > 0) {
+    return urls.map((src) => ({ kind: "image" as const, src }));
+  }
+  if (product.colors && product.colors.length > 0) {
+    return product.colors.slice(0, 4).map((item) => ({
+      kind: "swatch" as const,
+      fill: swatchHex(item),
+    }));
+  }
+  return [{ kind: "swatch", fill: fillFromId(product.id) }];
+}
+
+function cartLineId(productId: string, size?: string, color?: string) {
+  if (!size && !color) return productId;
+  return `${productId}:${size ?? ""}:${color ?? ""}`;
+}
+
+export function ProductDetail({
+  product,
+  slug,
+}: {
+  product: Product;
+  slug: string;
+}) {
+  const { addItem } = useCart();
+  const router = useRouter();
+  const cartHref = `/store/template-a/${slug}/cart`;
+  const sizes = product.sizes ?? [];
+  const colors = product.colors ?? [];
+
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(sizes[0] ?? "");
+  const [selectedColor, setSelectedColor] = useState(colors[0] ?? "");
+
+  const gallery = useMemo(
+    () => galleryFor(product, selectedColor, selectedSize),
+    [product, selectedColor, selectedSize]
+  );
+  const galleryKey = gallery
+    .map((item) => (item.kind === "image" ? item.src : item.fill))
+    .join("|");
+
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [galleryKey]);
+
+  const main = gallery[Math.min(selectedImage, Math.max(gallery.length - 1, 0))] ?? gallery[0];
+
+  function handleBuy() {
+    const size = selectedSize || undefined;
+    const color = selectedColor || undefined;
+    const variantLabel = [size, color].filter(Boolean).join(" / ");
+
+    addItem({
+      productId: cartLineId(product.id, size, color),
+      name: variantLabel ? `${product.name} · ${variantLabel}` : product.name,
+      priceCedis: product.priceCedis,
+      image: color ? swatchHex(color) : fillFromId(product.id),
+      size,
+      color,
+      quantity: 1,
+    });
+    router.push(cartHref);
+  }
+
+  return (
+    <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
+      <div>
+        <div className="relative flex aspect-[3/4] max-h-[560px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[#EDEDED]">
+          {main?.kind === "image" ? (
+            <Image
+              src={main.src}
+              alt={product.name}
+              fill
+              sizes="(min-width: 1024px) 40vw, 90vw"
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <ShirtPlaceholder
+              fill={main?.kind === "swatch" ? main.fill : fillFromId(product.id)}
+              className="h-[72%] w-[72%]"
+            />
+          )}
+        </div>
+
+        {gallery.length > 1 ? (
+          <div className="mt-4 flex items-center gap-3">
+            <button
+              type="button"
+              aria-label="Previous image"
+              onClick={() => setSelectedImage((current) => (current - 1 + gallery.length) % gallery.length)}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white text-black"
+            >
+              <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+            </button>
+
+            <div className="grid min-w-0 flex-1 grid-cols-4 gap-3">
+              {gallery.map((item, index) => {
+                const selected = index === selectedImage;
+                return (
+                  <button
+                    key={item.kind === "image" ? item.src : `${item.fill}-${index}`}
+                    type="button"
+                    aria-label={`View image ${index + 1}`}
+                    aria-pressed={selected}
+                    onClick={() => setSelectedImage(index)}
+                    className="relative flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-[#EDEDED]"
+                    style={{
+                      boxShadow: selected ? `inset 0 0 0 2px ${ACCENT}` : undefined,
+                    }}
+                  >
+                    {item.kind === "image" ? (
+                      <Image src={item.src} alt="" fill sizes="80px" className="object-cover" />
+                    ) : (
+                      <ShirtPlaceholder fill={item.fill} className="h-[72%] w-[72%]" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              aria-label="Next image"
+              onClick={() => setSelectedImage((current) => (current + 1) % gallery.length)}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-white"
+            >
+              <ChevronRight className="h-4 w-4" strokeWidth={2} />
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="lg:pt-2">
+        <h1 className="text-[26px] font-extrabold leading-tight tracking-tight md:text-[32px]">
+          {product.name}
+        </h1>
+        {product.description ? (
+          <p className="mt-3 text-[14px] leading-relaxed text-black/45">{product.description}</p>
+        ) : null}
+
+        <p className="mt-5 text-[36px] font-extrabold leading-none" style={{ color: ACCENT }}>
+          {formatCedis(product.priceCedis)}
+        </p>
+
+        {sizes.length > 0 ? (
+          <div className="mt-8">
+            <p className="text-[15px] font-bold">Select Size</p>
+            <div className="mt-3 flex items-center gap-3">
+              <div className="flex min-w-0 flex-1 flex-wrap gap-2">
+                {sizes.map((size) => {
+                  const selected = size === selectedSize;
+                  return (
+                    <button
+                      key={size}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setSelectedSize(size)}
+                      className={
+                        selected
+                          ? "h-10 min-w-[44px] rounded-lg px-3.5 text-sm font-semibold text-white"
+                          : "h-10 min-w-[44px] rounded-lg border border-black/15 bg-white px-3.5 text-sm font-medium text-black"
+                      }
+                      style={selected ? { backgroundColor: ACCENT } : undefined}
+                    >
+                      {size}
+                    </button>
+                  );
+                })}
+              </div>
+              <a href="#" className="shrink-0 text-[13px] font-medium text-black/55 underline underline-offset-2">
+                Size Guide
+              </a>
+            </div>
+          </div>
+        ) : null}
+
+        {colors.length > 0 ? (
+          <div className="mt-7">
+            <p className="text-[15px] font-bold">Colors Available</p>
+            <div className="mt-3 flex items-center gap-3">
+              {colors.map((color) => {
+                const selected = color === selectedColor;
+                const hex = swatchHex(color);
+                return (
+                  <button
+                    key={color}
+                    type="button"
+                    aria-label={color}
+                    aria-pressed={selected}
+                    onClick={() => setSelectedColor(color)}
+                    className="flex h-9 w-9 items-center justify-center rounded-full"
+                    style={selected ? { boxShadow: "0 0 0 1.5px #111" } : undefined}
+                  >
+                    <span
+                      className="h-7 w-7 rounded-full"
+                      style={{
+                        backgroundColor: hex,
+                        boxShadow: isLightSwatch(hex) ? "inset 0 0 0 1px rgba(0,0,0,0.08)" : undefined,
+                      }}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={handleBuy}
+          className="mt-10 flex h-12 w-full items-center justify-center rounded-full bg-black text-[15px] font-semibold text-white transition hover:bg-black/90"
+        >
+          Buy this product
+        </button>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,29 @@
+{
+  "name": "ansaa",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:dashboard": "turbo run dev --filter=dashboard",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "start": "turbo run start",
+    "seed:storefront": "node scripts/seed-storefront.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.4"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.8"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": "10.8.2"
+    }
+  }
+}

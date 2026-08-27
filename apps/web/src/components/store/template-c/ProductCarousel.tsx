@@ -1,0 +1,89 @@
+"use client";
+
+import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
+
+export type KitchenProduct = {
+  id: string;
+  name: string;
+  price: string;
+  badge: "Promotion" | "New" | "Customer favorite";
+  colors: string[];
+  image: string;
+  imageAlt: string;
+};
+
+const VISIBLE = 4;
+
+export default function ProductCarousel({ products }: { products: KitchenProduct[] }) {
+  const [start, setStart] = useState(0);
+  const maxStart = Math.max(0, products.length - VISIBLE);
+
+  const visible = useMemo(
+    () => products.slice(start, start + VISIBLE),
+    [products, start],
+  );
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        aria-label="Previous products"
+        disabled={start === 0}
+        onClick={() => setStart((s) => Math.max(0, s - 1))}
+        className="absolute -left-5 top-[38%] z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#2B4239]/15 bg-white text-[#2B4239] shadow-sm disabled:opacity-30 md:flex"
+      >
+        <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
+      </button>
+      <button
+        type="button"
+        aria-label="Next products"
+        disabled={start >= maxStart}
+        onClick={() => setStart((s) => Math.min(maxStart, s + 1))}
+        className="absolute -right-5 top-[38%] z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#2B4239]/15 bg-white text-[#2B4239] shadow-sm disabled:opacity-30 md:flex"
+      >
+        <ChevronRight className="h-5 w-5" strokeWidth={1.5} />
+      </button>
+
+      <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4">
+        {visible.map((p) => (
+          <article key={p.id} className="group">
+            <div className="relative aspect-[4/5] overflow-hidden bg-[#EDE8DC]">
+              <span className="absolute left-3 top-3 z-10 rounded-full bg-[#F5F1E4] px-3 py-1 text-[11px] font-medium text-[#2B4239]">
+                {p.badge}
+              </span>
+              <Image
+                src={p.image}
+                alt={p.imageAlt}
+                fill
+                sizes="(min-width: 768px) 25vw, 50vw"
+                className="object-cover transition duration-500 group-hover:scale-[1.03]"
+              />
+            </div>
+            <div className="mt-3 flex gap-1.5">
+              {p.colors.map((c) => (
+                <span
+                  key={c}
+                  className="h-2.5 w-2.5 rounded-full ring-1 ring-[#2B4239]/15"
+                  style={{ backgroundColor: c }}
+                  aria-hidden
+                />
+              ))}
+            </div>
+            <p className="mt-2 text-[15px] font-semibold leading-snug text-[#2B4239]">{p.name}</p>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <span className="text-sm font-semibold text-[#2B4239]">{p.price}</span>
+              <button
+                type="button"
+                className="inline-flex shrink-0 items-center rounded-full bg-[#2B4239] px-3 py-1.5 text-[11px] font-medium text-[#F5F1E4]"
+              >
+                + Cart
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
