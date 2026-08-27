@@ -8,6 +8,8 @@ import type {
   ProductVariant,
   Seller,
   SignupLead,
+  StorefrontEvent,
+  StorefrontEventType,
 } from "./types";
 
 const ORDER_STATUSES: OrderStatus[] = [
@@ -246,6 +248,33 @@ export function orderFromRow(row: unknown): Order {
     createdAt: epochMs(fields.created_at),
     packedAt: optionalEpochMs(fields.packed_at),
     dispatchedAt: optionalEpochMs(fields.dispatched_at),
+  };
+}
+
+const STOREFRONT_EVENT_TYPES: StorefrontEventType[] = [
+  "page_view",
+  "product_view",
+  "add_to_cart",
+];
+
+function storefrontEventTypeFromUnknown(value: unknown): StorefrontEventType {
+  const type = String(value ?? "");
+  return STOREFRONT_EVENT_TYPES.includes(type as StorefrontEventType)
+    ? (type as StorefrontEventType)
+    : "page_view";
+}
+
+/** Map a storefront_events row (snake_case) to StorefrontEvent (camelCase). */
+export function storefrontEventFromRow(row: unknown): StorefrontEvent {
+  const fields = asRecord(row);
+  return {
+    id: String(fields.id ?? ""),
+    sellerId: String(fields.seller_id ?? ""),
+    eventType: storefrontEventTypeFromUnknown(fields.event_type),
+    path: String(fields.path ?? ""),
+    productId: String(fields.product_id ?? "") || undefined,
+    sessionId: String(fields.session_id ?? ""),
+    createdAt: epochMs(fields.created_at),
   };
 }
 

@@ -130,6 +130,18 @@ export interface DailyMetric {
   revenueCedis: number;
 }
 
+export type StorefrontEventType = "page_view" | "product_view" | "add_to_cart";
+
+export interface StorefrontEvent {
+  id: string;
+  sellerId: string;
+  eventType: StorefrontEventType;
+  path: string;
+  productId?: string;
+  sessionId: string;
+  createdAt: number;
+}
+
 // Signup lead from the landing page — not yet a seller until onboarded/inspected
 export interface SignupLead {
   id: string;
