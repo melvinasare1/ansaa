@@ -26,34 +26,12 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   refunded: "Refunded",
 };
 
-const FULFILLMENT_NEXT: Record<OrderStatus, OrderStatus[]> = {
-  pending_payment: ["paid"],
-  paid: ["packed"],
-  packed: ["dispatched"],
-  dispatched: ["delivered"],
-  delivered: ["return_requested"],
-  return_requested: ["returned"],
-  returned: [],
-  cancelled: [],
-  refunded: [],
-};
-
-export function nextFulfillmentStatuses(status: OrderStatus): OrderStatus[] {
-  return FULFILLMENT_NEXT[status];
-}
-
 export function canCancelOrder(status: OrderStatus): boolean {
   return status === "pending_payment" || status === "paid" || status === "packed" || status === "dispatched";
 }
 
 export function canRefundOrder(status: OrderStatus): boolean {
   return status !== "pending_payment" && status !== "refunded";
-}
-
-export function isStatusTransitionAllowed(current: OrderStatus, next: OrderStatus): boolean {
-  if (next === "cancelled") return canCancelOrder(current);
-  if (next === "refunded") return canRefundOrder(current);
-  return FULFILLMENT_NEXT[current].includes(next);
 }
 
 export function formatOrderStatus(status: OrderStatus): string {

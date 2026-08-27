@@ -151,9 +151,7 @@ export function OrderDetail({ orderId }: { orderId: string }) {
                   }}
                 >
                   <SelectTrigger className="min-w-48 bg-white" aria-label="Order status">
-                    <SelectValue>
-                      {savingStatus ? "Saving…" : formatOrderStatus(order.status)}
-                    </SelectValue>
+                    <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
