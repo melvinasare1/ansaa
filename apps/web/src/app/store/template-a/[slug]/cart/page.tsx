@@ -1,8 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import {
+  CheckoutForm,
+  PaymentInstructions,
+} from "@/components/store/template-a/CheckoutForm";
 import { useCart } from "@/lib/cart-context";
+import type { CheckoutSuccess } from "@/lib/checkout";
 import { formatCedis } from "@/lib/price";
 
 const ACCENT = "#FF7A1A";
@@ -13,13 +19,21 @@ export default function TemplateACartPage({
   params: { slug: string };
 }) {
   const shopHref = `/store/template-a/${params.slug}`;
-  const { items, updateQuantity, removeItem, totalCedis, hydrated } = useCart();
+  const { items, updateQuantity, removeItem, clearCart, totalCedis, hydrated } = useCart();
+  const [receipt, setReceipt] = useState<CheckoutSuccess | null>(null);
+
+  function handleCheckoutSuccess(next: CheckoutSuccess) {
+    setReceipt(next);
+    clearCart();
+  }
 
   return (
     <div className="mx-auto max-w-xl">
       <h1 className="text-[28px] font-extrabold tracking-tight md:text-[32px]">Your bag</h1>
 
-      {!hydrated ? (
+      {receipt ? (
+        <PaymentInstructions receipt={receipt} shopHref={shopHref} />
+      ) : !hydrated ? (
         <p className="mt-8 text-sm text-black/45">Loading your bag…</p>
       ) : items.length === 0 ? (
         <div className="mt-8">
@@ -94,15 +108,11 @@ export default function TemplateACartPage({
             <span>{formatCedis(totalCedis)}</span>
           </div>
 
-          <button
-            type="button"
-            className="mt-8 flex h-12 w-full items-center justify-center rounded-full bg-black text-[15px] font-semibold text-white transition hover:bg-black/90"
-          >
-            Pay now
-          </button>
-          <p className="mt-4 text-center text-xs text-black/40">
-            Payment is collected upfront. Your order ships once payment clears.
-          </p>
+          <CheckoutForm
+            storeSlug={params.slug}
+            items={items}
+            onSuccess={handleCheckoutSuccess}
+          />
         </>
       )}
     </div>

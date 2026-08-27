@@ -73,8 +73,8 @@ export function DashboardHeading() {
   if (pathname.startsWith("/dashboard/products")) {
     return null;
   }
-  // Order detail owns its heading so it can sit with the back link and actions.
-  if (pathname.startsWith("/dashboard/orders/")) {
+  // Order and customer detail own their headings so they can sit with the back link.
+  if (pathname.startsWith("/dashboard/orders/") || pathname.startsWith("/dashboard/customers/")) {
     return null;
   }
   const title = titles[pathname] ?? "Dashboard";

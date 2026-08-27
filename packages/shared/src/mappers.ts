@@ -1,4 +1,5 @@
 import type {
+  Customer,
   Order,
   OrderItem,
   OrderStatus,
@@ -192,11 +193,30 @@ function orderItemFromUnknown(value: unknown): OrderItem | null {
   if (!productId && !name) return null;
   const quantity = Number(fields.quantity ?? 0);
   const priceCedis = Number(fields.priceCedis ?? fields.price_cedis ?? fields.price ?? 0);
+  const size = String(fields.size ?? "").trim();
+  const color = String(fields.color ?? "").trim();
   return {
     productId,
     name: name || "Item",
     priceCedis: Number.isFinite(priceCedis) ? priceCedis : 0,
     quantity: Number.isFinite(quantity) ? quantity : 0,
+    size: size || undefined,
+    color: color || undefined,
+  };
+}
+
+/** Map a customers row (snake_case) to the Customer type (camelCase). */
+export function customerFromRow(row: unknown): Customer {
+  const fields = asRecord(row);
+  return {
+    id: String(fields.id ?? ""),
+    sellerId: String(fields.seller_id ?? ""),
+    email: String(fields.email ?? ""),
+    name: String(fields.name ?? ""),
+    phone: String(fields.phone ?? ""),
+    deliveryAddress: String(fields.delivery_address ?? ""),
+    createdAt: epochMs(fields.created_at),
+    updatedAt: epochMs(fields.updated_at),
   };
 }
 
@@ -211,9 +231,11 @@ export function orderFromRow(row: unknown): Order {
   return {
     id: String(fields.id ?? ""),
     sellerId: String(fields.seller_id ?? ""),
+    customerId: String(fields.customer_id ?? "") || undefined,
     items,
     subtotalCedis: Number(fields.subtotal_cedis ?? 0),
     buyerName: String(fields.buyer_name ?? ""),
+    buyerEmail: String(fields.buyer_email ?? ""),
     buyerPhone: String(fields.buyer_phone ?? ""),
     deliveryAddress: String(fields.delivery_address ?? ""),
     status: orderStatusFromUnknown(fields.status),

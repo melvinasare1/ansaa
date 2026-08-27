@@ -81,19 +81,34 @@ export type OrderStatus =
   | "cancelled"
   | "refunded";
 
+export interface Customer {
+  id: string;
+  sellerId: string;
+  email: string;
+  name: string;
+  phone: string;
+  deliveryAddress: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface OrderItem {
   productId: string;
   name: string;
   priceCedis: number;
   quantity: number;
+  size?: string;
+  color?: string;
 }
 
 export interface Order {
   id: string;
   sellerId: string;
+  customerId?: string;
   items: OrderItem[];
   subtotalCedis: number;
   buyerName: string;
+  buyerEmail: string;
   buyerPhone: string;
   deliveryAddress: string;
   status: OrderStatus;

@@ -30,14 +30,13 @@ import { createClient } from "@ansaa/shared/supabase/client";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 import type { ProductVariant } from "@ansaa/shared/types";
 
-const TABS = ["basic", "variations", "images", "descriptions"] as const;
+const TABS = ["basic", "variations", "images"] as const;
 type TabId = (typeof TABS)[number];
 
 const TAB_LABELS: Record<TabId, string> = {
   basic: "Basic information",
   variations: "Variations and price",
   images: "Images",
-  descriptions: "Descriptions",
 };
 
 const FIELD_INPUT_CLASS =
@@ -53,7 +52,6 @@ export function NewProductForm() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState<SellerCategory[]>([]);
-  const [hasVariations, setHasVariations] = useState(true);
   const [variants, setVariants] = useState<DraftVariant[]>([]);
   const [price, setPrice] = useState("");
   const [compareAtPrice, setCompareAtPrice] = useState("");
@@ -69,10 +67,7 @@ export function NewProductForm() {
 
   const sellerKey = seller?.id ?? null;
 
-  const imageGroups = useMemo(
-    () => (hasVariations ? variantImageGroups(variants) : []),
-    [hasVariations, variants]
-  );
+  const imageGroups = useMemo(() => variantImageGroups(variants), [variants]);
 
   useEffect(() => {
     const validSlots = new Set(images.slots.map((slot) => slot.id));
@@ -138,7 +133,6 @@ export function NewProductForm() {
   }
 
   function persistVariants(uploaded: Array<{ id: string; url: string }>): ProductVariant[] {
-    if (!hasVariations) return [];
     const basePrice = parsedPrice(price) ?? 0;
     return variants
       .filter((row) => row.name.trim() || row.values.length > 0)
@@ -196,8 +190,8 @@ export function NewProductForm() {
       sku: sku.trim(),
       category: category.trim(),
       active,
-      sizes: hasVariations ? storefrontSizesAndColors(variants).sizes : [],
-      colors: hasVariations ? storefrontSizesAndColors(variants).colors : [],
+      sizes: storefrontSizesAndColors(variants).sizes,
+      colors: storefrontSizesAndColors(variants).colors,
       variants: persistVariants(uploaded),
     };
   }
@@ -415,59 +409,43 @@ export function NewProductForm() {
                 onDelete={handleDeleteCategory}
               />
 
-              <div role="group" aria-labelledby="has-variations-label">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p id="has-variations-label" className="text-sm font-semibold text-ink-950">
-                    Does the product have variations?
-                  </p>
-                  <div className="flex items-center gap-6">
-                    <label className="inline-flex items-center gap-2 text-sm text-ink-950">
-                      <input
-                        type="radio"
-                        name="hasVariations"
-                        checked={hasVariations}
-                        onChange={() => setHasVariations(true)}
-                        className="size-4 accent-ink-950"
-                      />
-                      Yes
-                    </label>
-                    <label className="inline-flex items-center gap-2 text-sm text-ink-950">
-                      <input
-                        type="radio"
-                        name="hasVariations"
-                        checked={!hasVariations}
-                        onChange={() => {
-                          setHasVariations(false);
-                          setVariants([]);
-                        }}
-                        className="size-4 accent-ink-950"
-                      />
-                      No
-                    </label>
-                  </div>
-                </div>
-              </div>
+              <label className="block">
+                <span className="text-sm font-semibold text-ink-950">Short description</span>
+                <textarea
+                  rows={3}
+                  maxLength={240}
+                  value={shortDescription}
+                  onChange={(event) => setShortDescription(event.target.value)}
+                  placeholder="A one-line summary for listings and cards"
+                  className={cn(FIELD_INPUT_CLASS, "min-h-20 resize-y")}
+                />
+                <span className="mt-1 block text-xs text-muted-foreground">
+                  {shortDescription.length}/240
+                </span>
+              </label>
+              <label className="block">
+                <span className="text-sm font-semibold text-ink-950">Full description</span>
+                <textarea
+                  rows={8}
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  placeholder="Tell shoppers about this product"
+                  className={cn(FIELD_INPUT_CLASS, "min-h-40 resize-y")}
+                />
+              </label>
             </div>
           </TabsContent>
 
           <TabsContent value="variations" className="px-6 pt-4 pb-2 outline-none">
             <div className="space-y-5">
-              {hasVariations ? (
-                <p className="text-sm text-muted-foreground">
-                  Add a variant such as Color, then add its values (Black, White). Price and stock
-                  below apply as defaults.
-                </p>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  This product has no variations. Price and stock apply to the whole product.
-                </p>
-              )}
+              <p className="text-sm text-muted-foreground">
+                Add a variant such as Color, then add its values (Black, White). Price and stock
+                below apply as defaults when a variant does not set its own.
+              </p>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block">
-                  <span className="text-sm font-semibold text-ink-950">
-                    {hasVariations ? "Default price (GHS)" : "Price (GHS)"}
-                  </span>
+                  <span className="text-sm font-semibold text-ink-950">Default price (GHS)</span>
                   <input
                     type="number"
                     min={0}
@@ -491,9 +469,7 @@ export function NewProductForm() {
                   />
                 </label>
                 <label className="block">
-                  <span className="text-sm font-semibold text-ink-950">
-                    {hasVariations ? "Default SKU" : "SKU"}
-                  </span>
+                  <span className="text-sm font-semibold text-ink-950">Default SKU</span>
                   <input
                     value={sku}
                     onChange={(event) => setSku(event.target.value)}
@@ -502,9 +478,7 @@ export function NewProductForm() {
                   />
                 </label>
                 <label className="block">
-                  <span className="text-sm font-semibold text-ink-950">
-                    {hasVariations ? "Default stock quantity" : "Stock quantity"}
-                  </span>
+                  <span className="text-sm font-semibold text-ink-950">Default stock quantity</span>
                   <input
                     type="number"
                     min={0}
@@ -516,17 +490,15 @@ export function NewProductForm() {
                 </label>
               </div>
 
-              {hasVariations ? (
-                <VariantList
-                  variants={variants}
-                  defaultPrice={price}
-                  defaultSku={sku}
-                  defaultStock={stock}
-                  onPatch={patchVariant}
-                  onRemove={removeVariant}
-                  onAdd={() => setVariants((prev) => [...prev, emptyManualVariant()])}
-                />
-              ) : null}
+              <VariantList
+                variants={variants}
+                defaultPrice={price}
+                defaultSku={sku}
+                defaultStock={stock}
+                onPatch={patchVariant}
+                onRemove={removeVariant}
+                onAdd={() => setVariants((prev) => [...prev, emptyManualVariant()])}
+              />
             </div>
           </TabsContent>
 
@@ -543,43 +515,12 @@ export function NewProductForm() {
                 onRemove={images.removeSlot}
               />
             </div>
-            {hasVariations ? (
-              <VariantImageAssigner
-                groups={imageGroups}
-                slots={images.slots}
-                assignments={variantImages}
-                onToggle={toggleVariantImage}
-              />
-            ) : null}
-          </TabsContent>
-
-          <TabsContent value="descriptions" className="px-6 pt-4 pb-2 outline-none">
-            <div className="space-y-5">
-              <label className="block">
-                <span className="text-sm font-semibold text-ink-950">Short description</span>
-                <textarea
-                  rows={3}
-                  maxLength={240}
-                  value={shortDescription}
-                  onChange={(event) => setShortDescription(event.target.value)}
-                  placeholder="A one-line summary for listings and cards"
-                  className={cn(FIELD_INPUT_CLASS, "min-h-20 resize-y")}
-                />
-                <span className="mt-1 block text-xs text-muted-foreground">
-                  {shortDescription.length}/240
-                </span>
-              </label>
-              <label className="block">
-                <span className="text-sm font-semibold text-ink-950">Description</span>
-                <textarea
-                  rows={8}
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  placeholder="Tell shoppers about this product"
-                  className={cn(FIELD_INPUT_CLASS, "min-h-40 resize-y")}
-                />
-              </label>
-            </div>
+            <VariantImageAssigner
+              groups={imageGroups}
+              slots={images.slots}
+              assignments={variantImages}
+              onToggle={toggleVariantImage}
+            />
           </TabsContent>
 
           {displayError ? (
