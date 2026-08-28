@@ -12,15 +12,21 @@ export default function Header() {
     <header className="sticky top-0 z-50 border-b border-wire bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4">
         <Link href="/" className="font-display text-lg font-semibold text-ink-950">
-          Fulfil
+          Ansaa
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm text-ink-700 md:flex">
-          {marketingNav.map((link) => (
-            <a key={link.href} href={link.href} className="transition hover:text-ink-950">
-              {link.label}
-            </a>
-          ))}
+          {marketingNav.map((link) =>
+            link.href.startsWith("/#") ? (
+              <a key={link.href} href={link.href} className="transition hover:text-ink-950">
+                {link.label}
+              </a>
+            ) : (
+              <Link key={link.href} href={link.href} className="transition hover:text-ink-950">
+                {link.label}
+              </Link>
+            )
+          )}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -49,16 +55,27 @@ export default function Header() {
           className="border-t border-wire px-6 py-4 md:hidden"
         >
           <div className="mx-auto flex max-w-5xl flex-col gap-1">
-            {marketingNav.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="py-2.5 text-sm text-ink-700"
-                onClick={() => setOpen(false)}
-              >
-                {link.label}
-              </a>
-            ))}
+            {marketingNav.map((link) =>
+              link.href.startsWith("/#") ? (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="py-2.5 text-sm text-ink-700"
+                  onClick={() => setOpen(false)}
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="py-2.5 text-sm text-ink-700"
+                  onClick={() => setOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
             <Link
               href="/signup"
               className="mt-2 inline-flex items-center justify-center rounded-full bg-navy px-5 py-2.5 text-sm font-medium text-white"

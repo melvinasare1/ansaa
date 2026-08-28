@@ -15,7 +15,7 @@ export default function MarketingLayout({
         <div className="mx-auto max-w-5xl px-6 py-16">
           <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="font-display text-xl font-semibold">Fulfil</p>
+              <p className="font-display text-xl font-semibold">Ansaa</p>
               <p className="mt-2 max-w-xs text-sm text-white/70">
                 Storefront first. Fulfilment if you want it.
               </p>
@@ -41,7 +41,7 @@ export default function MarketingLayout({
             </div>
           </div>
           <p className="mt-12 border-t border-white/10 pt-6 text-xs text-white/50">
-            © {new Date().getFullYear()} Fulfil
+            © {new Date().getFullYear()} Ansaa
           </p>
         </div>
       </footer>

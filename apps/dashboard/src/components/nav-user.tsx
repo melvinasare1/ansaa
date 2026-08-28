@@ -11,11 +11,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSeller } from "@/lib/seller-context";
-import { LogOutIcon } from "lucide-react";
+import { storefrontUrl } from "@/lib/storefront-url";
+import { ExternalLinkIcon, LogOutIcon } from "lucide-react";
 
 export function NavUser() {
   const router = useRouter();
   const { seller, user, signOut } = useSeller();
+  const storeUrl = storefrontUrl(seller);
   const displayName = seller?.businessName || "Seller dashboard";
   const email = user?.email || "";
   const initials = displayName
@@ -61,6 +63,14 @@ export function NavUser() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {storeUrl ? (
+          <DropdownMenuItem asChild>
+            <a href={storeUrl} target="_blank" rel="noopener noreferrer">
+              <ExternalLinkIcon />
+              View store
+            </a>
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOutIcon />
           Log out

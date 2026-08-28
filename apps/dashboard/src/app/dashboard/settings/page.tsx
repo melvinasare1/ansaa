@@ -1,6 +1,7 @@
 "use client";
 
 import { useSeller } from "@/lib/seller-context";
+import { storefrontUrl } from "@/lib/storefront-url";
 
 const templateLabels = {
   "template-a": "Template A — Minimal",
@@ -14,6 +15,7 @@ const tierLabels = {
 
 export default function SettingsPage() {
   const { seller } = useSeller();
+  const storeUrl = storefrontUrl(seller);
 
   const templateLabel = seller ? templateLabels[seller.template] : "—";
   const billingLabel = seller
@@ -39,6 +41,12 @@ export default function SettingsPage() {
             hint="Auto-generated, not editable"
           />
           <SettingRow label="Template" value={templateLabel} />
+          <SettingRow
+            label="Online store"
+            value={storeUrl ? "View store" : "Not set up yet"}
+            hint="Opens your public shop in a new tab"
+            href={storeUrl}
+          />
         </div>
       </section>
 
@@ -67,14 +75,35 @@ export default function SettingsPage() {
   );
 }
 
-function SettingRow({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function SettingRow({
+  label,
+  value,
+  hint,
+  href,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  href?: string | null;
+}) {
   return (
     <div className="flex items-center justify-between border-b border-wire pb-4 last:border-0 last:pb-0">
       <div>
         <p className="text-sm font-medium text-ink-950">{label}</p>
         {hint ? <p className="mt-0.5 text-xs text-ink-700/40">{hint}</p> : null}
       </div>
-      <p className="text-sm text-ink-700/70">{value}</p>
+      {href ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm font-medium text-brand hover:underline"
+        >
+          {value}
+        </a>
+      ) : (
+        <p className="text-sm text-ink-700/70">{value}</p>
+      )}
     </div>
   );
 }

@@ -22,7 +22,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fulfil: Storefronts, and fulfilment if you want it",
+  title: "Ansaa: Storefronts, and fulfilment if you want it",
   description:
     "A storefront and admin dashboard you run yourself, plus an optional fulfilment add-on where we pack and send every order.",
 };

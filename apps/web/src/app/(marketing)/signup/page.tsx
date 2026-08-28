@@ -12,6 +12,9 @@ const categories = [
   "Other",
 ];
 
+const fieldClassName =
+  "mt-2 w-full rounded-lg border border-wire bg-white px-4 py-3 text-ink-950 outline-none focus:border-navy";
+
 export default function SignupPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -42,11 +45,11 @@ export default function SignupPage() {
 
   if (submitted) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-ink-950 px-6 text-canvas">
+      <main className="flex min-h-screen items-center justify-center bg-white px-6 text-ink-950">
         <div className="max-w-md text-center">
-          <p className="font-mono text-sm uppercase tracking-[0.2em] text-signal">You&apos;re on the list</p>
+          <p className="font-mono text-sm uppercase tracking-[0.2em] text-navy">You&apos;re on the list</p>
           <h1 className="mt-4 font-display text-3xl font-semibold">Thanks. We&apos;ll be in touch.</h1>
-          <p className="mt-3 text-canvas/60">
+          <p className="mt-3 text-ink-700">
             We&apos;re lining up the first cohort now. We&apos;ll reach out on the number you gave us as soon
             as we&apos;re ready to onboard.
           </p>
@@ -56,11 +59,11 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="min-h-screen bg-ink-950 px-6 py-24 text-canvas">
+    <main className="min-h-screen bg-white px-6 py-24 text-ink-950">
       <div className="mx-auto max-w-lg">
-        <p className="font-mono text-sm uppercase tracking-[0.2em] text-signal">Early access</p>
+        <p className="font-mono text-sm uppercase tracking-[0.2em] text-navy">Early access</p>
         <h1 className="mt-4 font-display text-3xl font-semibold">Tell us about your business</h1>
-        <p className="mt-3 text-canvas/60">
+        <p className="mt-3 text-ink-700">
           Two minutes, no commitment. We use this to line up the first cohort and confirm pricing works
           for real sellers before we launch.
         </p>
@@ -72,12 +75,8 @@ export default function SignupPage() {
           <Field label="Email" name="email" type="email" required />
 
           <label className="block">
-            <span className="text-sm text-canvas/70">Product category</span>
-            <select
-              name="productCategory"
-              required
-              className="mt-2 w-full rounded-lg border border-ink-700 bg-ink-900 px-4 py-3 text-canvas outline-none focus:border-signal"
-            >
+            <span className="text-sm text-ink-700">Product category</span>
+            <select name="productCategory" required className={fieldClassName}>
               {categories.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -93,20 +92,16 @@ export default function SignupPage() {
           />
 
           <label className="block">
-            <span className="text-sm text-canvas/70">Anything else we should know?</span>
-            <textarea
-              name="notes"
-              rows={3}
-              className="mt-2 w-full rounded-lg border border-ink-700 bg-ink-900 px-4 py-3 text-canvas outline-none focus:border-signal"
-            />
+            <span className="text-sm text-ink-700">Anything else we should know?</span>
+            <textarea name="notes" rows={3} className={fieldClassName} />
           </label>
 
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-signal px-7 py-3 font-medium text-ink-950 transition hover:bg-signal/90 disabled:opacity-50"
+            className="w-full rounded-full bg-navy px-7 py-3 font-medium text-white transition hover:bg-navy/90 disabled:opacity-50"
           >
             {loading ? "Sending…" : "Join the list"}
           </button>
@@ -129,12 +124,12 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-sm text-canvas/70">{label}</span>
+      <span className="text-sm text-ink-700">{label}</span>
       <input
         name={name}
         type={type}
         required={required}
-        className="mt-2 w-full rounded-lg border border-ink-700 bg-ink-900 px-4 py-3 text-canvas outline-none focus:border-signal"
+        className={fieldClassName}
       />
     </label>
   );

@@ -3,4 +3,5 @@ export const marketingNav = [
   { href: "/#pricing", label: "Pricing" },
   { href: "/#templates", label: "Templates" },
   { href: "/#who-its-for", label: "Who this is for" },
+  { href: "/login", label: "Login" },
 ];

@@ -21,6 +21,7 @@ export function NavMain({
     url: string;
     icon: LucideIcon;
     badge?: number;
+    external?: boolean;
   }[];
   pathname: string;
 }) {
@@ -30,8 +31,9 @@ export function NavMain({
         <SidebarMenu className="gap-1">
           {items.map((item) => {
             const Icon = item.icon;
-            const isActive =
-              item.url === "/dashboard"
+            const isActive = item.external
+              ? false
+              : item.url === "/dashboard"
                 ? pathname === "/dashboard"
                 : pathname === item.url || pathname.startsWith(`${item.url}/`);
             return (
@@ -55,10 +57,17 @@ export function NavMain({
                       : "text-muted-foreground hover:bg-mist hover:text-foreground"
                   )}
                 >
-                  <Link href={item.url}>
-                    <Icon />
-                    <span>{item.title}</span>
-                  </Link>
+                  {item.external ? (
+                    <a href={item.url} target="_blank" rel="noopener noreferrer">
+                      <Icon />
+                      <span>{item.title}</span>
+                    </a>
+                  ) : (
+                    <Link href={item.url}>
+                      <Icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  )}
                 </SidebarMenuButton>
                 {item.badge != null && item.badge > 0 ? (
                   <SidebarMenuBadge className="right-3 rounded-md bg-delta-up-soft font-semibold text-delta-up">
