@@ -1,4 +1,4 @@
-import type { StorefrontTemplate } from "@ansaa/shared/types";
+import { templateHasBlog, type StorefrontTemplate } from "@ansaa/shared/types";
 
 export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
   id: StorefrontTemplate;
@@ -72,3 +72,5 @@ export const FULFILMENT_FEATURES = [
 export function templateLabel(id: StorefrontTemplate): string {
   return STOREFRONT_TEMPLATE_OPTIONS.find((option) => option.id === id)?.name ?? id;
 }
+
+export { templateHasBlog };

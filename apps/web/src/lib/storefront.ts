@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { productFromRow, sellerFromRow } from "@ansaa/shared/mappers";
+import { blogPostFromRow, productFromRow, sellerFromRow } from "@ansaa/shared/mappers";
 import type { StorefrontContent } from "@ansaa/shared/storefront-content-schema";
-import type { Product } from "@ansaa/shared/types";
+import type { Product, StoreBlogPost } from "@ansaa/shared/types";
 
 export type StorefrontSeller = {
   id: string;
@@ -80,4 +80,51 @@ export async function getStorefrontProduct(
   const product = productFromRow(data);
   if (product.sellerId !== sellerId || !product.active) return null;
   return product;
+}
+
+export async function getPublishedBlogPosts(
+  supabase: SupabaseClient,
+  sellerId: string,
+  limit = 3
+): Promise<StoreBlogPost[]> {
+  if (!sellerId) return [];
+
+  const { data, error } = await supabase
+    .from("store_blog_posts")
+    .select("*")
+    .eq("seller_id", sellerId)
+    .eq("published", true)
+    .order("published_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("Failed to load storefront blog posts", error);
+    return [];
+  }
+
+  return (data ?? []).map(blogPostFromRow);
+}
+
+export async function getPublishedBlogPost(
+  supabase: SupabaseClient,
+  sellerId: string,
+  postId: string
+): Promise<StoreBlogPost | null> {
+  if (!sellerId || !postId) return null;
+
+  const { data, error } = await supabase
+    .from("store_blog_posts")
+    .select("*")
+    .eq("id", postId)
+    .eq("seller_id", sellerId)
+    .eq("published", true)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to load storefront blog post", error);
+    return null;
+  }
+  if (!data) return null;
+
+  return blogPostFromRow(data);
 }

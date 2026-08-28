@@ -10,6 +10,7 @@ import {
   type ProductVariant,
   type Seller,
   type SignupLead,
+  type StoreBlogPost,
   type StorefrontEvent,
   type StorefrontEventType,
 } from "./types";
@@ -305,5 +306,36 @@ export function productToInsert(product: Omit<Product, "id">) {
     sizes: product.sizes ?? [],
     colors: product.colors ?? [],
     variants: product.variants ?? [],
+  };
+}
+
+export function blogPostFromRow(row: unknown): StoreBlogPost {
+  const fields = asRecord(row);
+  return {
+    id: String(fields.id ?? ""),
+    sellerId: String(fields.seller_id ?? ""),
+    title: String(fields.title ?? ""),
+    excerpt: String(fields.excerpt ?? ""),
+    body: String(fields.body ?? ""),
+    imageUrl: String(fields.image_url ?? ""),
+    published: Boolean(fields.published),
+    publishedAt: epochMs(fields.published_at) || epochMs(fields.created_at),
+    createdAt: epochMs(fields.created_at),
+    updatedAt: epochMs(fields.updated_at),
+  };
+}
+
+export function blogPostToInsert(
+  post: Omit<StoreBlogPost, "id" | "createdAt" | "updatedAt">
+) {
+  return {
+    seller_id: post.sellerId,
+    title: post.title,
+    excerpt: post.excerpt,
+    body: post.body,
+    image_url: post.imageUrl,
+    published: post.published,
+    published_at: new Date(post.publishedAt || Date.now()).toISOString(),
+    updated_at: new Date().toISOString(),
   };
 }

@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowRight,
   Award,
@@ -18,25 +20,27 @@ import {
 import { StorefrontTracker } from "@/components/store/StorefrontTracker";
 import {
   BagPlaceholder,
-  BicyclePlaceholder,
   BootsPlaceholder,
-  EbikePlaceholder,
   GlovesPlaceholder,
   HelmetPlaceholder,
   HeroVehiclePlaceholder,
   LightPlaceholder,
-  MopedPlaceholder,
   MotorbikePlaceholder,
-  PromoVehiclePlaceholder,
   RotorPlaceholder,
-  ScooterPlaceholder,
 } from "@/components/store/motorbike-template/placeholders";
 import { formatCedis } from "@/lib/price";
-import { getSellerByStoreSlug } from "@/lib/storefront";
+import { getPublishedBlogPosts, getSellerByStoreSlug } from "@/lib/storefront";
 import { createClient } from "@ansaa/shared/supabase/server";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 
 const ORANGE = "#E8622C";
+
+const RIDE_IMAGES = {
+  motorbike: "/store/motorbike-template/motorbike.png",
+  moped: "/store/motorbike-template/moped.png",
+  classic: "/store/motorbike-template/classic.png",
+  ebike: "/store/motorbike-template/ebike.png",
+} as const;
 
 const trustBadges = [
   { label: "Premium Components", Icon: Cog },
@@ -46,10 +50,10 @@ const trustBadges = [
 ] as const;
 
 const categories = [
-  { id: "motorbikes", label: "Motorbikes", Placeholder: MotorbikePlaceholder },
-  { id: "bicycles", label: "Bicycles", Placeholder: BicyclePlaceholder },
-  { id: "mopeds", label: "Mopeds", Placeholder: MopedPlaceholder },
-  { id: "scooters", label: "Scooters", Placeholder: ScooterPlaceholder },
+  { id: "ebikes", label: "E-Bike", image: RIDE_IMAGES.ebike },
+  { id: "mopeds", label: "Moped", image: RIDE_IMAGES.moped },
+  { id: "motorbikes", label: "Motorbike", image: RIDE_IMAGES.motorbike },
+  { id: "classics", label: "Classic", image: RIDE_IMAGES.classic },
 ] as const;
 
 const trustFeatures = [
@@ -141,26 +145,13 @@ const valueFeatures = [
   },
 ] as const;
 
-const blogPosts = [
-  {
-    date: "12 Aug 2026",
-    title: "How to pick a commuter scooter for Accra traffic",
-    excerpt: "Range, brakes, and a seat you can live with at 7am — what actually matters on the road.",
-    Placeholder: ScooterPlaceholder,
-  },
-  {
-    date: "28 Jul 2026",
-    title: "Sunday loop: Labadi to the hills and back",
-    excerpt: "A mixed-bike group ride, a coffee stop, and the gear we actually packed.",
-    Placeholder: BicyclePlaceholder,
-  },
-  {
-    date: "09 Jul 2026",
-    title: "Wet-season service: five checks before the rains",
-    excerpt: "Chain, lights, pads, and a battery that still holds a charge when the sky opens.",
-    Placeholder: MotorbikePlaceholder,
-  },
-] as const;
+function formatBlogDate(ms: number): string {
+  return new Date(ms).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 function StarRating({ value }: { value: number }) {
   return (
@@ -207,6 +198,8 @@ export default async function MotorbikeTemplateHome({
   if (!seller) {
     notFound();
   }
+
+  const blogPosts = await getPublishedBlogPosts(supabase, seller.id, 3);
 
   return (
     <div>
@@ -280,9 +273,15 @@ export default async function MotorbikeTemplateHome({
                 className="flex flex-col rounded-[28px] px-8 pb-9 pt-10 md:px-10 md:pb-11 md:pt-12"
                 style={{ backgroundColor: "#EFEBE3" }}
               >
-                <div className="relative flex aspect-[16/9] items-center justify-center">
-                  {/* Real seller photography goes here — category vehicle photo. */}
-                  <category.Placeholder className="h-[88%] w-[88%] drop-shadow-[0_22px_28px_rgba(20,20,20,0.18)]" />
+                <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
+                  <Image
+                    src={category.image}
+                    alt=""
+                    fill
+                    unoptimized
+                    sizes="(min-width: 640px) 45vw, 100vw"
+                    className="object-contain"
+                  />
                 </div>
                 <p
                   className="mt-6 text-center text-[17px] font-extrabold uppercase tracking-[0.08em] text-[#141414] md:text-[19px]"
@@ -351,9 +350,15 @@ export default async function MotorbikeTemplateHome({
                 </a>
               </div>
             </div>
-            <div className="relative min-h-[260px] md:min-h-[380px]">
-              {/* Real seller photography goes here — featured vehicle photo. */}
-              <PromoVehiclePlaceholder className="absolute -right-16 -bottom-10 h-[125%] w-[130%] max-w-none drop-shadow-[0_24px_40px_rgba(0,0,0,0.45)] md:-right-10 md:-bottom-12" />
+            <div className="relative flex min-h-[280px] items-center justify-center px-4 py-6 md:min-h-[420px] md:px-6 md:py-8">
+              <Image
+                src={RIDE_IMAGES.motorbike}
+                alt="Apex R9 street motorbike"
+                width={1536}
+                height={1024}
+                unoptimized
+                className="h-auto w-[97%] object-contain"
+              />
             </div>
           </div>
         </div>
@@ -463,10 +468,15 @@ export default async function MotorbikeTemplateHome({
       <section className="bg-[#F7F5F0] pb-8 md:pb-10">
         <div className="mx-auto max-w-[1400px] px-6 md:px-10">
           <div className="relative grid overflow-hidden rounded-[28px] bg-[#141414] md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.9fr)]">
-            <div className="relative min-h-[280px] md:min-h-[380px]">
-              {/* Real seller photography goes here — featured e-bike photo. */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_38%_52%,#3a2a20_0%,transparent_58%)]" />
-              <EbikePlaceholder className="absolute -left-8 bottom-[-6%] h-[108%] w-[118%] max-w-none drop-shadow-[0_24px_40px_rgba(0,0,0,0.4)] md:-left-4" />
+            <div className="relative flex min-h-[280px] items-center justify-center px-6 py-8 md:min-h-[400px] md:px-8 md:py-10">
+              <Image
+                src={RIDE_IMAGES.ebike}
+                alt="E-Bike"
+                width={1619}
+                height={971}
+                unoptimized
+                className="h-auto w-[81%] object-contain"
+              />
               <div className="absolute left-[8%] top-[22%] z-10 flex items-center">
                 <div className="max-w-[210px] rounded-xl bg-black/55 px-3.5 py-2.5 ring-1 ring-white/15 backdrop-blur-sm">
                   <p className="text-[12px] font-semibold leading-snug text-white">
@@ -505,6 +515,7 @@ export default async function MotorbikeTemplateHome({
         </div>
       </section>
 
+      {blogPosts.length > 0 ? (
       <section id="blog" className="bg-[#F7F5F0]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-10 md:py-24">
           <h2
@@ -515,12 +526,16 @@ export default async function MotorbikeTemplateHome({
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3 md:mt-12 md:gap-6">
             {blogPosts.map((post) => (
-              <article key={post.title}>
+              <article key={post.id}>
                 <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-[24px] bg-[#E8E6E1]">
-                  <post.Placeholder className="h-[70%] w-[80%] drop-shadow-[0_12px_16px_rgba(20,20,20,0.14)]" />
+                  {post.imageUrl ? (
+                    <img src={post.imageUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <MotorbikePlaceholder className="h-[70%] w-[80%] drop-shadow-[0_12px_16px_rgba(20,20,20,0.14)]" />
+                  )}
                 </div>
                 <p className="mt-5 text-[12px] font-medium uppercase tracking-[0.14em] text-[#141414]/40">
-                  {post.date}
+                  {formatBlogDate(post.publishedAt)}
                 </p>
                 <h3
                   className="mt-2 max-w-[280px] text-[18px] font-extrabold leading-snug text-[#141414]"
@@ -528,18 +543,21 @@ export default async function MotorbikeTemplateHome({
                 >
                   {post.title}
                 </h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-[#141414]/50">{post.excerpt}</p>
-                <a
-                  href="#blog"
+                {post.excerpt ? (
+                  <p className="mt-2 text-[14px] leading-relaxed text-[#141414]/50">{post.excerpt}</p>
+                ) : null}
+                <Link
+                  href={`${base}/blog/${post.id}`}
                   className="mt-5 inline-flex items-center rounded-lg border border-[#141414] px-4 py-2 text-[13px] font-semibold text-[#141414] transition-colors hover:bg-[#141414] hover:text-white"
                 >
                   Read More
-                </a>
+                </Link>
               </article>
             ))}
           </div>
         </div>
       </section>
+      ) : null}
     </div>
   );
 }

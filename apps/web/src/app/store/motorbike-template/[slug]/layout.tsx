@@ -33,11 +33,10 @@ const footerLinkGroups = [
   {
     heading: "Shop",
     links: [
-      { label: "Motorbikes", href: "#motorbikes" },
-      { label: "Bicycles", href: "#bicycles" },
+      { label: "E-Bikes", href: "#ebikes" },
       { label: "Mopeds", href: "#mopeds" },
-      { label: "Scooters", href: "#scooters" },
-      { label: "E-Bikes", href: "#featured" },
+      { label: "Motorbikes", href: "#motorbikes" },
+      { label: "Classic", href: "#classics" },
       { label: "Accessories", href: "#accessories" },
     ],
   },

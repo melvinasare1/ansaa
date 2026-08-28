@@ -4,11 +4,13 @@ import { NavMain } from "@/components/nav-main";
 import { Sidebar, SidebarContent } from "@/components/ui/sidebar";
 import { useSeller } from "@/lib/seller-context";
 import { storefrontUrl } from "@/lib/storefront-url";
+import { templateHasBlog } from "@/lib/storefront-templates";
 import {
   BarChart3Icon,
   ExternalLinkIcon,
   LayoutDashboardIcon,
   LifeBuoyIcon,
+  NewspaperIcon,
   PackageIcon,
   PencilIcon,
   SettingsIcon,
@@ -36,17 +38,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { seller } = useSeller();
   const storeUrl = storefrontUrl(seller);
-  const items = storeUrl
-    ? [
-        ...navMain,
-        {
-          title: "View store",
-          url: storeUrl,
-          icon: ExternalLinkIcon,
-          external: true,
-        },
-      ]
-    : navMain;
+  const items = (() => {
+    const next = [...navMain];
+    if (templateHasBlog(seller?.template)) {
+      const editorIndex = next.findIndex((item) => item.url === "/dashboard/editor");
+      next.splice(editorIndex + 1, 0, {
+        title: "Blog",
+        url: "/dashboard/blog",
+        icon: NewspaperIcon,
+      });
+    }
+    if (storeUrl) {
+      next.push({
+        title: "View store",
+        url: storeUrl,
+        icon: ExternalLinkIcon,
+        external: true,
+      });
+    }
+    return next;
+  })();
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

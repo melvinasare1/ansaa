@@ -63,6 +63,29 @@ export interface Seller {
   storeContent: Record<string, string>;
 }
 
+/** Templates that show a blog on the storefront and a Blog nav in the dashboard. */
+export const STOREFRONT_TEMPLATES_WITH_BLOG = ["motorbike-template"] as const;
+
+export function templateHasBlog(template: StorefrontTemplate | undefined): boolean {
+  return Boolean(
+    template &&
+      (STOREFRONT_TEMPLATES_WITH_BLOG as readonly string[]).includes(template)
+  );
+}
+
+export interface StoreBlogPost {
+  id: string;
+  sellerId: string;
+  title: string;
+  excerpt: string;
+  body: string;
+  imageUrl: string;
+  published: boolean;
+  publishedAt: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export type ProductVariant = {
   id: string;
   name?: string;
