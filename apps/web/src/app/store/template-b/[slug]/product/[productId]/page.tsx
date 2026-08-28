@@ -1,36 +1,50 @@
+import { notFound } from "next/navigation";
+import { ProductDetail } from "@/components/store/template-b/ProductDetail";
 import { StorefrontTracker } from "@/components/store/StorefrontTracker";
+import { getSellerByStoreSlug, getStorefrontProduct } from "@/lib/storefront";
+import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
+import { createClient } from "@ansaa/shared/supabase/server";
 
-// TODO: fetch this product by productId from Firestore
-export default function TemplateBProductPage({
+export default async function TemplateBProductPage({
   params,
 }: {
   params: { slug: string; productId: string };
 }) {
-  return (
-    <div className="grid gap-6 sm:grid-cols-2">
-      <StorefrontTracker
-        storeSlug={params.slug}
-        path={`/store/template-b/${params.slug}/product/${params.productId}`}
-        productId={params.productId}
-      />
-      <div className="aspect-square w-full border-2 border-[#0B1220] bg-[#0B1220]/10" />
-      <div>
+  const catalogHref = `/store/template-b/${params.slug}`;
+
+  if (!isSupabaseConfigured()) {
+    return (
+      <div className="flex min-h-[40vh] flex-col items-center justify-center py-16 text-center">
         <h1 className="font-[family-name:var(--font-market)] text-2xl font-extrabold uppercase">
-          Bluetooth earbuds
+          Store not found
         </h1>
-        <p className="mt-1 font-[family-name:var(--font-market)] text-xl font-extrabold text-[#1447E6]">
-          GHS 120
-        </p>
-        <p className="mt-4 text-sm text-[#0B1220]/70">
-          12 hour battery, quick pair, includes charging case.
-        </p>
-        <button className="mt-6 w-full bg-[#1447E6] py-3 text-sm font-extrabold uppercase text-white transition hover:opacity-90">
-          Add to cart
-        </button>
-        <p className="mt-3 text-xs text-[#0B1220]/40">
-          Product {params.productId} · Packed and dispatched by Fulfil
+        <p className="mt-2 text-sm text-[#0B1220]/55">
+          This storefront isn&apos;t connected yet. Check NEXT_PUBLIC_SUPABASE_URL and
+          NEXT_PUBLIC_SUPABASE_ANON_KEY.
         </p>
       </div>
-    </div>
+    );
+  }
+
+  const supabase = await createClient();
+  const seller = await getSellerByStoreSlug(supabase, params.slug);
+  if (!seller) {
+    notFound();
+  }
+
+  const product = await getStorefrontProduct(supabase, params.productId, seller.id);
+  if (!product) {
+    notFound();
+  }
+
+  return (
+    <>
+      <StorefrontTracker
+        storeSlug={params.slug}
+        path={`${catalogHref}/product/${product.id}`}
+        productId={product.id}
+      />
+      <ProductDetail product={product} slug={params.slug} />
+    </>
   );
 }

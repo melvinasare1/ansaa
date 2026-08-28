@@ -4,8 +4,8 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/ui/card";
-import { mockMetrics, overviewTotals } from "@/lib/dashboard-mock";
-import { percentChange } from "@/lib/analytics";
+import type { OverviewStats } from "@/lib/analytics";
+import { formatOrderMoney } from "@/lib/orders";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -17,56 +17,63 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-function previousFromDelta(current: number, deltaPercent: number) {
-  return current / (1 + deltaPercent / 100);
+function formatDelta(delta: number | null): string | null {
+  if (delta == null || !Number.isFinite(delta)) return null;
+  return `${Math.abs(delta).toFixed(1)}%`;
 }
 
-export function SectionCards({
-  impressions,
-  impressionsPrevious,
-}: {
-  impressions: number;
-  impressionsPrevious: number;
-}) {
-  const { revenue, orders, conversion } = overviewTotals(mockMetrics);
-  const impressionsDelta = Number(
-    (percentChange(impressions, impressionsPrevious) ?? 0).toFixed(1)
-  );
+export function SectionCards({ stats }: { stats: OverviewStats }) {
+  const revenueEmpty = stats.revenueCedis === 0 && stats.revenuePreviousCedis === 0;
+  const ordersEmpty = stats.orders === 0 && stats.ordersPrevious === 0;
+  const impressionsEmpty = stats.impressions === 0 && stats.impressionsPrevious === 0;
+  const conversionValue =
+    stats.conversion == null ? "—" : `${stats.conversion.toFixed(1)}%`;
 
   const cards: {
     label: string;
     value: string;
-    delta: number;
+    delta: number | null;
     icon: LucideIcon;
     comparison: string;
   }[] = [
     {
       label: "Revenue",
-      value: `GHS ${revenue.toLocaleString()}`,
-      delta: 12.4,
+      value: formatOrderMoney(stats.revenueCedis),
+      delta: revenueEmpty ? null : stats.revenueDelta,
       icon: WalletIcon,
-      comparison: `vs. GHS ${Math.round(previousFromDelta(revenue, 12.4)).toLocaleString()} last period`,
+      comparison: revenueEmpty
+        ? "No orders in the last 7 days"
+        : `vs. ${formatOrderMoney(stats.revenuePreviousCedis)} last period`,
     },
     {
       label: "Orders",
-      value: String(orders),
-      delta: 8.1,
+      value: stats.orders.toLocaleString("en-GH"),
+      delta: ordersEmpty ? null : stats.ordersDelta,
       icon: ShoppingBagIcon,
-      comparison: `vs. ${Math.round(previousFromDelta(orders, 8.1)).toLocaleString()} last period`,
+      comparison: ordersEmpty
+        ? "No orders in the last 7 days"
+        : `vs. ${stats.ordersPrevious.toLocaleString("en-GH")} last period`,
     },
     {
       label: "Impressions",
-      value: impressions.toLocaleString(),
-      delta: impressionsDelta,
+      value: stats.impressions.toLocaleString("en-GH"),
+      delta: impressionsEmpty ? null : stats.impressionsDelta,
       icon: EyeIcon,
-      comparison: `vs. ${impressionsPrevious.toLocaleString()} last period`,
+      comparison: impressionsEmpty
+        ? "No storefront views in the last 7 days"
+        : `vs. ${stats.impressionsPrevious.toLocaleString("en-GH")} last period`,
     },
     {
       label: "Conversion rate",
-      value: `${conversion.toFixed(1)}%`,
-      delta: -0.4,
+      value: conversionValue,
+      delta: stats.conversionDelta,
       icon: PercentIcon,
-      comparison: `vs. ${previousFromDelta(conversion, -0.4).toFixed(1)}% last period`,
+      comparison:
+        stats.conversion == null
+          ? "Needs storefront views to calculate"
+          : stats.conversionPrevious == null
+            ? "No views in the previous period"
+            : `vs. ${stats.conversionPrevious.toFixed(1)}% last period`,
     },
   ];
 
@@ -74,7 +81,8 @@ export function SectionCards({
     <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
-        const positive = card.delta >= 0;
+        const deltaLabel = formatDelta(card.delta);
+        const positive = (card.delta ?? 0) >= 0;
         return (
           <Card
             key={card.label}
@@ -91,21 +99,23 @@ export function SectionCards({
                 <p className="text-2xl font-bold tracking-tight tabular-nums text-foreground">
                   {card.value}
                 </p>
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold",
-                    positive
-                      ? "bg-delta-up-soft text-delta-up"
-                      : "bg-delta-down-soft text-delta-down"
-                  )}
-                >
-                  {positive ? (
-                    <ArrowUpIcon className="size-3" />
-                  ) : (
-                    <ArrowDownIcon className="size-3" />
-                  )}
-                  {Math.abs(card.delta)}%
-                </span>
+                {deltaLabel ? (
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold",
+                      positive
+                        ? "bg-delta-up-soft text-delta-up"
+                        : "bg-delta-down-soft text-delta-down"
+                    )}
+                  >
+                    {positive ? (
+                      <ArrowUpIcon className="size-3" />
+                    ) : (
+                      <ArrowDownIcon className="size-3" />
+                    )}
+                    {deltaLabel}
+                  </span>
+                ) : null}
               </div>
               <p className="mt-1 text-sm text-muted-foreground">{card.comparison}</p>
             </CardContent>

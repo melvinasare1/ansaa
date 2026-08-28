@@ -2,7 +2,6 @@
 
 import { NavMain } from "@/components/nav-main";
 import { Sidebar, SidebarContent } from "@/components/ui/sidebar";
-import { mockOrders, openOrderCount } from "@/lib/dashboard-mock";
 import { useSeller } from "@/lib/seller-context";
 import { storefrontUrl } from "@/lib/storefront-url";
 import {
@@ -23,7 +22,6 @@ const navMain = [
     title: "Orders",
     url: "/dashboard/orders",
     icon: ShoppingBagIcon,
-    badge: openOrderCount(mockOrders),
   },
   { title: "Products", url: "/dashboard/products", icon: PackageIcon },
   { title: "Customers", url: "/dashboard/customers", icon: UsersIcon },

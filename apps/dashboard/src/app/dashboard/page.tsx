@@ -1,36 +1,49 @@
-import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
-import { getPageViewStats } from "@/lib/analytics";
-import { mockOrders } from "@/lib/dashboard-mock";
+import { emptyOverviewStats, getOverviewStats } from "@/lib/analytics";
+import { getRecentDashboardOrders, type DashboardOrder } from "@/lib/overview";
 import { getDashboardSession } from "@/lib/seller";
 import { createClient } from "@ansaa/shared/supabase/server";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 
 export default async function DashboardOverviewPage() {
-  let impressions = 0;
-  let impressionsPrevious = 0;
-
   const session = await getDashboardSession();
-  if (session?.seller && isSupabaseConfigured()) {
+  const sellerId = session?.seller?.id ?? null;
+
+  let stats = emptyOverviewStats();
+  let recentOrders: DashboardOrder[] = [];
+  let loadError: string | null = null;
+
+  if (sellerId && isSupabaseConfigured()) {
     try {
       const supabase = await createClient();
-      const stats = await getPageViewStats(supabase, session.seller.id, "7d");
-      impressions = stats.current;
-      impressionsPrevious = stats.previous;
+      const [overview, orders] = await Promise.all([
+        getOverviewStats(supabase, sellerId),
+        getRecentDashboardOrders(supabase, sellerId, 5),
+      ]);
+      stats = overview;
+      recentOrders = orders;
     } catch (err) {
-      console.error("Failed to load impression stats", err);
+      console.error("Failed to load overview stats", err);
+      loadError = "Could not load overview from Supabase.";
     }
   }
 
   return (
     <div className="@container/main flex flex-1 flex-col gap-2">
       <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-        <SectionCards impressions={impressions} impressionsPrevious={impressionsPrevious} />
-        <div className="px-4 lg:px-6">
-          <ChartAreaInteractive />
-        </div>
-        <DataTable data={mockOrders} />
+        {loadError ? (
+          <p className="mx-4 rounded-xl border border-wire bg-white px-5 py-4 text-sm text-muted-foreground lg:mx-6">
+            {loadError}
+          </p>
+        ) : null}
+        {!sellerId && !loadError ? (
+          <p className="mx-4 rounded-xl border border-wire bg-white px-5 py-4 text-sm text-muted-foreground lg:mx-6">
+            Link a seller profile to this account to see storefront stats.
+          </p>
+        ) : null}
+        <SectionCards stats={stats} />
+        <DataTable data={recentOrders} />
       </div>
     </div>
   );

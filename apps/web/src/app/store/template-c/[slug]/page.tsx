@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import { ArrowRight, Github, Globe, Instagram, Leaf, Linkedin, Quote, Sprout, Twitter } from "lucide-react";
 import ProductCarousel, {
   type KitchenProduct,
@@ -10,64 +11,35 @@ import GalleryCarousel, {
   type GalleryPiece,
 } from "@/components/store/template-c/GalleryCarousel";
 import { StorefrontTracker } from "@/components/store/StorefrontTracker";
+import { formatCedis } from "@/lib/price";
+import { getActiveProductsForSeller, getSellerByStoreSlug } from "@/lib/storefront";
+import { fillFromId, swatchHex } from "@/lib/swatch";
+import { createClient } from "@ansaa/shared/supabase/server";
+import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
+import type { Product } from "@ansaa/shared/types";
 
-// TODO: fetch products from Firestore where sellerId == seller resolved from slug/domain
-const mockProducts: KitchenProduct[] = [
-  {
-    id: "p1",
-    name: "Reusable drinkware for a greener lifestyle.",
-    price: "GHS 43.85",
-    badge: "Promotion",
-    colors: ["#7BA3C9", "#3D6B4F", "#9AA0A6"],
-    image: "/template-c/bottle.jpg",
-    imageAlt: "Matte green reusable water bottle",
-  },
-  {
-    id: "p2",
-    name: "Enamel cookware set for everyday meals.",
-    price: "GHS 128.00",
-    badge: "New",
-    colors: ["#E8A54B", "#C45C26", "#2B4239"],
-    image: "/template-c/pots.jpg",
-    imageAlt: "Stacked enamel pots on a kitchen counter",
-  },
-  {
-    id: "p3",
-    name: "Electric kettle in recycled steel.",
-    price: "GHS 89.50",
-    badge: "Customer favorite",
-    colors: ["#3D6B4F", "#D7C7A2", "#2B4239"],
-    image: "/template-c/kettle.jpg",
-    imageAlt: "Green electric kettle",
-  },
-  {
-    id: "p4",
-    name: "Utensil crock for a clutter-free counter.",
-    price: "GHS 36.00",
-    badge: "Promotion",
-    colors: ["#E8C547", "#F5F1E4", "#2B4239"],
-    image: "/template-c/utensils.jpg",
-    imageAlt: "Kitchen utensils in a ceramic holder",
-  },
-  {
-    id: "p5",
-    name: "Bamboo serving boards, two-piece set.",
-    price: "GHS 54.00",
-    badge: "New",
-    colors: ["#C4A574", "#2B4239", "#EDE8DC"],
-    image: "/template-c/boards.jpg",
-    imageAlt: "Bamboo cutting and serving boards",
-  },
-  {
-    id: "p6",
-    name: "Stoneware bowls for slow weekend cooking.",
-    price: "GHS 62.00",
-    badge: "Customer favorite",
-    colors: ["#8B9A8C", "#D4C4A8", "#2B4239"],
-    image: "/template-c/bowls.jpg",
-    imageAlt: "Stacked ceramic bowls",
-  },
-];
+const BADGES: KitchenProduct["badge"][] = ["Promotion", "New", "Customer favorite"];
+
+function toKitchenProduct(product: Product, index: number): KitchenProduct {
+  const colors =
+    product.colors && product.colors.length > 0
+      ? product.colors.slice(0, 3).map(swatchHex)
+      : [fillFromId(product.id)];
+  let badge: KitchenProduct["badge"] = BADGES[index % BADGES.length];
+  if (product.compareAtPriceCedis && product.compareAtPriceCedis > product.priceCedis) {
+    badge = "Promotion";
+  }
+  return {
+    id: product.id,
+    name: product.name,
+    price: formatCedis(product.priceCedis),
+    priceCedis: product.priceCedis,
+    badge,
+    colors,
+    image: product.images[0] ?? "",
+    imageAlt: product.name,
+  };
+}
 
 const mockCategories: KitchenCategory[] = [
   {
@@ -132,7 +104,33 @@ const mockReviews = [
   },
 ];
 
-export default function TemplateCHome({ params }: { params: { slug: string } }) {
+export default async function TemplateCHome({ params }: { params: { slug: string } }) {
+  if (!isSupabaseConfigured()) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 py-24 text-center">
+        <h1
+          className="text-[32px] font-medium text-[#2B4239]"
+          style={{ fontFamily: "var(--font-homedine-serif), ui-serif, Georgia" }}
+        >
+          Store not found
+        </h1>
+        <p className="mt-2 max-w-md text-sm text-[#2B4239]/55">
+          This storefront isn&apos;t connected yet. Check NEXT_PUBLIC_SUPABASE_URL and
+          NEXT_PUBLIC_SUPABASE_ANON_KEY.
+        </p>
+      </div>
+    );
+  }
+
+  const supabase = await createClient();
+  const seller = await getSellerByStoreSlug(supabase, params.slug);
+  if (!seller) {
+    notFound();
+  }
+
+  const catalog = await getActiveProductsForSeller(supabase, seller.id);
+  const products = catalog.map(toKitchenProduct);
+
   return (
     <div>
       <StorefrontTracker storeSlug={params.slug} path={`/store/template-c/${params.slug}`} />
@@ -215,7 +213,16 @@ export default function TemplateCHome({ params }: { params: { slug: string } }) 
             </a>
           </div>
 
-          <ProductCarousel products={mockProducts} />
+          {products.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-[#2B4239]/20 px-6 py-16 text-center">
+              <p className="text-lg font-semibold text-[#2B4239]">No products yet</p>
+              <p className="mt-2 text-sm text-[#2B4239]/50">
+                This seller hasn&apos;t listed any active products.
+              </p>
+            </div>
+          ) : (
+            <ProductCarousel products={products} slug={params.slug} />
+          )}
         </div>
       </section>
 

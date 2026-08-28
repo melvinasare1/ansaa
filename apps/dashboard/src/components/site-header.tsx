@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { NavUser } from "@/components/nav-user";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { BellIcon, SearchIcon, ShoppingBagIcon, SunIcon } from "lucide-react";
+import { useSeller } from "@/lib/seller-context";
+import { BellIcon, SearchIcon, SunIcon } from "lucide-react";
 
 const titles: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -18,14 +19,23 @@ const titles: Record<string, string> = {
 };
 
 export function SiteHeader() {
+  const { seller } = useSeller();
+  const businessName = seller?.businessName.trim() || "Dashboard";
+  const initials = businessName
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <header className="sticky top-0 z-20 flex h-(--header-height) shrink-0 items-center gap-4 border-b border-black/4 bg-white px-4 lg:px-6">
       <SidebarTrigger className="md:hidden" />
-      <Link href="/dashboard" className="flex shrink-0 items-center gap-2.5">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-brand text-white">
-          <ShoppingBagIcon className="size-4" />
+      <Link href="/dashboard" className="flex min-w-0 shrink-0 items-center gap-2.5">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand text-[11px] font-semibold tracking-wide text-white">
+          {initials || "S"}
         </span>
-        <span className="text-base font-semibold tracking-tight">Fulfil</span>
+        <span className="truncate text-base font-semibold tracking-tight">{businessName}</span>
       </Link>
       <div className="hidden min-w-0 flex-1 justify-center sm:flex">
         <label className="relative w-full max-w-xl">

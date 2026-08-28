@@ -59,6 +59,62 @@ export function productIdFromCartLine(lineId: string): string {
   return match?.[0] ?? "";
 }
 
+export function cartLineId(productId: string, size?: string, color?: string) {
+  if (!size && !color) return productId;
+  return `${productId}:${size ?? ""}:${color ?? ""}`;
+}
+
+export function checkoutItemsPayload(items: Array<{
+  productId: string;
+  name: string;
+  quantity: number;
+  size?: string;
+  color?: string;
+}>): CheckoutItemInput[] {
+  return items.map((item) => ({
+    productId: item.productId,
+    name: item.name,
+    quantity: item.quantity,
+    size: item.size,
+    color: item.color,
+  }));
+}
+
+export async function submitCheckout(
+  body: CheckoutBody
+): Promise<{ ok: true; receipt: CheckoutSuccess } | { ok: false; error: string }> {
+  try {
+    const response = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const payload: unknown = await response.json().catch(() => null);
+    const message =
+      payload && typeof payload === "object" && "error" in payload
+        ? String((payload as { error?: unknown }).error ?? "")
+        : "";
+
+    if (!response.ok) {
+      return { ok: false, error: message || "Could not place your order. Please try again." };
+    }
+
+    const receipt = payload as CheckoutSuccess;
+    if (!receipt?.orderId || !receipt.paymentReference) {
+      return {
+        ok: false,
+        error: "Order was created but the confirmation was incomplete. Check with the seller.",
+      };
+    }
+
+    return { ok: true, receipt };
+  } catch (err) {
+    console.error("Checkout request failed", err);
+    return { ok: false, error: "Could not reach checkout. Check your connection and try again." };
+  }
+}
+
 export function parseCheckoutBody(raw: unknown): { ok: true; data: ParsedCheckout } | { ok: false; error: string } {
   const body = asRecord(raw);
   const storeSlug = trim(body.storeSlug, 80);

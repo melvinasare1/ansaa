@@ -97,9 +97,16 @@ export default async function AnalyticsPage({
 
       <div className="mt-6 rounded-xl border border-wire bg-white p-5">
         <h2 className="font-display text-base font-semibold text-ink-950">Revenue and views</h2>
-        <div className="mt-4 h-72">
-          <RevenueChart data={analytics.chart} />
-        </div>
+        {analytics.chart.some((point) => point.revenue > 0 || point.impressions > 0) ? (
+          <div className="mt-4 h-72">
+            <RevenueChart data={analytics.chart} />
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-muted-foreground">
+            No storefront views or orders in this period yet. The chart will fill in as shoppers visit
+            your store and place orders.
+          </p>
+        )}
       </div>
 
       <div className="mt-6 rounded-xl border border-wire bg-white p-5">

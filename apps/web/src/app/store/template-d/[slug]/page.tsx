@@ -1,6 +1,15 @@
 import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowRight, ArrowUpRight, BadgeCheck, Hexagon, Shield, Sparkles, Star } from "lucide-react";
+import { AddToCartButton } from "@/components/store/template-d/AddToCartButton";
 import { StorefrontTracker } from "@/components/store/StorefrontTracker";
+import { formatCedis } from "@/lib/price";
+import { getActiveProductsForSeller, getSellerByStoreSlug } from "@/lib/storefront";
+import { fillFromId, swatchHex } from "@/lib/swatch";
+import { createClient } from "@ansaa/shared/supabase/server";
+import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
+import type { Product } from "@ansaa/shared/types";
 
 const avatars = [
   { src: "/template-d/avatar-1.jpg", alt: "Customer review avatar" },
@@ -21,15 +30,6 @@ const categories = [
   { src: "/template-d/cat-set.jpg", label: "Set Collection", count: "35 items", alt: "Navy corduroy jacket over white hoodie" },
   { src: "/template-d/cat-shirt.jpg", label: "Shirt Outfit", count: "25 items", alt: "Olive corduroy shirt over white tee" },
   { src: "/template-d/cat-tee.jpg", label: "T-Shirt", count: "20 items", alt: "Neutral sweatshirts on hangers" },
-];
-
-const products = [
-  { src: "/template-d/prod-1.jpg", alt: "Navy corduroy jacket over white hoodie" },
-  { src: "/template-d/prod-2.jpg", alt: "Olive corduroy shirt over white tee" },
-  { src: "/template-d/prod-3.jpg", alt: "Light denim jacket over white hoodie" },
-  { src: "/template-d/prod-4.jpg", alt: "Cream corduroy shirt over white tee" },
-  { src: "/template-d/prod-5.jpg", alt: "Grey overshirt product shot" },
-  { src: "/template-d/prod-6.jpg", alt: "Black shirt product shot" },
 ];
 
 const collections = [
@@ -55,10 +55,45 @@ const collections = [
   },
 ];
 
-export default function TemplateDHome({ params }: { params: { slug: string } }) {
+function cartImage(product: Product): string {
+  const photo = product.images[0];
+  if (photo) return photo;
+  const firstColor = product.colors?.[0];
+  if (firstColor) return swatchHex(firstColor);
+  return fillFromId(product.id);
+}
+
+export default async function TemplateDHome({ params }: { params: { slug: string } }) {
+  const base = `/store/template-d/${params.slug}`;
+
+  if (!isSupabaseConfigured()) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 py-24 text-center">
+        <h1
+          className="text-[32px] font-extrabold tracking-tight"
+          style={{ fontFamily: "var(--font-stylehive-display), ui-sans-serif, system-ui" }}
+        >
+          Store not found
+        </h1>
+        <p className="mt-2 max-w-md text-sm text-black/55">
+          This storefront isn&apos;t connected yet. Check NEXT_PUBLIC_SUPABASE_URL and
+          NEXT_PUBLIC_SUPABASE_ANON_KEY.
+        </p>
+      </div>
+    );
+  }
+
+  const supabase = await createClient();
+  const seller = await getSellerByStoreSlug(supabase, params.slug);
+  if (!seller) {
+    notFound();
+  }
+
+  const products = await getActiveProductsForSeller(supabase, seller.id);
+
   return (
     <div className="pb-16 pt-6 md:pb-24 md:pt-8">
-      <StorefrontTracker storeSlug={params.slug} path={`/store/template-d/${params.slug}`} />
+      <StorefrontTracker storeSlug={params.slug} path={base} />
       {/* Hero */}
       <section className="mx-auto grid max-w-[1400px] gap-4 px-5 md:grid-cols-2 md:gap-5 md:px-8">
         <div className="flex flex-col justify-between rounded-[28px] bg-white p-8 md:min-h-[560px] md:rounded-[32px] md:p-12">
@@ -231,33 +266,59 @@ export default function TemplateDHome({ params }: { params: { slug: string } }) 
           </h2>
           <p className="mt-2 text-[14px] text-black/45 md:text-[15px]">Recently added shirts!</p>
         </div>
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-12 md:grid-cols-3 md:gap-6">
-          {products.map((product, i) => (
-            <article
-              key={`${product.src}-${i}`}
-              className="overflow-hidden rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
-            >
-              <div className="relative aspect-[4/5] bg-[#F7F7F5]">
-                <Image
-                  src={product.src}
-                  alt={product.alt}
-                  fill
-                  sizes="(min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
-                  className="object-cover object-center"
-                />
-              </div>
-              <div className="px-5 pb-5 pt-4">
-                <h3
-                  className="text-[15px] font-bold text-black"
-                  style={{ fontFamily: "var(--font-stylehive-display), ui-sans-serif, system-ui" }}
+        {products.length === 0 ? (
+          <div className="mt-10 rounded-2xl border border-dashed border-black/15 px-6 py-16 text-center">
+            <p className="text-lg font-bold">No products yet</p>
+            <p className="mt-2 text-sm text-black/50">
+              This seller hasn&apos;t listed any active products.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-12 md:grid-cols-3 md:gap-6">
+            {products.map((product) => {
+              const photo = product.images[0];
+              return (
+                <article
+                  key={product.id}
+                  className="overflow-hidden rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)]"
                 >
-                  Plain White Shirt
-                </h3>
-                <p className="mt-1 text-[14px] text-black/80">$29.00</p>
-              </div>
-            </article>
-          ))}
-        </div>
+                  <Link
+                    href={`${base}/product/${product.id}`}
+                    aria-label={product.name}
+                    className="relative block aspect-[4/5] bg-[#F7F7F5]"
+                  >
+                    {photo ? (
+                      <Image
+                        src={photo}
+                        alt={product.name}
+                        fill
+                        sizes="(min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover object-center"
+                      />
+                    ) : null}
+                  </Link>
+                  <div className="flex items-end justify-between gap-3 px-5 pb-5 pt-4">
+                    <Link href={`${base}/product/${product.id}`} className="min-w-0">
+                      <h3
+                        className="text-[15px] font-bold text-black"
+                        style={{ fontFamily: "var(--font-stylehive-display), ui-sans-serif, system-ui" }}
+                      >
+                        {product.name}
+                      </h3>
+                      <p className="mt-1 text-[14px] text-black/80">{formatCedis(product.priceCedis)}</p>
+                    </Link>
+                    <AddToCartButton
+                      productId={product.id}
+                      name={product.name}
+                      priceCedis={product.priceCedis}
+                      image={cartImage(product)}
+                    />
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Promo banner */}

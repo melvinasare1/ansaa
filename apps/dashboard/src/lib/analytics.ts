@@ -41,14 +41,37 @@ export type AnalyticsSnapshot = {
   topProducts: TopViewedProduct[];
 };
 
+export type OverviewStats = {
+  revenueCedis: number;
+  revenuePreviousCedis: number;
+  revenueDelta: number | null;
+  orders: number;
+  ordersPrevious: number;
+  ordersDelta: number | null;
+  impressions: number;
+  impressionsPrevious: number;
+  impressionsDelta: number | null;
+  conversion: number | null;
+  conversionPrevious: number | null;
+  conversionDelta: number | null;
+};
+
 export function parseAnalyticsPeriod(value: unknown): AnalyticsPeriod {
   return ANALYTICS_PERIODS.includes(value as AnalyticsPeriod) ? (value as AnalyticsPeriod) : "30d";
 }
 
 export function percentChange(current: number, previous: number): number | null {
   if (!Number.isFinite(current) || !Number.isFinite(previous)) return null;
-  if (previous === 0) return current === 0 ? 0 : 100;
+  if (previous === 0 && current === 0) return null;
+  if (previous === 0) return 100;
   return ((current - previous) / previous) * 100;
+}
+
+export function conversionRate(orders: number, impressions: number): number | null {
+  if (!Number.isFinite(orders) || !Number.isFinite(impressions) || impressions <= 0) {
+    return null;
+  }
+  return (orders / impressions) * 100;
 }
 
 export function formatDeltaPercent(delta: number | null): string | undefined {
@@ -238,6 +261,60 @@ export async function getPageViewStats(
     current: currentCount,
     previous: previousCount,
     delta: percentChange(currentCount, previousCount),
+  };
+}
+
+export function emptyOverviewStats(): OverviewStats {
+  return {
+    revenueCedis: 0,
+    revenuePreviousCedis: 0,
+    revenueDelta: null,
+    orders: 0,
+    ordersPrevious: 0,
+    ordersDelta: null,
+    impressions: 0,
+    impressionsPrevious: 0,
+    impressionsDelta: null,
+    conversion: null,
+    conversionPrevious: null,
+    conversionDelta: null,
+  };
+}
+
+export async function getOverviewStats(
+  supabase: SupabaseClient,
+  sellerId: string
+): Promise<OverviewStats> {
+  const currentRange = periodRange("7d");
+  const prior = previousRange(currentRange.start, currentRange.end);
+
+  const [currentOrders, previousOrders, impressionStats] = await Promise.all([
+    fetchOrdersInRange(supabase, sellerId, currentRange.start, currentRange.end),
+    fetchOrdersInRange(supabase, sellerId, prior.start, prior.end),
+    getPageViewStats(supabase, sellerId, "7d"),
+  ]);
+
+  const current = summarizeOrders(currentOrders);
+  const previous = summarizeOrders(previousOrders);
+  const conversion = conversionRate(current.ordersPlaced, impressionStats.current);
+  const conversionPrevious = conversionRate(previous.ordersPlaced, impressionStats.previous);
+
+  return {
+    revenueCedis: current.revenueCedis,
+    revenuePreviousCedis: previous.revenueCedis,
+    revenueDelta: percentChange(current.revenueCedis, previous.revenueCedis),
+    orders: current.ordersPlaced,
+    ordersPrevious: previous.ordersPlaced,
+    ordersDelta: percentChange(current.ordersPlaced, previous.ordersPlaced),
+    impressions: impressionStats.current,
+    impressionsPrevious: impressionStats.previous,
+    impressionsDelta: impressionStats.delta,
+    conversion,
+    conversionPrevious,
+    conversionDelta:
+      conversion != null && conversionPrevious != null
+        ? percentChange(conversion, conversionPrevious)
+        : null,
   };
 }
 

@@ -8,11 +8,11 @@ import {
   Instagram,
   Menu,
   Search,
-  ShoppingBag,
   Twitter,
   User,
   Youtube,
 } from "lucide-react";
+import { CartLink } from "@/components/store/template-d/CartLink";
 
 const footerLinkGroups = [
   { heading: "About", links: ["Company", "Leadership", "Press", "Careers"] },
@@ -102,9 +102,7 @@ export default function TemplateDLayout({
             <button type="button" aria-label="Account" className="p-1">
               <User className="h-[18px] w-[18px]" strokeWidth={1.6} />
             </button>
-            <Link href={`${base}/cart`} aria-label="Cart" className="p-1">
-              <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.6} />
-            </Link>
+            <CartLink href={`${base}/cart`} />
           </div>
         </div>
 
