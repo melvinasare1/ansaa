@@ -2,9 +2,13 @@ import { notFound } from "next/navigation";
 import {
   ArrowRight,
   Award,
+  Bike,
+  Calendar,
+  ChevronRight,
   Clock,
   Cog,
   Handshake,
+  MessageCircle,
   Shield,
   Star,
   User,
@@ -16,6 +20,7 @@ import {
   BagPlaceholder,
   BicyclePlaceholder,
   BootsPlaceholder,
+  EbikePlaceholder,
   GlovesPlaceholder,
   HelmetPlaceholder,
   HeroVehiclePlaceholder,
@@ -32,7 +37,6 @@ import { createClient } from "@ansaa/shared/supabase/server";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 
 const ORANGE = "#E8622C";
-const CREAM = "#F7F5F0";
 
 const trustBadges = [
   { label: "Premium Components", Icon: Cog },
@@ -116,6 +120,48 @@ const accessories = [
   },
 ] as const;
 
+const valueFeatures = [
+  {
+    label: "Special Offers",
+    body: "Seasonal drops, bundle pricing, and trade-in credit on machines you already ride.",
+    Icon: Bike,
+    href: "#featured",
+  },
+  {
+    label: "Amazing Events",
+    body: "Shop rides, demo days, and weekend loops — show up, clip in, ride with the floor.",
+    Icon: Calendar,
+    href: "#blog",
+  },
+  {
+    label: "Human Reviews",
+    body: "Notes from riders who commute, tour, and wrench — not a star average from nowhere.",
+    Icon: MessageCircle,
+    href: "#accessories",
+  },
+] as const;
+
+const blogPosts = [
+  {
+    date: "12 Aug 2026",
+    title: "How to pick a commuter scooter for Accra traffic",
+    excerpt: "Range, brakes, and a seat you can live with at 7am — what actually matters on the road.",
+    Placeholder: ScooterPlaceholder,
+  },
+  {
+    date: "28 Jul 2026",
+    title: "Sunday loop: Labadi to the hills and back",
+    excerpt: "A mixed-bike group ride, a coffee stop, and the gear we actually packed.",
+    Placeholder: BicyclePlaceholder,
+  },
+  {
+    date: "09 Jul 2026",
+    title: "Wet-season service: five checks before the rains",
+    excerpt: "Chain, lights, pads, and a battery that still holds a charge when the sky opens.",
+    Placeholder: MotorbikePlaceholder,
+  },
+] as const;
+
 function StarRating({ value }: { value: number }) {
   return (
     <div className="mt-1.5 flex gap-0.5" aria-label={`${value} out of 5 stars`}>
@@ -123,8 +169,8 @@ function StarRating({ value }: { value: number }) {
         <Star
           key={i}
           className="h-3.5 w-3.5"
-          fill={i < value ? ORANGE : "none"}
-          color={ORANGE}
+          fill={i < value ? "#E8B923" : "none"}
+          color="#E8B923"
           strokeWidth={1.6}
         />
       ))}
@@ -166,88 +212,90 @@ export default async function MotorbikeTemplateHome({
     <div>
       <StorefrontTracker storeSlug={params.slug} path={base} />
 
-      <section className="relative flex min-h-[calc(100svh-4.75rem)] flex-col overflow-hidden bg-[#141414]">
-        {/* Real seller photography goes here — this stand-in vehicle drawing is a
-            placeholder until the seller uploads their own shop photography. */}
+      <section className="relative flex min-h-[calc(100svh-5rem)] flex-col overflow-hidden bg-[#141414]">
+        {/* Real seller photography goes here — this stand-in is a placeholder
+            until the seller uploads their own shop photography. */}
         <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_45%,#2a2a2a_0%,#141414_58%)]" />
-          <HeroVehiclePlaceholder className="absolute -right-8 bottom-16 h-[58%] w-[70%] max-w-[780px] opacity-80 md:right-[4%] md:h-[68%] md:w-[52%]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-[#141414]/80 to-transparent md:via-[#141414]/55" />
+          <div className="absolute inset-0 bg-[#0c0c0c]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_78%_42%,#6a4a32_0%,transparent_42%),radial-gradient(ellipse_at_60%_70%,#2a1c14_0%,transparent_50%)]" />
+          <HeroVehiclePlaceholder className="absolute -right-[8%] bottom-[12%] h-[72%] w-[78%] max-w-[820px] drop-shadow-[0_30px_50px_rgba(0,0,0,0.55)] md:right-[2%] md:h-[78%] md:w-[54%]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-[#141414]/75 to-transparent md:from-[#141414] md:via-[#141414]/50 md:to-transparent" />
         </div>
 
-        <div className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-1 flex-col justify-center px-5 pb-28 pt-14 md:px-8 md:pb-32 md:pt-20">
+        <div className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-1 flex-col justify-center px-6 pb-32 pt-16 md:px-10 md:pb-36 md:pt-24">
           <h1
-            className="max-w-xl text-[40px] font-extrabold leading-[1.05] tracking-tight text-white md:text-[56px] lg:text-[64px]"
+            className="max-w-xl text-[42px] font-extrabold leading-[1.02] tracking-tight text-white md:text-[58px] lg:text-[68px]"
             style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
           >
             Ride Better.
             <br />
             Ride Together.
           </h1>
-          <p className="mt-5 max-w-md text-[15px] leading-relaxed text-white/75 md:text-[16px]">
+          <p className="mt-6 max-w-[420px] text-[15px] leading-relaxed text-white/70 md:text-[16px]">
             Motorbikes, bicycles, mopeds, and scooters — chosen for the ride, backed by
             people who know the machines.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="mt-9 flex flex-wrap items-center gap-3.5">
             <a
               href="#shop"
-              className="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              className="inline-flex items-center rounded-lg px-7 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: ORANGE }}
             >
               Shop Now
             </a>
             <a
               href="#about"
-              className="inline-flex items-center rounded-md border border-white bg-transparent px-6 py-3 text-sm font-semibold text-white"
+              className="inline-flex items-center rounded-lg border border-white/90 bg-transparent px-7 py-3 text-sm font-semibold text-white"
             >
               Learn More
             </a>
           </div>
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 z-10 bg-[#0c0c0c]/70">
-          <ul className="mx-auto grid max-w-[1400px] grid-cols-2 gap-y-5 px-5 py-5 md:grid-cols-4 md:px-8 md:py-6">
+        <div className="absolute inset-x-0 bottom-0 z-10 bg-black/45 backdrop-blur-[2px]">
+          <ul className="mx-auto grid max-w-[1400px] grid-cols-2 gap-y-5 px-6 py-5 md:grid-cols-4 md:px-10 md:py-6">
             {trustBadges.map(({ label, Icon }) => (
               <li key={label} className="flex items-center gap-3 text-white">
-                <Icon className="h-5 w-5 shrink-0" strokeWidth={1.75} color={ORANGE} />
-                <span className="text-[12px] font-medium md:text-[13px]">{label}</span>
+                <Icon className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.6} />
+                <span className="text-[13px] font-medium tracking-wide">{label}</span>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      <section id="shop" className="bg-white">
-        <div className="mx-auto max-w-[1400px] px-5 pt-14 pb-10 md:px-8 md:pt-20 md:pb-12">
+      <section id="shop" className="bg-[#F7F5F0]">
+        <div className="mx-auto max-w-[1400px] px-6 pt-16 pb-12 md:px-10 md:pt-24 md:pb-16">
           <h2
-            className="text-[36px] font-extrabold tracking-tight text-[#141414] md:text-[44px]"
+            className="text-[40px] font-extrabold tracking-tight text-[#141414] md:text-[48px]"
             style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
           >
             Shop
           </h2>
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 md:mt-10 md:gap-6">
+          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 md:mt-12 md:gap-8">
             {categories.map((category) => (
               <article
                 key={category.id}
                 id={category.id}
-                className="flex flex-col overflow-hidden rounded-2xl px-6 pb-8 pt-6 md:px-8 md:pb-10 md:pt-8"
-                style={{ backgroundColor: CREAM }}
+                className="flex flex-col rounded-[28px] px-8 pb-9 pt-10 md:px-10 md:pb-11 md:pt-12"
+                style={{ backgroundColor: "#EFEBE3" }}
               >
-                <div className="relative flex aspect-[16/10] items-center justify-center">
+                <div className="relative flex aspect-[16/9] items-center justify-center">
                   {/* Real seller photography goes here — category vehicle photo. */}
-                  <category.Placeholder className="h-[85%] w-[90%]" />
+                  <category.Placeholder className="h-[88%] w-[88%] drop-shadow-[0_22px_28px_rgba(20,20,20,0.18)]" />
                 </div>
                 <p
-                  className="mt-4 text-center text-[18px] font-extrabold uppercase tracking-[0.04em] text-[#141414] md:text-[20px]"
+                  className="mt-6 text-center text-[17px] font-extrabold uppercase tracking-[0.08em] text-[#141414] md:text-[19px]"
                   style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
                 >
                   {category.label}
                 </p>
                 <a
                   href={`#${category.id}`}
-                  className="mx-auto mt-4 inline-flex items-center rounded-full border border-[#141414] px-5 py-2 text-[13px] font-semibold text-[#141414] transition-colors hover:bg-[#141414] hover:text-white"
+                  className="mx-auto mt-4 inline-flex items-center gap-1 rounded-full border border-[#141414] px-5 py-1.5 text-[12px] font-semibold text-[#141414] transition-colors hover:bg-[#141414] hover:text-white"
                 >
-                  View {category.label}
+                  Shop Now
+                  <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.25} />
                 </a>
               </article>
             ))}
@@ -255,77 +303,80 @@ export default async function MotorbikeTemplateHome({
         </div>
       </section>
 
-      <section className="bg-white pb-6 md:pb-8">
-        <div className="mx-auto max-w-[1400px] px-5 md:px-8">
+      <section className="bg-[#F7F5F0] pb-8 md:pb-10">
+        <div className="mx-auto max-w-[1400px] px-6 md:px-10">
           <div
             id="featured"
-            className="relative grid overflow-hidden rounded-2xl bg-[#141414] md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]"
+            className="relative grid overflow-hidden rounded-[28px] bg-[#141414] md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.1fr)]"
           >
             <div
               className="pointer-events-none absolute inset-0"
               aria-hidden
               style={{
                 background:
-                  "radial-gradient(ellipse at 88% 55%, #4a3220 0%, transparent 52%)",
+                  "radial-gradient(ellipse at 18% 48%, rgba(232,98,44,0.28) 0%, transparent 52%), radial-gradient(ellipse at 88% 60%, #4a3220 0%, transparent 48%)",
               }}
             />
-            <div className="relative z-10 flex flex-col justify-center px-8 py-12 md:px-12 md:py-16 lg:px-16">
+            <div className="relative z-10 flex flex-col justify-center px-8 py-14 md:px-14 md:py-20 lg:px-16">
               <h2
-                className="text-[28px] font-extrabold tracking-tight text-white md:text-[34px]"
+                className="text-[30px] font-extrabold tracking-tight text-white md:text-[38px]"
                 style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
               >
                 Apex R9
               </h2>
-              <p className="mt-2 text-[20px] font-semibold" style={{ color: ORANGE }}>
+              <p className="mt-1.5 text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: ORANGE }}>
+                Street Motorbike
+              </p>
+              <p className="mt-2 text-[22px] font-semibold" style={{ color: ORANGE }}>
                 {formatCedis(18900)}
               </p>
-              <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-white/75 md:text-[15px]">
+              <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-white/70 md:text-[15px]">
                 Street-ready motorbike with a punchy engine, upright seating, and the range
                 to cover town and the open road.
               </p>
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="mt-8 flex flex-wrap items-center gap-3.5">
                 <a
                   href="#accessories"
-                  className="inline-flex items-center rounded-md px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                  className="inline-flex items-center rounded-lg px-7 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
                   style={{ backgroundColor: ORANGE }}
                 >
                   More Info
                 </a>
                 <a
                   href="#shop"
-                  className="inline-flex items-center gap-2 rounded-md border border-white px-6 py-3 text-sm font-semibold text-white"
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/90 px-7 py-3 text-sm font-semibold text-white"
                 >
                   View Collections
                   <ArrowRight className="h-4 w-4" strokeWidth={2} />
                 </a>
               </div>
             </div>
-            <div className="relative min-h-[240px] md:min-h-[340px]">
+            <div className="relative min-h-[260px] md:min-h-[380px]">
               {/* Real seller photography goes here — featured vehicle photo. */}
-              <PromoVehiclePlaceholder className="absolute -right-10 bottom-0 h-[108%] w-[118%] max-w-none md:-right-6" />
+              <PromoVehiclePlaceholder className="absolute -right-16 -bottom-10 h-[125%] w-[130%] max-w-none drop-shadow-[0_24px_40px_rgba(0,0,0,0.45)] md:-right-10 md:-bottom-12" />
             </div>
           </div>
         </div>
       </section>
 
       <section className="bg-[#F7F5F0]">
-        <div className="mx-auto max-w-[1400px] px-5 py-16 md:px-8 md:py-20">
-          <ul className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+        <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-10 md:py-20">
+          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
             {trustFeatures.map(({ label, body, Icon }) => (
-              <li key={label}>
+              <li key={label} className="rounded-[24px] bg-white/80 px-6 py-8 md:px-7 md:py-9">
                 <span
-                  className="flex h-11 w-11 items-center justify-center rounded-full"
-                  style={{ boxShadow: `inset 0 0 0 1.5px ${ORANGE}55` }}
+                  className="flex h-12 w-12 items-center justify-center rounded-full"
+                  style={{ backgroundColor: ORANGE }}
                 >
-                  <Icon className="h-5 w-5" strokeWidth={1.75} color={ORANGE} />
+                  <Icon className="h-5 w-5 text-white" strokeWidth={1.75} color="#fff" />
                 </span>
                 <h3
-                  className="mt-4 text-[16px] font-extrabold leading-snug text-[#141414] md:text-[17px]"
+                  className="mt-5 text-[17px] font-extrabold leading-snug text-[#141414]"
                   style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
                 >
                   {label}
                 </h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-[#141414]/55">{body}</p>
+                <p className="mt-2 text-[13px] leading-relaxed text-[#141414]/50">{body}</p>
               </li>
             ))}
           </ul>
@@ -333,25 +384,25 @@ export default async function MotorbikeTemplateHome({
       </section>
 
       <section id="accessories" className="bg-[#F7F5F0]">
-        <div className="mx-auto max-w-[1400px] px-5 pb-16 md:px-8 md:pb-24">
+        <div className="mx-auto max-w-[1400px] px-6 pb-16 md:px-10 md:pb-20">
           <h2
-            className="text-[36px] font-extrabold tracking-tight text-[#141414] md:text-[44px]"
+            className="text-[40px] font-extrabold tracking-tight text-[#141414] md:text-[48px]"
             style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
           >
             Gear &amp; Accessories
           </h2>
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 md:mt-10 md:gap-6">
+          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 md:mt-12">
             {accessories.map((item) => (
-              <article key={item.name} className="overflow-hidden rounded-2xl bg-[#EDEDED] p-5 md:p-6">
-                <div className="relative flex aspect-[4/3] items-center justify-center">
+              <article key={item.name}>
+                <div className="relative flex aspect-square items-center justify-center rounded-[24px] bg-[#E8E6E1]">
                   {/* Real seller photography goes here — accessory product photo. */}
-                  <item.Placeholder className="h-[80%] w-[80%]" />
+                  <item.Placeholder className="h-[62%] w-[62%] drop-shadow-[0_14px_18px_rgba(20,20,20,0.16)]" />
                 </div>
-                <div className="mt-4 flex gap-1.5">
+                <div className="mt-4 flex gap-1.5 px-0.5">
                   {item.colors.map((hex) => (
                     <span
                       key={hex}
-                      className="h-3 w-3 rounded-full"
+                      className="h-3.5 w-3.5 rounded-full"
                       style={{
                         backgroundColor: hex,
                         boxShadow: hex === "#F4C430" || hex === "#ADB5BD" ? "inset 0 0 0 1px rgba(0,0,0,0.12)" : undefined,
@@ -360,24 +411,132 @@ export default async function MotorbikeTemplateHome({
                   ))}
                 </div>
                 <h3
-                  className="mt-3 text-[15px] font-extrabold text-[#141414]"
+                  className="mt-3 text-[16px] font-extrabold text-[#141414]"
                   style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
                 >
                   {item.name}
                 </h3>
-                <p className="mt-1 text-[14px] text-[#141414]/80">{formatCedis(item.priceCedis)}</p>
+                <p className="mt-1 text-[14px] text-[#141414]/55">{formatCedis(item.priceCedis)}</p>
                 <StarRating value={item.rating} />
               </article>
             ))}
           </div>
-          <div className="mt-10 flex justify-center md:mt-12">
+          <div className="mt-12 flex justify-center md:mt-14">
             <a
               href="#accessories"
-              className="inline-flex items-center rounded-md border px-8 py-3 text-[13px] font-semibold uppercase tracking-[0.12em]"
+              className="inline-flex items-center rounded-lg border px-10 py-3.5 text-[12px] font-semibold uppercase tracking-[0.16em]"
               style={{ borderColor: ORANGE, color: ORANGE }}
             >
-              View More Accessories
+              View All Accessories
             </a>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#F7F5F0]">
+        <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-10 md:py-20">
+          <ul className="grid grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-8 lg:gap-12">
+            {valueFeatures.map(({ label, body, Icon, href }) => (
+              <li key={label} className="flex flex-col items-center text-center">
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#141414]">
+                  <Icon className="h-7 w-7 text-white" strokeWidth={1.6} color="#fff" />
+                </span>
+                <h3
+                  className="mt-6 text-[20px] font-extrabold text-[#141414]"
+                  style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
+                >
+                  {label}
+                </h3>
+                <p className="mt-3 max-w-[280px] text-[14px] leading-relaxed text-[#141414]/50">{body}</p>
+                <a
+                  href={href}
+                  className="mt-6 inline-flex items-center rounded-lg border border-[#141414] px-5 py-2 text-[13px] font-semibold text-[#141414] transition-colors hover:bg-[#141414] hover:text-white"
+                >
+                  Learn More
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="bg-[#F7F5F0] pb-8 md:pb-10">
+        <div className="mx-auto max-w-[1400px] px-6 md:px-10">
+          <div className="relative grid overflow-hidden rounded-[28px] bg-[#141414] md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.9fr)]">
+            <div className="relative min-h-[280px] md:min-h-[380px]">
+              {/* Real seller photography goes here — featured e-bike photo. */}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_38%_52%,#3a2a20_0%,transparent_58%)]" />
+              <EbikePlaceholder className="absolute -left-8 bottom-[-6%] h-[108%] w-[118%] max-w-none drop-shadow-[0_24px_40px_rgba(0,0,0,0.4)] md:-left-4" />
+              <div className="absolute left-[8%] top-[22%] z-10 flex items-center">
+                <div className="max-w-[210px] rounded-xl bg-black/55 px-3.5 py-2.5 ring-1 ring-white/15 backdrop-blur-sm">
+                  <p className="text-[12px] font-semibold leading-snug text-white">
+                    Super Powerful Battery
+                  </p>
+                  <p className="mt-0.5 text-[11px] leading-snug text-white/55">
+                    The best range ever seen for a bike like this.
+                  </p>
+                </div>
+                <span className="hidden h-px w-12 bg-white/70 sm:block" aria-hidden />
+                <span className="hidden h-2 w-2 rounded-full bg-white sm:block" aria-hidden />
+              </div>
+            </div>
+            <div className="relative z-10 flex flex-col justify-center px-8 py-12 md:px-12 md:py-16 lg:pr-16">
+              <h2
+                className="text-[30px] font-extrabold tracking-tight text-white md:text-[36px]"
+                style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
+              >
+                E-Bike
+              </h2>
+              <p className="mt-2 text-[16px] font-medium text-white/55">
+                From {formatCedis(9450)}
+              </p>
+              <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-white/70 md:text-[15px]">
+                Quiet power for city hops and weekend loops — a removable battery, disc
+                brakes, and a ride that stays composed in traffic.
+              </p>
+              <a
+                href="#shop"
+                className="mt-8 inline-flex w-fit items-center rounded-lg bg-white px-8 py-3 text-sm font-semibold text-[#141414] transition-opacity hover:opacity-90"
+              >
+                Buy Now
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="blog" className="bg-[#F7F5F0]">
+        <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-10 md:py-24">
+          <h2
+            className="text-[40px] font-extrabold tracking-tight text-[#141414] md:text-[48px]"
+            style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
+          >
+            Recent Blog Posts
+          </h2>
+          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3 md:mt-12 md:gap-6">
+            {blogPosts.map((post) => (
+              <article key={post.title}>
+                <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden rounded-[24px] bg-[#E8E6E1]">
+                  <post.Placeholder className="h-[70%] w-[80%] drop-shadow-[0_12px_16px_rgba(20,20,20,0.14)]" />
+                </div>
+                <p className="mt-5 text-[12px] font-medium uppercase tracking-[0.14em] text-[#141414]/40">
+                  {post.date}
+                </p>
+                <h3
+                  className="mt-2 max-w-[280px] text-[18px] font-extrabold leading-snug text-[#141414]"
+                  style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
+                >
+                  {post.title}
+                </h3>
+                <p className="mt-2 text-[14px] leading-relaxed text-[#141414]/50">{post.excerpt}</p>
+                <a
+                  href="#blog"
+                  className="mt-5 inline-flex items-center rounded-lg border border-[#141414] px-4 py-2 text-[13px] font-semibold text-[#141414] transition-colors hover:bg-[#141414] hover:text-white"
+                >
+                  Read More
+                </a>
+              </article>
+            ))}
           </div>
         </div>
       </section>

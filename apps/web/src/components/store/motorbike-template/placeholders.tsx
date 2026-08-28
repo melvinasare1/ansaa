@@ -178,6 +178,27 @@ export function BootsPlaceholder({ className }: PlaceholderProps) {
   );
 }
 
+export function EbikePlaceholder({ className }: PlaceholderProps) {
+  return (
+    <svg viewBox="0 0 640 360" fill="none" className={className} aria-hidden>
+      <ellipse cx="340" cy="328" rx="230" ry="14" fill="#000" opacity="0.45" />
+      <circle cx="140" cy="248" r="72" stroke="#E8E2D8" strokeWidth="8" />
+      <circle cx="140" cy="248" r="18" fill="#E8622C" />
+      <circle cx="500" cy="248" r="76" stroke="#E8E2D8" strokeWidth="8" />
+      <circle cx="500" cy="248" r="18" fill="#E8622C" />
+      <path
+        d="M140 248h148l88-110h86M288 248 376 138M288 248h78M376 138 348 90"
+        stroke="#F4EFE6"
+        strokeWidth="9"
+        strokeLinejoin="round"
+      />
+      <path d="M326 90h78" stroke="#F4EFE6" strokeWidth="9" strokeLinecap="round" />
+      <rect x="236" y="186" width="78" height="30" rx="6" fill="#E8622C" />
+      <circle cx="288" cy="248" r="10" fill="#F4EFE6" />
+    </svg>
+  );
+}
+
 export function ScooterPlaceholder({ className }: PlaceholderProps) {
   return (
     <svg viewBox="0 0 360 200" fill="none" className={className} aria-hidden>
