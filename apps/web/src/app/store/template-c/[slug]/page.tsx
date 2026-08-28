@@ -9,6 +9,7 @@ import CategoryCarousel, {
 import GalleryCarousel, {
   type GalleryPiece,
 } from "@/components/store/template-c/GalleryCarousel";
+import { StorefrontTracker } from "@/components/store/StorefrontTracker";
 
 // TODO: fetch products from Firestore where sellerId == seller resolved from slug/domain
 const mockProducts: KitchenProduct[] = [
@@ -134,6 +135,7 @@ const mockReviews = [
 export default function TemplateCHome({ params }: { params: { slug: string } }) {
   return (
     <div>
+      <StorefrontTracker storeSlug={params.slug} path={`/store/template-c/${params.slug}`} />
       <section className="relative min-h-[92vh] overflow-hidden bg-[#1F3830]">
         {/* Real seller photography goes here — this Unsplash kitchen still is a
             stand-in until the seller uploads their own warm kitchen shots. The

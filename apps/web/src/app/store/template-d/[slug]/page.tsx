@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ArrowRight, ArrowUpRight, BadgeCheck, Hexagon, Shield, Sparkles, Star } from "lucide-react";
+import { StorefrontTracker } from "@/components/store/StorefrontTracker";
 
 const avatars = [
   { src: "/template-d/avatar-1.jpg", alt: "Customer review avatar" },
@@ -55,10 +56,9 @@ const collections = [
 ];
 
 export default function TemplateDHome({ params }: { params: { slug: string } }) {
-  void params;
-
   return (
     <div className="pb-16 pt-6 md:pb-24 md:pt-8">
+      <StorefrontTracker storeSlug={params.slug} path={`/store/template-d/${params.slug}`} />
       {/* Hero */}
       <section className="mx-auto grid max-w-[1400px] gap-4 px-5 md:grid-cols-2 md:gap-5 md:px-8">
         <div className="flex flex-col justify-between rounded-[28px] bg-white p-8 md:min-h-[560px] md:rounded-[32px] md:p-12">

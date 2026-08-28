@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ImagePlusIcon, Loader2Icon, XIcon } from "lucide-react";
 import { productToInsert } from "@ansaa/shared/mappers";
+import { track } from "@vercel/analytics";
 import { useSeller } from "@/lib/seller-context";
 import {
   MAX_PRODUCT_IMAGES,
@@ -243,6 +244,14 @@ export default function ProductFormDialog({
           })
         );
         if (insertError) throw insertError;
+      }
+
+      if (active) {
+        try {
+          track("product_published");
+        } catch {
+          // Tracking must never block publishing.
+        }
       }
 
       onOpenChange(false);

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ChevronRight, ChevronUp, Heart, SlidersHorizontal } from "lucide-react";
 import { AddToBagButton } from "@/components/store/template-a/AddToBagButton";
 import { ShirtPlaceholder } from "@/components/store/template-a/ShirtPlaceholder";
@@ -8,6 +9,7 @@ import { getActiveProductsForSeller, getSellerByStoreSlug } from "@/lib/storefro
 import { createClient } from "@ansaa/shared/supabase/server";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 import { fillFromId, swatchHex } from "@/lib/swatch";
+import { StorefrontTracker } from "@/components/store/StorefrontTracker";
 import type { Product } from "@ansaa/shared/types";
 
 const ACCENT = "#FF7A1A";
@@ -158,12 +160,7 @@ export default async function TemplateAHome({ params }: { params: { slug: string
   const supabase = await createClient();
   const seller = await getSellerByStoreSlug(supabase, params.slug);
   if (!seller) {
-    return (
-      <CatalogMessage
-        title="Store not found"
-        body="No seller matches this store URL. Seed a seller with this store_slug, or check the path."
-      />
-    );
+    notFound();
   }
 
   const products = await getActiveProductsForSeller(supabase, seller.id);
@@ -173,6 +170,7 @@ export default async function TemplateAHome({ params }: { params: { slug: string
       id="catalog"
       className="mx-auto flex max-w-[1400px] flex-col md:flex-row md:items-start"
     >
+      <StorefrontTracker storeSlug={params.slug} path={base} />
       <FilterSidebar />
 
       <section className="min-w-0 flex-1 px-5 py-8 md:px-8 lg:px-10">

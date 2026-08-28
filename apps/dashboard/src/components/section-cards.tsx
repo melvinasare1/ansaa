@@ -5,6 +5,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { mockMetrics, overviewTotals } from "@/lib/dashboard-mock";
+import { percentChange } from "@/lib/analytics";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -20,8 +21,17 @@ function previousFromDelta(current: number, deltaPercent: number) {
   return current / (1 + deltaPercent / 100);
 }
 
-export function SectionCards() {
-  const { revenue, impressions, orders, conversion } = overviewTotals(mockMetrics);
+export function SectionCards({
+  impressions,
+  impressionsPrevious,
+}: {
+  impressions: number;
+  impressionsPrevious: number;
+}) {
+  const { revenue, orders, conversion } = overviewTotals(mockMetrics);
+  const impressionsDelta = Number(
+    (percentChange(impressions, impressionsPrevious) ?? 0).toFixed(1)
+  );
 
   const cards: {
     label: string;
@@ -47,9 +57,9 @@ export function SectionCards() {
     {
       label: "Impressions",
       value: impressions.toLocaleString(),
-      delta: 3.6,
+      delta: impressionsDelta,
       icon: EyeIcon,
-      comparison: `vs. ${Math.round(previousFromDelta(impressions, 3.6)).toLocaleString()} last period`,
+      comparison: `vs. ${impressionsPrevious.toLocaleString()} last period`,
     },
     {
       label: "Conversion rate",

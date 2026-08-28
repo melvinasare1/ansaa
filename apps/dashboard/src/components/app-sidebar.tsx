@@ -6,6 +6,7 @@ import { mockOrders, openOrderCount } from "@/lib/dashboard-mock";
 import {
   BarChart3Icon,
   LayoutDashboardIcon,
+  LifeBuoyIcon,
   PackageIcon,
   SettingsIcon,
   ShoppingBagIcon,
@@ -24,6 +25,7 @@ const navMain = [
   { title: "Products", url: "/dashboard/products", icon: PackageIcon },
   { title: "Customers", url: "/dashboard/customers", icon: UsersIcon },
   { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3Icon },
+  { title: "Support", url: "/dashboard/support", icon: LifeBuoyIcon },
   { title: "Settings", url: "/dashboard/settings", icon: SettingsIcon },
 ];
 

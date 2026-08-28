@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { track } from "@vercel/analytics/server";
 import { leadToInsert } from "@ansaa/shared/mappers";
 import { createAdminClient } from "@ansaa/shared/supabase/admin";
 import type { SignupLead } from "@ansaa/shared/types";
@@ -34,6 +35,12 @@ export async function POST(req: NextRequest) {
     if (error || !data) {
       console.error("Failed to save lead", error);
       return NextResponse.json({ error: "Failed to save lead" }, { status: 500 });
+    }
+
+    try {
+      void track("lead_submitted", { productCategory: lead.productCategory }).catch(() => {});
+    } catch {
+      // Tracking must never fail the lead insert.
     }
 
     return NextResponse.json({ id: data.id }, { status: 201 });

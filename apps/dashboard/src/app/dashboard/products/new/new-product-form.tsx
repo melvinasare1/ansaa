@@ -26,6 +26,7 @@ import {
 import { useSeller } from "@/lib/seller-context";
 import { cn } from "@/lib/utils";
 import { productToInsert } from "@ansaa/shared/mappers";
+import { track } from "@vercel/analytics";
 import { createClient } from "@ansaa/shared/supabase/client";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 import type { ProductVariant } from "@ansaa/shared/types";
@@ -269,6 +270,14 @@ export function NewProductForm() {
           .single();
         if (insertError || !data) throw insertError ?? new Error("Could not save product.");
         setSavedId(data.id);
+      }
+
+      if (mode === "publish") {
+        try {
+          track("product_published");
+        } catch {
+          // Tracking must never block publishing.
+        }
       }
 
       if (mode === "draft") {

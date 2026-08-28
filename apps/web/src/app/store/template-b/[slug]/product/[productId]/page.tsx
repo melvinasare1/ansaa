@@ -1,3 +1,5 @@
+import { StorefrontTracker } from "@/components/store/StorefrontTracker";
+
 // TODO: fetch this product by productId from Firestore
 export default function TemplateBProductPage({
   params,
@@ -6,6 +8,11 @@ export default function TemplateBProductPage({
 }) {
   return (
     <div className="grid gap-6 sm:grid-cols-2">
+      <StorefrontTracker
+        storeSlug={params.slug}
+        path={`/store/template-b/${params.slug}/product/${params.productId}`}
+        productId={params.productId}
+      />
       <div className="aspect-square w-full border-2 border-[#0B1220] bg-[#0B1220]/10" />
       <div>
         <h1 className="font-[family-name:var(--font-market)] text-2xl font-extrabold uppercase">

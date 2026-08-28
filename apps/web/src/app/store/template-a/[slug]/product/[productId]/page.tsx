@@ -1,5 +1,6 @@
-import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ProductDetail } from "@/components/store/template-a/ProductDetail";
+import { StorefrontTracker } from "@/components/store/StorefrontTracker";
 import { getSellerByStoreSlug, getStorefrontProduct } from "@/lib/storefront";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 import { createClient } from "@ansaa/shared/supabase/server";
@@ -26,28 +27,22 @@ export default async function TemplateAProductPage({
   const supabase = await createClient();
   const seller = await getSellerByStoreSlug(supabase, params.slug);
   if (!seller) {
-    return (
-      <div className="flex min-h-[40vh] flex-col items-center justify-center py-16 text-center">
-        <h1 className="text-2xl font-extrabold tracking-tight">Store not found</h1>
-        <p className="mt-2 text-sm text-black/55">No seller matches this store URL.</p>
-      </div>
-    );
+    notFound();
   }
 
   const product = await getStorefrontProduct(supabase, params.productId, seller.id);
   if (!product) {
-    return (
-      <div className="flex min-h-[40vh] flex-col items-center justify-center py-16 text-center">
-        <h1 className="text-2xl font-extrabold tracking-tight">Product not found</h1>
-        <p className="mt-2 text-sm text-black/55">
-          This product does not exist, is not active, or does not belong to this store.
-        </p>
-        <Link href={catalogHref} className="mt-6 text-sm font-semibold underline underline-offset-2">
-          Back to catalog
-        </Link>
-      </div>
-    );
+    notFound();
   }
 
-  return <ProductDetail product={product} slug={params.slug} />;
+  return (
+    <>
+      <StorefrontTracker
+        storeSlug={params.slug}
+        path={`${catalogHref}/product/${product.id}`}
+        productId={product.id}
+      />
+      <ProductDetail product={product} slug={params.slug} />
+    </>
+  );
 }

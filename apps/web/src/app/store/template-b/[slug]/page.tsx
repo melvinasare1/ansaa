@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { StorefrontTracker } from "@/components/store/StorefrontTracker";
 
 // TODO: fetch products from Firestore where sellerId == seller resolved from slug/domain
 const mockProducts = [
@@ -11,8 +12,11 @@ const mockProducts = [
 ];
 
 export default function TemplateBHome({ params }: { params: { slug: string } }) {
+  const path = `/store/template-b/${params.slug}`;
+
   return (
     <div>
+      <StorefrontTracker storeSlug={params.slug} path={path} />
       <div className="mb-6 border-2 border-[#0B1220] bg-[#FFE8A3] px-5 py-3">
         <p className="font-[family-name:var(--font-market)] text-sm font-extrabold uppercase">
           In stock, ships today if ordered before 4pm
