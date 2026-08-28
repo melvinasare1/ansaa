@@ -1,9 +1,13 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import TrialBanner from "@/components/dashboard/TrialBanner";
+import TrialExpiryModal from "@/components/dashboard/TrialExpiryModal";
 import { DashboardHeading, SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import type { AnsaaMomoDetails } from "@/lib/billing";
 import { SellerProvider } from "@/lib/seller-context";
+import type { TrialBannerState } from "@/lib/trial";
 import type { Seller, SellerUser } from "@ansaa/shared/types";
 
 export default function DashboardShell({
@@ -11,11 +15,17 @@ export default function DashboardShell({
   user,
   seller,
   sellerError,
+  trial,
+  showExpiryModal,
+  momo,
 }: {
   children: React.ReactNode;
   user: SellerUser;
   seller: Seller | null;
   sellerError: string | null;
+  trial: TrialBannerState | null;
+  showExpiryModal: boolean;
+  momo: AnsaaMomoDetails;
 }) {
   return (
     <SellerProvider user={user} seller={seller} sellerError={sellerError}>
@@ -29,6 +39,12 @@ export default function DashboardShell({
         }
       >
         <SiteHeader />
+        <TrialBanner trial={trial} />
+        <TrialExpiryModal
+          open={showExpiryModal}
+          billingReference={seller?.billingReference ?? "Not available"}
+          momo={momo}
+        />
         <div className="flex min-h-0 flex-1">
           <AppSidebar className="top-(--header-height)! bottom-0! h-auto!" />
           <SidebarInset className="bg-mist">

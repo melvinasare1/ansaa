@@ -688,6 +688,12 @@ function ConfirmStep({
 }) {
   return (
     <div className="space-y-4">
+      <div className="rounded-2xl border border-brand/30 bg-brand-soft p-6">
+        <p className="text-sm font-medium text-ink-950">
+          Your 14-day free trial starts today — no payment needed until it ends.
+        </p>
+      </div>
+
       <div className="rounded-2xl border border-black/8 bg-white p-6 shadow-card">
         <h2 className="font-display text-lg font-semibold">Review before you go live</h2>
         <dl className="mt-4 divide-y divide-black/6 text-sm">

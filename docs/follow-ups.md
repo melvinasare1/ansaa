@@ -65,6 +65,19 @@ Vercel dashboard setup is fine at tiny scale, becomes a bottleneck past that.
 - **Business registration → extra features** — the `has_business_registration`
   flag is captured at onboarding but nothing currently reads it. No
   feature-gating logic built yet.
+- **Self-serve "I've paid"** — `/dashboard/billing` shows Ansaa's MoMo number
+  and a permanent 6-digit `billing_reference`, then we mark the account active
+  by hand. A seller button that claims payment was sent is deferred until
+  volume makes matching by hand a bottleneck.
+- **Lock dashboard after trial expiry** — the trial banner and expiry modal
+  stay visible when `trial_ends_at` has passed (unless `status = active`), but
+  sellers can still use the dashboard. Access restriction is a separate
+  product decision, not implemented.
+- **Dedicated subscription status** — trial/paid is currently inferred from
+  `trial_ends_at` plus `sellers.status` (`active` treated as paid). `status` is
+  really operational (onboarding / paused / offboarded). Add a billing field
+  (`subscription_status`: trialing | unpaid | active) before we need to mark
+  someone operationally active without collecting payment, or vice versa.
 
 ---
 

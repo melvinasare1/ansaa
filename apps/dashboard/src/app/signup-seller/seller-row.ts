@@ -1,5 +1,6 @@
 import { sellerToInsert } from "@ansaa/shared/mappers";
 import { PRICING_TIER_BASE_FEE_CEDIS, type PricingTier, type Seller } from "@ansaa/shared/types";
+import { trialEndsAtFromNow } from "@/lib/trial";
 
 export function newSellerInsertRow(input: {
   userId: string;
@@ -23,6 +24,7 @@ export function newSellerInsertRow(input: {
     baseFeeCedis: PRICING_TIER_BASE_FEE_CEDIS[input.pricingTier],
     status: "onboarding",
     createdAt: Date.now(),
+    trialEndsAt: trialEndsAtFromNow(),
     hasBusinessRegistration: false,
   });
 }

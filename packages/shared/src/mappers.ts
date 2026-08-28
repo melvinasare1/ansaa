@@ -90,6 +90,12 @@ function epochMs(value: unknown): number {
   return 0;
 }
 
+function optionalEpochMs(value: unknown): number | undefined {
+  if (value == null || value === "") return undefined;
+  const ms = epochMs(value);
+  return ms || undefined;
+}
+
 function asRecord(data: unknown): Record<string, unknown> {
   return data && typeof data === "object" ? (data as Record<string, unknown>) : {};
 }
@@ -143,6 +149,8 @@ export function sellerToInsert(seller: Omit<Seller, "createdAt"> & { createdAt?:
     base_fee_cedis: seller.baseFeeCedis,
     status: seller.status,
     created_at: new Date(seller.createdAt ?? Date.now()).toISOString(),
+    trial_ends_at:
+      seller.trialEndsAt != null ? new Date(seller.trialEndsAt).toISOString() : null,
   };
 }
 
@@ -161,6 +169,8 @@ export function sellerFromRow(row: unknown): Seller {
     baseFeeCedis: Number(fields.base_fee_cedis ?? 0),
     status: (fields.status as Seller["status"]) ?? "onboarding",
     createdAt: epochMs(fields.created_at),
+    trialEndsAt: optionalEpochMs(fields.trial_ends_at),
+    billingReference: String(fields.billing_reference ?? "").trim() || undefined,
     idDocumentUrl: String(fields.id_document_url ?? "") || undefined,
     profilePhotoUrl: String(fields.profile_photo_url ?? "") || undefined,
     businessRegistrationUrl: String(fields.business_registration_url ?? "") || undefined,
@@ -178,12 +188,6 @@ export function leadToInsert(lead: Omit<SignupLead, "id">) {
     estimated_monthly_orders: lead.estimatedMonthlyOrders ?? null,
     notes: lead.notes ?? null,
   };
-}
-
-function optionalEpochMs(value: unknown): number | undefined {
-  if (value == null || value === "") return undefined;
-  const ms = epochMs(value);
-  return ms || undefined;
 }
 
 function orderStatusFromUnknown(value: unknown): OrderStatus {

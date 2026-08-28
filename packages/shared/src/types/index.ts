@@ -49,6 +49,10 @@ export interface Seller {
   baseFeeCedis: number; // 250 Website & Admin, 400 Fulfilment intro
   status: "onboarding" | "active" | "paused" | "offboarded";
   createdAt: number;
+  /** Epoch ms when the 14-day free trial ends. Unset for accounts that skip onboarding. */
+  trialEndsAt?: number;
+  /** Permanent 6-digit MoMo payment reference. Assigned on insert, never regenerated. */
+  billingReference?: string;
   /** Private storage object path in the id-verification bucket, not a public URL. */
   idDocumentUrl?: string;
   profilePhotoUrl?: string;

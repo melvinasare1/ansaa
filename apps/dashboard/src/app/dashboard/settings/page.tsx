@@ -57,6 +57,12 @@ export default function SettingsPage() {
           <SettingRow label="Pricing tier" value={billingLabel} />
           <SettingRow label="Included orders" value="20 orders / month" />
           <SettingRow label="Overage rate" value="3 GHS / order (21–50), then tiered down" />
+          <SettingRow
+            label="Pay for your plan"
+            value="Pay by MoMo"
+            hint="Send Mobile Money to Ansaa using your billing reference"
+            href="/dashboard/billing"
+          />
         </div>
       </section>
 
@@ -105,8 +111,9 @@ function SettingRow({
       {href ? (
         <a
           href={href}
-          target="_blank"
-          rel="noopener noreferrer"
+          {...(href.startsWith("/")
+            ? {}
+            : { target: "_blank", rel: "noopener noreferrer" })}
           className="text-sm font-medium text-brand hover:underline"
         >
           {value}

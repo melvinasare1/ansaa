@@ -116,6 +116,9 @@ export default function LandingPage() {
             Start with a storefront you run yourself. Add Fulfilment when you
             want us to pack and send every order.
           </p>
+          <p className="mt-4 text-sm font-medium text-navy">
+            Try it free for 14 days — no payment required to get started.
+          </p>
 
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             <article className="flex flex-col rounded-2xl border border-wire bg-white p-8">
@@ -125,6 +128,9 @@ export default function LandingPage() {
                 250 GHS
                 <span className="ml-1 text-lg font-medium text-ink-700">/ month</span>
               </p>
+              <span className="mt-3 inline-flex self-start rounded-full border border-navy/20 bg-navy/5 px-2.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide text-navy">
+                14-day free trial
+              </span>
               <ul className="mt-8 flex-1 space-y-3">
                 {websiteFeatures.map((feature) => (
                   <li key={feature} className="flex items-start gap-3 text-sm text-ink-800">
@@ -153,6 +159,9 @@ export default function LandingPage() {
                 400 GHS
                 <span className="ml-1 text-lg font-medium text-ink-700">/ month</span>
               </p>
+              <span className="mt-3 inline-flex self-start rounded-full border border-navy/20 bg-navy/5 px-2.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide text-navy">
+                14-day free trial
+              </span>
               <p className="mt-1 font-mono text-xs font-medium uppercase tracking-wide text-navy">Intro price</p>
               <ul className="mt-8 flex-1 space-y-3">
                 {fulfilmentFeatures.map((feature) => (
