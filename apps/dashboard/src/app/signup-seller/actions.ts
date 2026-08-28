@@ -1,8 +1,8 @@
 "use server";
 
 import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
-import { track } from "@vercel/analytics/server";
 import { slugifyStoreName } from "@/lib/store-slug";
+import { trackEvent } from "@/lib/vercel-track-server";
 import { createAdminClient } from "@ansaa/shared/supabase/admin";
 import { createClient } from "@ansaa/shared/supabase/server";
 import type { Seller } from "@ansaa/shared/types";
@@ -233,11 +233,7 @@ async function insertSellerRow(
 
     const { error: insertError } = await admin.from("sellers").insert(row);
     if (!insertError) {
-      try {
-        void track("seller_signed_up").catch(() => {});
-      } catch {
-        // Tracking must never fail seller creation.
-      }
+      trackEvent("seller_signed_up");
       return { ok: true };
     }
 

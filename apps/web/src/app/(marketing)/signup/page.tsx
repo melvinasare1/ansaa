@@ -45,7 +45,7 @@ export default function SignupPage() {
       <main className="flex min-h-screen items-center justify-center bg-ink-950 px-6 text-canvas">
         <div className="max-w-md text-center">
           <p className="font-mono text-sm uppercase tracking-[0.2em] text-signal">You&apos;re on the list</p>
-          <h1 className="mt-4 font-display text-3xl font-semibold">Thanks — we&apos;ll be in touch.</h1>
+          <h1 className="mt-4 font-display text-3xl font-semibold">Thanks. We&apos;ll be in touch.</h1>
           <p className="mt-3 text-canvas/60">
             We&apos;re lining up the first cohort now. We&apos;ll reach out on the number you gave us as soon
             as we&apos;re ready to onboard.

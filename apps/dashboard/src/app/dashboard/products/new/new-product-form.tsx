@@ -26,8 +26,8 @@ import {
 import { useSeller } from "@/lib/seller-context";
 import { cn } from "@/lib/utils";
 import { productToInsert } from "@ansaa/shared/mappers";
-import { track } from "@vercel/analytics";
 import { createClient } from "@ansaa/shared/supabase/client";
+import { trackEvent } from "@/lib/vercel-track";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 import type { ProductVariant } from "@ansaa/shared/types";
 
@@ -273,11 +273,7 @@ export function NewProductForm() {
       }
 
       if (mode === "publish") {
-        try {
-          track("product_published");
-        } catch {
-          // Tracking must never block publishing.
-        }
+        trackEvent("product_published");
       }
 
       if (mode === "draft") {

@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ImagePlusIcon, Loader2Icon, XIcon } from "lucide-react";
 import { productToInsert } from "@ansaa/shared/mappers";
-import { track } from "@vercel/analytics";
 import { useSeller } from "@/lib/seller-context";
+import { trackEvent } from "@/lib/vercel-track";
 import {
   MAX_PRODUCT_IMAGES,
   PRODUCT_IMAGE_ACCEPT,
@@ -247,11 +247,7 @@ export default function ProductFormDialog({
       }
 
       if (active) {
-        try {
-          track("product_published");
-        } catch {
-          // Tracking must never block publishing.
-        }
+        trackEvent("product_published");
       }
 
       onOpenChange(false);

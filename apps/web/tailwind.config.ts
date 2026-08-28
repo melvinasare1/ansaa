@@ -24,6 +24,13 @@ const config: Config = {
           soft: "#FFE4D6",
         },
         wire: "#E4E1D8",
+        // Light marketing / admin accent — same hex as dashboard `brand`.
+        brand: {
+          DEFAULT: "#3B6FF0",
+          soft: "#EBF1FE",
+        },
+        // CTA + secondary — sampled from the navy pill reference.
+        navy: "#191A2D",
       },
       fontFamily: {
         display: ["var(--font-display)"],

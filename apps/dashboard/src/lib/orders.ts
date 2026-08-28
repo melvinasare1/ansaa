@@ -1,7 +1,7 @@
 import { orderFromRow } from "@ansaa/shared/mappers";
-import { track } from "@vercel/analytics";
 import { createClient } from "@ansaa/shared/supabase/client";
 import type { Order, OrderStatus } from "@ansaa/shared/types";
+import { trackEvent } from "@/lib/vercel-track";
 
 export const ORDER_STATUSES: OrderStatus[] = [
   "pending_payment",
@@ -98,10 +98,6 @@ export async function updateOrderStatus(
 
   if (error) throw error;
   const updated = orderFromRow(data);
-  try {
-    track("order_status_changed", { status: next });
-  } catch {
-    // Tracking must never block the status update.
-  }
+  trackEvent("order_status_changed", { status: next });
   return updated;
 }
