@@ -18,16 +18,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { StorefrontTracker } from "@/components/store/StorefrontTracker";
-import {
-  BagPlaceholder,
-  BootsPlaceholder,
-  GlovesPlaceholder,
-  HelmetPlaceholder,
-  HeroVehiclePlaceholder,
-  LightPlaceholder,
-  MotorbikePlaceholder,
-  RotorPlaceholder,
-} from "@/components/store/motorbike-template/placeholders";
+import { MotorbikePlaceholder } from "@/components/store/motorbike-template/placeholders";
 import { formatCedis } from "@/lib/price";
 import { getPublishedBlogPosts, getSellerByStoreSlug } from "@/lib/storefront";
 import { createClient } from "@ansaa/shared/supabase/server";
@@ -36,10 +27,17 @@ import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 const ORANGE = "#E8622C";
 
 const RIDE_IMAGES = {
+  hero: "/store/motorbike-template/hero.png",
   motorbike: "/store/motorbike-template/motorbike.png",
   moped: "/store/motorbike-template/moped.png",
   classic: "/store/motorbike-template/classic.png",
   ebike: "/store/motorbike-template/ebike.png",
+  helmet: "/store/motorbike-template/helmet.png",
+  jacket: "/store/motorbike-template/jacket.png",
+  gloves: "/store/motorbike-template/gloves.png",
+  gopro: "/store/motorbike-template/gopro.png",
+  trousers: "/store/motorbike-template/trousers.png",
+  boots: "/store/motorbike-template/boots.png",
 } as const;
 
 const trustBadges = [
@@ -81,46 +79,46 @@ const trustFeatures = [
 
 const accessories = [
   {
-    name: "Trail Helmet",
+    name: "Motorbike Helmet",
     priceCedis: 450,
     rating: 5,
-    colors: ["#7B2CBF", "#E03131", "#F4C430", "#2F9E44"],
-    Placeholder: HelmetPlaceholder,
+    colors: ["#111111", "#3A3A3A"],
+    image: RIDE_IMAGES.helmet,
   },
   {
-    name: "Riding Gloves",
+    name: "Motorbike Jacket",
+    priceCedis: 890,
+    rating: 5,
+    colors: ["#111111", "#FFFFFF", "#C0392B"],
+    image: RIDE_IMAGES.jacket,
+  },
+  {
+    name: "Motorbike Gloves",
     priceCedis: 95,
     rating: 4,
-    colors: ["#111111", "#C08A4D", "#ADB5BD"],
-    Placeholder: GlovesPlaceholder,
+    colors: ["#111111", "#ADB5BD"],
+    image: RIDE_IMAGES.gloves,
   },
   {
-    name: "Handlebar Bag",
-    priceCedis: 180,
+    name: "Go Pro Camera",
+    priceCedis: 720,
     rating: 5,
-    colors: ["#C0392B", "#1D3557", "#111111"],
-    Placeholder: BagPlaceholder,
+    colors: ["#111111", "#3B82F6"],
+    image: RIDE_IMAGES.gopro,
   },
   {
-    name: "Disc Brake Kit",
-    priceCedis: 240,
+    name: "Motorbike Trousers",
+    priceCedis: 640,
     rating: 4,
-    colors: ["#3A3A3A", "#ADB5BD"],
-    Placeholder: RotorPlaceholder,
+    colors: ["#111111", "#FFFFFF"],
+    image: RIDE_IMAGES.trousers,
   },
   {
-    name: "LED Headlight",
-    priceCedis: 150,
-    rating: 5,
-    colors: ["#111111", "#F4C430"],
-    Placeholder: LightPlaceholder,
-  },
-  {
-    name: "Touring Boots",
+    name: "Motorbike Boots",
     priceCedis: 380,
     rating: 4,
-    colors: ["#111111", "#C08A4D"],
-    Placeholder: BootsPlaceholder,
+    colors: ["#111111", "#FFFFFF"],
+    image: RIDE_IMAGES.boots,
   },
 ] as const;
 
@@ -206,13 +204,21 @@ export default async function MotorbikeTemplateHome({
       <StorefrontTracker storeSlug={params.slug} path={base} />
 
       <section className="relative flex min-h-[calc(100svh-5rem)] flex-col overflow-hidden bg-[#141414]">
-        {/* Real seller photography goes here — this stand-in is a placeholder
-            until the seller uploads their own shop photography. */}
         <div className="pointer-events-none absolute inset-0" aria-hidden>
           <div className="absolute inset-0 bg-[#0c0c0c]" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_78%_42%,#6a4a32_0%,transparent_42%),radial-gradient(ellipse_at_60%_70%,#2a1c14_0%,transparent_50%)]" />
-          <HeroVehiclePlaceholder className="absolute -right-[8%] bottom-[12%] h-[72%] w-[78%] max-w-[820px] drop-shadow-[0_30px_50px_rgba(0,0,0,0.55)] md:right-[2%] md:h-[78%] md:w-[54%]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-[#141414]/75 to-transparent md:from-[#141414] md:via-[#141414]/50 md:to-transparent" />
+          <div className="absolute right-0 top-[20%] h-[52%] w-[56%] md:right-4 md:top-[18%] md:h-[50%]">
+            <Image
+              src={RIDE_IMAGES.hero}
+              alt=""
+              fill
+              unoptimized
+              priority
+              sizes="(min-width: 768px) 56vw, 90vw"
+              className="object-contain object-right"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-[#141414]/80 to-transparent md:from-[#141414] md:via-[#141414]/55 md:to-transparent" />
         </div>
 
         <div className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-1 flex-col justify-center px-6 pb-32 pt-16 md:px-10 md:pb-36 md:pt-24">
@@ -257,7 +263,7 @@ export default async function MotorbikeTemplateHome({
         </div>
       </section>
 
-      <section id="shop" className="bg-[#F7F5F0]">
+      <section id="shop" className="bg-[#FFFFFF]">
         <div className="mx-auto max-w-[1400px] px-6 pt-16 pb-12 md:px-10 md:pt-24 md:pb-16">
           <h2
             className="text-[40px] font-extrabold tracking-tight text-[#141414] md:text-[48px]"
@@ -270,8 +276,8 @@ export default async function MotorbikeTemplateHome({
               <article
                 key={category.id}
                 id={category.id}
-                className="flex flex-col rounded-[28px] px-8 pb-9 pt-10 md:px-10 md:pb-11 md:pt-12"
-                style={{ backgroundColor: "#EFEBE3" }}
+                className="flex flex-col rounded-[28px] px-8 pb-9 pt-10 shadow-[0_8px_28px_rgba(20,20,20,0.06)] md:px-10 md:pb-11 md:pt-12"
+                style={{ backgroundColor: "#FFFDFA" }}
               >
                 <div className="relative aspect-[16/9] overflow-hidden rounded-2xl">
                   <Image
@@ -302,7 +308,7 @@ export default async function MotorbikeTemplateHome({
         </div>
       </section>
 
-      <section className="bg-[#F7F5F0] pb-8 md:pb-10">
+      <section className="bg-[#FFFFFF] pb-8 md:pb-10">
         <div className="mx-auto max-w-[1400px] px-6 md:px-10">
           <div
             id="featured"
@@ -364,11 +370,14 @@ export default async function MotorbikeTemplateHome({
         </div>
       </section>
 
-      <section className="bg-[#F7F5F0]">
+      <section className="bg-[#FFFFFF]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-10 md:py-20">
           <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
             {trustFeatures.map(({ label, body, Icon }) => (
-              <li key={label} className="rounded-[24px] bg-white/80 px-6 py-8 md:px-7 md:py-9">
+              <li
+                key={label}
+                className="rounded-[24px] bg-[#FFFDFA] px-6 py-8 shadow-[0_8px_28px_rgba(20,20,20,0.06)] md:px-7 md:py-9"
+              >
                 <span
                   className="flex h-12 w-12 items-center justify-center rounded-full"
                   style={{ backgroundColor: ORANGE }}
@@ -388,7 +397,7 @@ export default async function MotorbikeTemplateHome({
         </div>
       </section>
 
-      <section id="accessories" className="bg-[#F7F5F0]">
+      <section id="accessories" className="bg-[#FFFFFF]">
         <div className="mx-auto max-w-[1400px] px-6 pb-16 md:px-10 md:pb-20">
           <h2
             className="text-[40px] font-extrabold tracking-tight text-[#141414] md:text-[48px]"
@@ -398,31 +407,47 @@ export default async function MotorbikeTemplateHome({
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 md:mt-12">
             {accessories.map((item) => (
-              <article key={item.name}>
-                <div className="relative flex aspect-square items-center justify-center rounded-[24px] bg-[#E8E6E1]">
-                  {/* Real seller photography goes here — accessory product photo. */}
-                  <item.Placeholder className="h-[62%] w-[62%] drop-shadow-[0_14px_18px_rgba(20,20,20,0.16)]" />
-                </div>
-                <div className="mt-4 flex gap-1.5 px-0.5">
-                  {item.colors.map((hex) => (
-                    <span
-                      key={hex}
-                      className="h-3.5 w-3.5 rounded-full"
-                      style={{
-                        backgroundColor: hex,
-                        boxShadow: hex === "#F4C430" || hex === "#ADB5BD" ? "inset 0 0 0 1px rgba(0,0,0,0.12)" : undefined,
-                      }}
+              <article
+                key={item.name}
+                className="overflow-hidden rounded-[24px] border border-[#D9D6CE] bg-[#FFFDFA]"
+              >
+                <div className="relative flex aspect-square items-center justify-center bg-[#E8E6E1]">
+                  <div className="relative h-[85%] w-[85%]">
+                    <Image
+                      src={item.image}
+                      alt=""
+                      fill
+                      unoptimized
+                      sizes="(min-width: 1024px) 24vw, (min-width: 640px) 38vw, 85vw"
+                      className="object-contain"
                     />
-                  ))}
+                  </div>
                 </div>
-                <h3
-                  className="mt-3 text-[16px] font-extrabold text-[#141414]"
-                  style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
-                >
-                  {item.name}
-                </h3>
-                <p className="mt-1 text-[14px] text-[#141414]/55">{formatCedis(item.priceCedis)}</p>
-                <StarRating value={item.rating} />
+                <div className="px-4 pb-5 pt-4">
+                  <div className="flex gap-1.5">
+                    {item.colors.map((hex) => (
+                      <span
+                        key={hex}
+                        className="h-3.5 w-3.5 rounded-full"
+                        style={{
+                          backgroundColor: hex,
+                          boxShadow:
+                            hex === "#FFFFFF" || hex === "#F4C430" || hex === "#ADB5BD"
+                              ? "inset 0 0 0 1px rgba(0,0,0,0.12)"
+                              : undefined,
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <h3
+                    className="mt-3 text-[16px] font-extrabold text-[#141414]"
+                    style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
+                  >
+                    {item.name}
+                  </h3>
+                  <p className="mt-1 text-[14px] text-[#141414]/55">{formatCedis(item.priceCedis)}</p>
+                  <StarRating value={item.rating} />
+                </div>
               </article>
             ))}
           </div>
@@ -438,7 +463,7 @@ export default async function MotorbikeTemplateHome({
         </div>
       </section>
 
-      <section className="bg-[#F7F5F0]">
+      <section className="bg-[#FFFFFF]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-10 md:py-20">
           <ul className="grid grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-8 lg:gap-12">
             {valueFeatures.map(({ label, body, Icon, href }) => (
@@ -465,7 +490,7 @@ export default async function MotorbikeTemplateHome({
         </div>
       </section>
 
-      <section className="bg-[#F7F5F0] pb-8 md:pb-10">
+      <section className="bg-[#FFFFFF] pb-8 md:pb-10">
         <div className="mx-auto max-w-[1400px] px-6 md:px-10">
           <div className="relative grid overflow-hidden rounded-[28px] bg-[#141414] md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.9fr)]">
             <div className="relative flex min-h-[280px] items-center justify-center px-6 py-8 md:min-h-[400px] md:px-8 md:py-10">
@@ -516,7 +541,7 @@ export default async function MotorbikeTemplateHome({
       </section>
 
       {blogPosts.length > 0 ? (
-      <section id="blog" className="bg-[#F7F5F0]">
+      <section id="blog" className="bg-[#FFFFFF]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-10 md:py-24">
           <h2
             className="text-[40px] font-extrabold tracking-tight text-[#141414] md:text-[48px]"

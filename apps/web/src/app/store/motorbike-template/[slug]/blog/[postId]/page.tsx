@@ -36,7 +36,7 @@ export default async function MotorbikeBlogPostPage({
   }
 
   return (
-    <article className="bg-[#F7F5F0]">
+    <article className="bg-[#FFFFFF]">
       <div className="mx-auto max-w-[800px] px-6 py-16 md:px-10 md:py-24">
         <Link
           href={`${base}#blog`}

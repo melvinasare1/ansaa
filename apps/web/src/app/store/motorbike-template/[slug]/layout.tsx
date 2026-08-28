@@ -117,7 +117,7 @@ export default async function MotorbikeTemplateLayout({
 
   return (
     <div
-      className={`${display.variable} ${body.variable} min-h-screen bg-[#F7F5F0] text-[#141414]`}
+      className={`${display.variable} ${body.variable} min-h-screen bg-[#FFFFFF] text-[#141414]`}
       style={{ fontFamily: "var(--font-ride-body), ui-sans-serif, system-ui" }}
     >
       <header className="bg-[#141414] text-white">
