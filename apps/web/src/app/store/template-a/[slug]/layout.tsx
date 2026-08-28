@@ -1,10 +1,15 @@
 // Template A — "Styleco": a general clothing/apparel catalog with sidebar filters
 // for fashion sellers. Plus Jakarta Sans + black/white with a warm orange accent.
+import Image from "next/image";
 import Link from "next/link";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { User } from "lucide-react";
 import { CartIconLink } from "@/components/store/template-a/CartIconLink";
 import { DEFAULT_STORE_NAME } from "@/lib/store-name";
+import { getSellerByStoreSlug } from "@/lib/storefront";
+import { createClient } from "@ansaa/shared/supabase/server";
+import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
+import { storefrontContentValue } from "@ansaa/shared/storefront-content-schema";
 
 const sans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -15,7 +20,7 @@ const sans = Plus_Jakarta_Sans({
 
 const navLinks = ["Shop", "Women", "Men", "Children"] as const;
 
-export default function TemplateALayout({
+export default async function TemplateALayout({
   children,
   params,
 }: {
@@ -23,6 +28,17 @@ export default function TemplateALayout({
   params: { slug: string };
 }) {
   const base = `/store/template-a/${params.slug}`;
+  let brandName = DEFAULT_STORE_NAME;
+  let logoUrl = "";
+
+  if (isSupabaseConfigured()) {
+    const supabase = await createClient();
+    const seller = await getSellerByStoreSlug(supabase, params.slug);
+    if (seller) {
+      brandName = seller.businessName.trim() || DEFAULT_STORE_NAME;
+      logoUrl = storefrontContentValue(seller.storeContent, "logoUrl");
+    }
+  }
 
   return (
     <div
@@ -35,7 +51,17 @@ export default function TemplateALayout({
             href={base}
             className="shrink-0 text-[22px] font-extrabold italic leading-none tracking-tight md:text-[26px]"
           >
-            {DEFAULT_STORE_NAME}
+            {logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt={brandName}
+                width={160}
+                height={40}
+                className="h-9 w-auto max-w-[160px] object-contain object-left"
+              />
+            ) : (
+              brandName
+            )}
           </Link>
 
           <nav className="hidden items-center gap-6 text-[15px] font-medium text-black md:flex">

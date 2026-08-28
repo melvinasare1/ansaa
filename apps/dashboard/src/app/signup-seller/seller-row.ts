@@ -26,5 +26,6 @@ export function newSellerInsertRow(input: {
     createdAt: Date.now(),
     trialEndsAt: trialEndsAtFromNow(),
     hasBusinessRegistration: false,
+    storeContent: {},
   });
 }

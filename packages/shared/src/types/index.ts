@@ -26,6 +26,7 @@ export const STOREFRONT_TEMPLATES = [
   "template-c",
   "template-d",
   "template-e",
+  "motorbike-template",
 ] as const;
 
 export type StorefrontTemplate = (typeof STOREFRONT_TEMPLATES)[number];
@@ -58,6 +59,8 @@ export interface Seller {
   profilePhotoUrl?: string;
   businessRegistrationUrl?: string;
   hasBusinessRegistration: boolean;
+  /** Editable storefront copy and image URLs, keyed by template field keys. */
+  storeContent: Record<string, string>;
 }
 
 export type ProductVariant = {

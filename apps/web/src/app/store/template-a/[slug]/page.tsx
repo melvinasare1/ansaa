@@ -11,8 +11,14 @@ import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 import { fillFromId, swatchHex } from "@/lib/swatch";
 import { StorefrontTracker } from "@/components/store/StorefrontTracker";
 import type { Product } from "@ansaa/shared/types";
+import { storefrontContentValue } from "@ansaa/shared/storefront-content-schema";
 
 const ACCENT = "#FF7A1A";
+
+const FALLBACK_HERO_HEADLINE = "Men's Clothing";
+const FALLBACK_HERO_SUBTEXT = "New season pieces, made to last.";
+const FALLBACK_ABOUT =
+  "Quality clothing made for everyday wear. New drops and classics, all in one shop.";
 
 const categories = [
   "Dresses",
@@ -164,75 +170,117 @@ export default async function TemplateAHome({ params }: { params: { slug: string
   }
 
   const products = await getActiveProductsForSeller(supabase, seller.id);
+  const content = seller.storeContent;
+  const heroHeadline = storefrontContentValue(content, "heroHeadline", FALLBACK_HERO_HEADLINE);
+  const heroSubtext = storefrontContentValue(content, "heroSubtext", FALLBACK_HERO_SUBTEXT);
+  const heroImageUrl = storefrontContentValue(content, "heroImageUrl");
+  const aboutText = storefrontContentValue(content, "aboutText", FALLBACK_ABOUT);
 
   return (
-    <div
-      id="catalog"
-      className="mx-auto flex max-w-[1400px] flex-col md:flex-row md:items-start"
-    >
+    <div>
       <StorefrontTracker storeSlug={params.slug} path={base} />
-      <FilterSidebar />
 
-      <section className="min-w-0 flex-1 px-5 py-8 md:px-8 lg:px-10">
-        <h1 className="text-[28px] font-extrabold tracking-tight md:text-[32px]">Men&apos;s Clothing</h1>
-
-        {products.length === 0 ? (
-          <div className="mt-16 rounded-2xl border border-dashed border-black/15 px-6 py-16 text-center">
-            <p className="text-lg font-bold">No products yet</p>
-            <p className="mt-2 text-sm text-black/50">
-              This seller hasn't listed any active products.
-            </p>
+      <section className="overflow-hidden bg-[#F4F1EC]">
+        {heroImageUrl ? (
+          <div className="relative min-h-[240px] w-full aspect-[16/7]">
+            <Image
+              src={heroImageUrl}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-black/35" />
+            <div className="absolute inset-0 flex flex-col justify-end px-5 py-10 md:px-8 lg:px-10">
+              <h1 className="text-[28px] font-extrabold tracking-tight text-white md:text-[40px]">
+                {heroHeadline}
+              </h1>
+              <p className="mt-2 max-w-xl text-[15px] text-white/85">{heroSubtext}</p>
+            </div>
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => {
-              const photo = product.images[0];
-              const swatch = productSwatch(product);
-              return (
-                <article key={product.id} className="group">
-                  <div className="relative">
-                    <Link
-                      href={`${base}/product/${product.id}`}
-                      className="relative flex aspect-[3/4] items-center justify-center overflow-hidden rounded-2xl bg-[#EDEDED]"
-                    >
-                      {photo ? (
-                        <Image
-                          src={photo}
-                          alt={product.name}
-                          fill
-                          sizes="(min-width: 1024px) 28vw, (min-width: 640px) 45vw, 90vw"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <ShirtPlaceholder fill={swatch} />
-                      )}
-                    </Link>
-                    <button
-                      type="button"
-                      aria-label="Add to wishlist"
-                      className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center"
-                    >
-                      <Heart className="h-[18px] w-[18px]" strokeWidth={1.75} color="#111" />
-                    </button>
-                  </div>
-
-                  <div className="relative mt-3 pr-11">
-                    <Link href={`${base}/product/${product.id}`}>
-                      <p className="text-[15px] font-bold leading-snug">{product.name}</p>
-                      <p className="mt-1 text-[14px] text-black/80">{formatCedis(product.priceCedis)}</p>
-                    </Link>
-                    <AddToBagButton
-                      productId={product.id}
-                      name={product.name}
-                      priceCedis={product.priceCedis}
-                      image={swatch}
-                    />
-                  </div>
-                </article>
-              );
-            })}
+          <div className="px-5 py-12 md:px-8 md:py-16 lg:px-10">
+            <h1 className="text-[28px] font-extrabold tracking-tight md:text-[40px]">
+              {heroHeadline}
+            </h1>
+            <p className="mt-2 max-w-xl text-[15px] text-black/55">{heroSubtext}</p>
           </div>
         )}
+      </section>
+
+      <div
+        id="catalog"
+        className="mx-auto flex max-w-[1400px] flex-col md:flex-row md:items-start"
+      >
+        <FilterSidebar />
+
+        <section className="min-w-0 flex-1 px-5 py-8 md:px-8 lg:px-10">
+          {products.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-black/15 px-6 py-16 text-center">
+              <p className="text-lg font-bold">No products yet</p>
+              <p className="mt-2 text-sm text-black/50">
+                This seller hasn't listed any active products.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((product) => {
+                const photo = product.images[0];
+                const swatch = productSwatch(product);
+                return (
+                  <article key={product.id} className="group">
+                    <div className="relative">
+                      <Link
+                        href={`${base}/product/${product.id}`}
+                        className="relative flex aspect-[3/4] items-center justify-center overflow-hidden rounded-2xl bg-[#EDEDED]"
+                      >
+                        {photo ? (
+                          <Image
+                            src={photo}
+                            alt={product.name}
+                            fill
+                            sizes="(min-width: 1024px) 28vw, (min-width: 640px) 45vw, 90vw"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <ShirtPlaceholder fill={swatch} />
+                        )}
+                      </Link>
+                      <button
+                        type="button"
+                        aria-label="Add to wishlist"
+                        className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center"
+                      >
+                        <Heart className="h-[18px] w-[18px]" strokeWidth={1.75} color="#111" />
+                      </button>
+                    </div>
+
+                    <div className="relative mt-3 pr-11">
+                      <Link href={`${base}/product/${product.id}`}>
+                        <p className="text-[15px] font-bold leading-snug">{product.name}</p>
+                        <p className="mt-1 text-[14px] text-black/80">{formatCedis(product.priceCedis)}</p>
+                      </Link>
+                      <AddToBagButton
+                        productId={product.id}
+                        name={product.name}
+                        priceCedis={product.priceCedis}
+                        image={swatch}
+                      />
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
+
+      <section className="mx-auto max-w-[1400px] px-5 py-12 md:px-8 lg:px-10">
+        <h2 className="text-lg font-bold tracking-tight">About</h2>
+        <p className="mt-3 max-w-2xl whitespace-pre-line text-[15px] leading-relaxed text-black/65">
+          {aboutText}
+        </p>
       </section>
     </div>
   );

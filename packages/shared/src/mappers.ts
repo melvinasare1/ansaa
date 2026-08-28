@@ -1,3 +1,4 @@
+import { parseStorefrontContent } from "./storefront-content-schema";
 import {
   parseStorefrontTemplate,
   type Customer,
@@ -175,6 +176,7 @@ export function sellerFromRow(row: unknown): Seller {
     profilePhotoUrl: String(fields.profile_photo_url ?? "") || undefined,
     businessRegistrationUrl: String(fields.business_registration_url ?? "") || undefined,
     hasBusinessRegistration: Boolean(fields.has_business_registration),
+    storeContent: parseStorefrontContent(fields.store_content),
   };
 }
 

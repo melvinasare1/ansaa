@@ -1,6 +1,11 @@
+import { unstable_noStore as noStore } from "next/cache";
 import { NextResponse } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { sellerFromRow } from "@ansaa/shared/mappers";
+import {
+  parseStorefrontContent,
+  type StorefrontContent,
+} from "@ansaa/shared/storefront-content-schema";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 import { createClient } from "@ansaa/shared/supabase/server";
 import type { Seller, SellerUser } from "@ansaa/shared/types";
@@ -19,6 +24,25 @@ export async function fetchSellerForAuthUser(
   if (byUid.data) return sellerFromRow(byUid.data);
 
   return null;
+}
+
+/** Fresh store_content for the editor — do not rely on layout-cached seller context. */
+export async function fetchSellerStoreContent(sellerId: string): Promise<StorefrontContent> {
+  noStore();
+  if (!sellerId || !isSupabaseConfigured()) return {};
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("sellers")
+    .select("store_content")
+    .eq("id", sellerId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to load seller store_content", error);
+    return {};
+  }
+  return parseStorefrontContent(data?.store_content);
 }
 
 export async function getDashboardSession(): Promise<{

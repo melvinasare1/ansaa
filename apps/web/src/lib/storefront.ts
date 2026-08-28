@@ -1,11 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { productFromRow, sellerFromRow } from "@ansaa/shared/mappers";
+import type { StorefrontContent } from "@ansaa/shared/storefront-content-schema";
 import type { Product } from "@ansaa/shared/types";
 
 export type StorefrontSeller = {
   id: string;
   storeSlug: string;
   businessName: string;
+  storeContent: StorefrontContent;
 };
 
 export async function getSellerByStoreSlug(
@@ -16,7 +18,7 @@ export async function getSellerByStoreSlug(
 
   const { data, error } = await supabase
     .from("sellers")
-    .select("id, store_slug, business_name")
+    .select("id, store_slug, business_name, store_content")
     .eq("store_slug", slug)
     .maybeSingle();
 
@@ -31,6 +33,7 @@ export async function getSellerByStoreSlug(
     id: seller.id,
     storeSlug: seller.storeSlug,
     businessName: seller.businessName,
+    storeContent: seller.storeContent,
   };
 }
 

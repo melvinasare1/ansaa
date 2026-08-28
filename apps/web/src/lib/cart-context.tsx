@@ -52,7 +52,7 @@ function storageKey(sellerId: string) {
 }
 
 function sellerIdFromPath(pathname: string): string {
-  const match = pathname.match(/^\/store\/template-[a-d]\/([^/]+)/);
+  const match = pathname.match(/^\/store\/[^/]+\/([^/]+)/);
   return match?.[1] ?? "";
 }
 

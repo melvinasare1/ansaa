@@ -36,6 +36,12 @@ export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
     description: "Quiet gallery layout, for makers and specialty goods.",
     previewClass: "bg-gradient-to-br from-stone-200 via-neutral-100 to-rose-100",
   },
+  {
+    id: "motorbike-template",
+    name: "Ride",
+    description: "Dark vehicle-retail layout, for motorbikes, bicycles, mopeds, and scooters.",
+    previewClass: "bg-gradient-to-br from-neutral-950 via-neutral-800 to-orange-700",
+  },
 ];
 
 export const PRODUCT_CATEGORY_SUGGESTIONS = [
@@ -49,7 +55,7 @@ export const PRODUCT_CATEGORY_SUGGESTIONS = [
 
 export const WEBSITE_ADMIN_FEATURES = [
   "Storefront on your own domain",
-  "Pick from 5 templates",
+  "Pick from 6 templates",
   "Admin dashboard for orders, products, and sales",
   "Manual MoMo payments. You mark orders paid, unpaid, or cancelled",
   "Email support",

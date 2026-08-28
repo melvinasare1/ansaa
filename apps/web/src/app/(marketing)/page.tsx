@@ -5,7 +5,7 @@ const steps = [
   {
     n: "01",
     title: "Pick a template",
-    body: "Choose from five storefront templates and put your shop on your own domain. Your catalogue, your look, live in a few steps.",
+    body: "Choose from six storefront templates and put your shop on your own domain. Your catalogue, your look, live in a few steps.",
   },
   {
     n: "02",
@@ -26,7 +26,7 @@ const steps = [
 
 const websiteFeatures = [
   "Storefront on your own domain",
-  "Pick from 5 templates",
+  "Pick from 6 templates",
   "Admin dashboard for orders, products, and sales",
   "Manual MoMo payments. You mark orders paid, unpaid, or cancelled",
   "Email support",
@@ -60,6 +60,10 @@ const templates = [
   {
     name: "Atelier",
     description: "Fifth storefront template, coming soon.",
+  },
+  {
+    name: "Ride",
+    description: "Dark vehicle-retail layout, for motorbikes, bicycles, mopeds, and scooters.",
   },
 ];
 
@@ -190,16 +194,14 @@ export default function LandingPage() {
       <section id="templates" className="scroll-mt-24 mx-auto max-w-5xl px-6 py-24">
         <h2 className="font-display text-3xl font-semibold">Pick a template</h2>
         <p className="mt-3 max-w-xl text-ink-700">
-          Five storefront designs, ready to launch on your own domain.
+          Six storefront designs, ready to launch on your own domain.
         </p>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
-          {templates.map((template, index) => (
+          {templates.map((template) => (
             <article
               key={template.name}
-              className={`flex flex-col rounded-2xl border border-wire bg-white p-6 lg:col-span-2 ${
-                index === 3 ? "lg:col-start-2" : ""
-              }`}
+              className="flex flex-col rounded-2xl border border-wire bg-white p-6 lg:col-span-2"
             >
               <div
                 className="aspect-[4/3] w-full rounded-xl bg-canvas"
