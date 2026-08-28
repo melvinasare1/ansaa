@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Check } from "lucide-react";
+import { sellerOnboardingHref } from "@/components/marketing/nav";
 
 const steps = [
   {
@@ -81,14 +81,14 @@ export default function LandingPage() {
             add Fulfilment and we&apos;ll pack and send every order for you.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Link
-              href="/signup"
+            <a
+              href={sellerOnboardingHref()}
               className="rounded-full bg-navy px-7 py-3 font-medium text-white transition hover:bg-navy/90"
             >
-              Get on the early adopter list
-            </Link>
+              Get your website now
+            </a>
             <a href="#pricing" className="text-sm text-navy underline underline-offset-4">
-              See the two tiers
+              See pricing
             </a>
           </div>
         </div>
@@ -133,12 +133,12 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link
-                href="/signup"
+              <a
+                href={sellerOnboardingHref()}
                 className="mt-8 inline-flex items-center justify-center rounded-full border border-navy px-6 py-3 text-sm font-medium text-navy transition hover:bg-navy hover:text-white"
               >
                 Get Website & Admin
-              </Link>
+              </a>
             </article>
 
             <article className="relative flex flex-col rounded-2xl border border-navy bg-navy/5 p-8">
@@ -162,12 +162,12 @@ export default function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link
-                href="/signup"
+              <a
+                href={sellerOnboardingHref()}
                 className="mt-8 inline-flex items-center justify-center rounded-full bg-navy px-6 py-3 text-sm font-medium text-white transition hover:bg-navy/90"
               >
                 Get Fulfilment
-              </Link>
+              </a>
             </article>
           </div>
 
@@ -246,12 +246,12 @@ export default function LandingPage() {
             know you&apos;re interested and we&apos;ll follow up when we&apos;re
             ready to launch.
           </p>
-          <Link
-            href="/signup"
+          <a
+            href={sellerOnboardingHref()}
             className="mt-8 inline-block rounded-full bg-navy px-7 py-3 font-medium text-white transition hover:bg-navy/90"
           >
-            Join the list
-          </Link>
+            Get your website
+          </a>
         </div>
       </section>
     </main>

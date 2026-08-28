@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { Archivo } from "next/font/google";
 import { CartLink } from "@/components/store/template-b/CartLink";
+import { DEFAULT_STORE_NAME } from "@/lib/store-name";
 
 const condensed = Archivo({ subsets: ["latin"], variable: "--font-market", weight: ["600", "800"] });
 
@@ -24,7 +25,7 @@ export default function TemplateBLayout({
             href={base}
             className="font-[family-name:var(--font-market)] text-lg font-extrabold uppercase tracking-tight"
           >
-            {params.slug}
+            {DEFAULT_STORE_NAME}
           </Link>
           <nav className="flex items-center gap-5 text-sm font-semibold">
             <Link href={base} className="hover:text-[#1447E6]">

@@ -3,10 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { marketingNav } from "./nav";
+import { marketingNav, sellerLoginHref, sellerOnboardingHref } from "./nav";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const loginHref = sellerLoginHref();
+  const onboardingHref = sellerOnboardingHref();
 
   return (
     <header className="sticky top-0 z-50 border-b border-wire bg-white/95 backdrop-blur">
@@ -16,26 +18,26 @@ export default function Header() {
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm text-ink-700 md:flex">
-          {marketingNav.map((link) =>
-            link.href.startsWith("/#") ? (
-              <a key={link.href} href={link.href} className="transition hover:text-ink-950">
-                {link.label}
-              </a>
-            ) : (
-              <Link key={link.href} href={link.href} className="transition hover:text-ink-950">
-                {link.label}
-              </Link>
-            )
-          )}
+          {marketingNav.map((link) => (
+            <a key={link.href} href={link.href} className="transition hover:text-ink-950">
+              {link.label}
+            </a>
+          ))}
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/signup"
+          <a
+            href={loginHref}
+            className="hidden text-sm font-medium text-ink-700 transition hover:text-ink-950 md:inline-flex"
+          >
+            Login
+          </a>
+          <a
+            href={onboardingHref}
             className="hidden rounded-full bg-navy px-5 py-2 text-sm font-medium text-white transition hover:bg-navy/90 md:inline-flex"
           >
-            Join the list
-          </Link>
+            Get your website
+          </a>
           <button
             type="button"
             className="inline-flex size-10 items-center justify-center rounded-full text-navy md:hidden"
@@ -50,39 +52,34 @@ export default function Header() {
       </div>
 
       {open ? (
-        <nav
-          id="mobile-nav"
-          className="border-t border-wire px-6 py-4 md:hidden"
-        >
+        <nav id="mobile-nav" className="border-t border-wire px-6 py-4 md:hidden">
           <div className="mx-auto flex max-w-5xl flex-col gap-1">
-            {marketingNav.map((link) =>
-              link.href.startsWith("/#") ? (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="py-2.5 text-sm text-ink-700"
-                  onClick={() => setOpen(false)}
-                >
-                  {link.label}
-                </a>
-              ) : (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="py-2.5 text-sm text-ink-700"
-                  onClick={() => setOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              )
-            )}
-            <Link
-              href="/signup"
-              className="mt-2 inline-flex items-center justify-center rounded-full bg-navy px-5 py-2.5 text-sm font-medium text-white"
-              onClick={() => setOpen(false)}
-            >
-              Join the list
-            </Link>
+            {marketingNav.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="py-2.5 text-sm text-ink-700"
+                onClick={() => setOpen(false)}
+              >
+                {link.label}
+              </a>
+            ))}
+            <div className="mt-2 flex flex-col gap-2">
+              <a
+                href={loginHref}
+                className="inline-flex items-center justify-center rounded-full border border-navy px-5 py-2.5 text-sm font-medium text-navy"
+                onClick={() => setOpen(false)}
+              >
+                Login
+              </a>
+              <a
+                href={onboardingHref}
+                className="inline-flex items-center justify-center rounded-full bg-navy px-5 py-2.5 text-sm font-medium text-white"
+                onClick={() => setOpen(false)}
+              >
+                Get your website
+              </a>
+            </div>
           </div>
         </nav>
       ) : null}

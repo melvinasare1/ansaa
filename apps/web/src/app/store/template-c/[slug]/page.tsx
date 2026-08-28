@@ -12,6 +12,7 @@ import GalleryCarousel, {
 } from "@/components/store/template-c/GalleryCarousel";
 import { StorefrontTracker } from "@/components/store/StorefrontTracker";
 import { formatCedis } from "@/lib/price";
+import { DEFAULT_STORE_NAME } from "@/lib/store-name";
 import { getActiveProductsForSeller, getSellerByStoreSlug } from "@/lib/storefront";
 import { fillFromId, swatchHex } from "@/lib/swatch";
 import { createClient } from "@ansaa/shared/supabase/server";
@@ -458,11 +459,11 @@ export default async function TemplateCHome({ params }: { params: { slug: string
                   className="text-[22px] font-medium leading-none text-[#2B4239]"
                   style={{ fontFamily: "var(--font-homedine-serif), ui-serif, Georgia" }}
                 >
-                  Homedine
+                  {DEFAULT_STORE_NAME}
                 </span>
               </div>
               <p className="mt-4 text-sm leading-relaxed text-[#2B4239]/60">
-                Homedine makes planet-kind kitchenware for everyday cooking — durable pieces that
+                {DEFAULT_STORE_NAME} makes planet-kind kitchenware for everyday cooking — durable pieces that
                 are easier to keep, share, and cook with for years, not a single season.
               </p>
               <div className="mt-5 flex items-center gap-4 text-[#2B4239]">
@@ -535,7 +536,7 @@ export default async function TemplateCHome({ params }: { params: { slug: string
           </div>
 
           <div className="mt-12 flex flex-col gap-4 border-t border-[#2B4239]/12 pt-6 text-sm text-[#2B4239]/55 md:flex-row md:items-center md:justify-between">
-            <p>© 2026 Homedine. All rights reserved.</p>
+            <p>© 2026 {DEFAULT_STORE_NAME}. All rights reserved.</p>
             <div className="flex flex-wrap gap-x-6 gap-y-2">
               <a href="#" className="underline underline-offset-4">
                 Privacy Policy

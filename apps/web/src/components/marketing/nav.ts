@@ -1,7 +1,16 @@
+import { getDashboardUrl } from "@ansaa/shared/supabase/env";
+
 export const marketingNav = [
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#pricing", label: "Pricing" },
   { href: "/#templates", label: "Templates" },
   { href: "/#who-its-for", label: "Who this is for" },
-  { href: "/login", label: "Login" },
 ];
+
+export function sellerOnboardingHref() {
+  return `${getDashboardUrl()}/signup-seller`;
+}
+
+export function sellerLoginHref() {
+  return `${getDashboardUrl()}/login`;
+}

@@ -27,7 +27,7 @@ export function SectionCards({ stats }: { stats: OverviewStats }) {
   const ordersEmpty = stats.orders === 0 && stats.ordersPrevious === 0;
   const impressionsEmpty = stats.impressions === 0 && stats.impressionsPrevious === 0;
   const conversionValue =
-    stats.conversion == null ? "—" : `${stats.conversion.toFixed(1)}%`;
+    stats.conversion == null ? "n/a" : `${stats.conversion.toFixed(1)}%`;
 
   const cards: {
     label: string;

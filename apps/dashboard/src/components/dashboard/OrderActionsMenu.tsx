@@ -13,7 +13,7 @@ import { useSeller } from "@/lib/seller-context";
 import type { Order } from "@ansaa/shared/types";
 
 const REFUND_NOTE =
-  "This only marks the order as refunded in Fulfil. It does not send money back — MoMo refunds are handled by you outside this system.";
+  "This only marks the order as refunded in Fulfil. It does not send money back. MoMo refunds are handled by you outside this system.";
 
 type PendingAction = "cancel" | "refund";
 

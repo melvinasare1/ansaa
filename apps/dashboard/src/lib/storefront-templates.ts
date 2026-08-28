@@ -1,0 +1,68 @@
+import type { StorefrontTemplate } from "@ansaa/shared/types";
+
+export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
+  id: StorefrontTemplate;
+  name: string;
+  description: string;
+  previewClass: string;
+}> = [
+  {
+    id: "template-a",
+    name: "Studio",
+    description: "Minimal boutique layout, for fashion and beauty sellers.",
+    previewClass: "bg-gradient-to-br from-zinc-100 via-white to-orange-100",
+  },
+  {
+    id: "template-b",
+    name: "Market",
+    description: "Dense bold grid, for electronics and general goods.",
+    previewClass: "bg-gradient-to-br from-ink-950 via-ink-800 to-amber-700",
+  },
+  {
+    id: "template-c",
+    name: "Homedine",
+    description: "Warm editorial layout, for home and kitchen goods.",
+    previewClass: "bg-gradient-to-br from-emerald-50 via-stone-100 to-amber-100",
+  },
+  {
+    id: "template-d",
+    name: "Stylehive",
+    description: "Monochrome streetwear layout, for apparel sellers.",
+    previewClass: "bg-gradient-to-br from-black via-zinc-800 to-zinc-500",
+  },
+  {
+    id: "template-e",
+    name: "Atelier",
+    description: "Quiet gallery layout, for makers and specialty goods.",
+    previewClass: "bg-gradient-to-br from-stone-200 via-neutral-100 to-rose-100",
+  },
+];
+
+export const PRODUCT_CATEGORY_SUGGESTIONS = [
+  "Fashion",
+  "Beauty & cosmetics",
+  "Phone accessories",
+  "Home goods",
+  "Baby items",
+  "Stationery",
+] as const;
+
+export const WEBSITE_ADMIN_FEATURES = [
+  "Storefront on your own domain",
+  "Pick from 5 templates",
+  "Admin dashboard for orders, products, and sales",
+  "Manual MoMo payments. You mark orders paid, unpaid, or cancelled",
+  "Email support",
+] as const;
+
+export const FULFILMENT_FEATURES = [
+  "Everything in Website & Admin",
+  "We store your stock",
+  "We pack and dispatch every order",
+  "Photo proof at intake and before dispatch",
+  "Priority support",
+] as const;
+
+export function templateLabel(id: StorefrontTemplate): string {
+  return STOREFRONT_TEMPLATE_OPTIONS.find((option) => option.id === id)?.name ?? id;
+}

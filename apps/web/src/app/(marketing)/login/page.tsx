@@ -94,8 +94,8 @@ export default function LoginPage() {
 
         <p className="mt-8 text-sm text-ink-700">
           Not onboarded yet?{" "}
-          <Link href="/signup" className="text-navy underline underline-offset-4">
-            Join the early access list
+          <Link href={`${getDashboardUrl()}/signup-seller`} className="text-navy underline underline-offset-4">
+            Get your website
           </Link>
         </p>
       </div>

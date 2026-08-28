@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AuthFrame } from "@/components/auth-frame";
 import { createClient } from "@ansaa/shared/supabase/client";
 
 export default function AuthCallbackPage() {
@@ -13,6 +14,7 @@ export default function AuthCallbackPage() {
     const params = new URLSearchParams(hash);
     const accessToken = params.get("access_token");
     const refreshToken = params.get("refresh_token");
+    const type = params.get("type");
 
     if (!accessToken || !refreshToken) {
       router.replace("/login");
@@ -28,7 +30,7 @@ export default function AuthCallbackPage() {
           return;
         }
         window.history.replaceState(null, "", "/auth/callback");
-        router.replace("/dashboard");
+        router.replace(type === "recovery" ? "/auth/reset-password" : "/dashboard");
         router.refresh();
       })
       .catch(() => {
@@ -37,8 +39,8 @@ export default function AuthCallbackPage() {
   }, [router]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-mist px-6 text-ink-950">
-      <p className="text-sm text-ink-700">{error ?? "Signing you in…"}</p>
-    </main>
+    <AuthFrame kicker="Seller access" title={error ? "Could not sign you in" : "Signing you in"}>
+      <p className="mt-6 text-sm text-ink-700">{error ?? "One moment…"}</p>
+    </AuthFrame>
   );
 }

@@ -47,7 +47,7 @@ export function formatOrderMoney(cedis: number): string {
 }
 
 export function formatOrderDateTime(ms: number | undefined): string {
-  if (!ms) return "—";
+  if (!ms) return "Not set";
   return new Date(ms).toLocaleString("en-GB", {
     day: "numeric",
     month: "short",

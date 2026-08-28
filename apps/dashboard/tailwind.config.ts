@@ -31,6 +31,7 @@ const config: Config = {
           DEFAULT: "#3B6FF0",
           soft: "#EBF1FE",
         },
+        navy: "#191A2D",
         delta: {
           up: "#059669",
           "up-soft": "#ECFDF5",

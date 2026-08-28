@@ -20,19 +20,40 @@ export type SellerUser = {
   email: string | null;
 };
 
+export const STOREFRONT_TEMPLATES = [
+  "template-a",
+  "template-b",
+  "template-c",
+  "template-d",
+  "template-e",
+] as const;
+
+export type StorefrontTemplate = (typeof STOREFRONT_TEMPLATES)[number];
+
+export function parseStorefrontTemplate(value: unknown): StorefrontTemplate {
+  return STOREFRONT_TEMPLATES.includes(value as StorefrontTemplate)
+    ? (value as StorefrontTemplate)
+    : "template-a";
+}
+
 export interface Seller {
   id: string;
   uid: string; // Intended auth uid of the seller who owns this tenant
   businessName: string;
   domain: string; // e.g. "makeup.com" — storefront lives here, dashboard at dashboard.makeup.com
   storeSlug: string; // fallback path-based routing in dev: /store/[slug]
-  template: "template-a" | "template-b";
+  template: StorefrontTemplate;
   email: string;
   phone: string;
   pricingTier: PricingTier;
   baseFeeCedis: number; // 250 Website & Admin, 400 Fulfilment intro
   status: "onboarding" | "active" | "paused" | "offboarded";
   createdAt: number;
+  /** Private storage object path in the id-verification bucket, not a public URL. */
+  idDocumentUrl?: string;
+  profilePhotoUrl?: string;
+  businessRegistrationUrl?: string;
+  hasBusinessRegistration: boolean;
 }
 
 export type ProductVariant = {

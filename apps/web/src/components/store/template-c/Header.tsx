@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, ShoppingBag, User } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
+import { DEFAULT_STORE_NAME } from "@/lib/store-name";
 
 export function Header({ slug }: { slug: string }) {
   const pathname = usePathname() ?? "";
@@ -27,7 +28,7 @@ export function Header({ slug }: { slug: string }) {
           className="text-center text-[28px] font-medium tracking-[0.04em] text-white md:text-[32px]"
           style={{ fontFamily: "var(--font-homedine-serif), ui-serif, Georgia" }}
         >
-          Homedine
+          {DEFAULT_STORE_NAME}
         </Link>
 
         <div className="flex items-center justify-end gap-3">

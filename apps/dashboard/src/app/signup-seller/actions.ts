@@ -5,7 +5,11 @@ import { slugifyStoreName } from "@/lib/store-slug";
 import { trackEvent } from "@/lib/vercel-track-server";
 import { createAdminClient } from "@ansaa/shared/supabase/admin";
 import { createClient } from "@ansaa/shared/supabase/server";
-import type { Seller } from "@ansaa/shared/types";
+import {
+  parseStorefrontTemplate,
+  type PricingTier,
+  type Seller,
+} from "@ansaa/shared/types";
 import { newSellerInsertRow } from "./seller-row";
 
 export type SignUpSellerResult =
@@ -17,29 +21,65 @@ type SellerSignupFields = {
   storeSlug: string;
   phone: string;
   template: Seller["template"];
+  pricingTier: PricingTier;
+  productCategory: string;
 };
 
-function randomSuffix() {
-  return Math.random().toString(36).slice(2, 6);
+function formatPostgresError(err: PostgrestError) {
+  return [err.message, err.details, err.hint].filter(Boolean).join(". ");
 }
 
-function formatPostgresError(err: PostgrestError) {
-  return [err.message, err.details, err.hint].filter(Boolean).join(" — ");
+function parsePricingTier(value: unknown): PricingTier {
+  return value === "fulfilment" ? "fulfilment" : "website_admin";
 }
 
 function normalizeSignupFields(input: SellerSignupFields) {
   const businessName = input.businessName.trim();
-  const phone = input.phone.trim();
-  const template: Seller["template"] = input.template === "template-b" ? "template-b" : "template-a";
+  const phone = input.phone.replace(/\s+/g, " ").trim();
+  const template = parseStorefrontTemplate(input.template);
+  const pricingTier = parsePricingTier(input.pricingTier);
+  const productCategory = input.productCategory.trim();
   const baseSlug = slugifyStoreName(input.storeSlug || businessName);
-  return { businessName, phone, template, baseSlug };
+  return { businessName, phone, template, pricingTier, productCategory, baseSlug };
 }
 
-function validateSignupFields(fields: { businessName: string; phone: string; baseSlug: string }) {
+function digitCount(phone: string) {
+  return phone.replace(/\D/g, "").length;
+}
+
+function validateSignupFields(fields: {
+  businessName: string;
+  phone: string;
+  baseSlug: string;
+  productCategory: string;
+}) {
   if (!fields.businessName) return "Business name is required.";
-  if (!fields.phone) return "Phone is required.";
+  if (!fields.productCategory) return "Product category is required.";
+  if (digitCount(fields.phone) < 9) {
+    return "Enter the MoMo number buyers will pay. Use at least 9 digits.";
+  }
   if (!fields.baseSlug) return "Store slug must use letters or numbers.";
   return null;
+}
+
+export async function checkStoreSlugAvailable(
+  rawSlug: string
+): Promise<{ slug: string; available: boolean; error?: string }> {
+  const slug = slugifyStoreName(rawSlug);
+  if (!slug) return { slug, available: false, error: "Store slug must use letters or numbers." };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("sellers")
+    .select("id")
+    .eq("store_slug", slug)
+    .maybeSingle();
+
+  if (error) {
+    return { slug, available: false, error: "Could not check that store URL. Try again." };
+  }
+
+  return { slug, available: !data };
 }
 
 export async function signUpSeller(input: {
@@ -49,6 +89,8 @@ export async function signUpSeller(input: {
   storeSlug: string;
   phone: string;
   template: Seller["template"];
+  pricingTier: PricingTier;
+  productCategory: string;
 }): Promise<SignUpSellerResult> {
   try {
     return await signUpSellerInner(input);
@@ -67,13 +109,15 @@ async function signUpSellerInner(input: {
   storeSlug: string;
   phone: string;
   template: Seller["template"];
+  pricingTier: PricingTier;
+  productCategory: string;
 }): Promise<SignUpSellerResult> {
   const email = input.email.trim().toLowerCase();
   const password = input.password;
   const fields = normalizeSignupFields(input);
 
   if (!email || !password) {
-    return { error: "Email, password, and business name are required." };
+    return { error: "Email and password are required." };
   }
   if (password.length < 6) {
     return { error: "Password must be at least 6 characters." };
@@ -123,6 +167,8 @@ async function signUpSellerInner(input: {
     businessName: fields.businessName,
     phone: fields.phone,
     template: fields.template,
+    pricingTier: fields.pricingTier,
+    productCategory: fields.productCategory,
     baseSlug: fields.baseSlug,
   });
 
@@ -144,7 +190,7 @@ async function signUpSellerInner(input: {
 
   if (data.session) {
     return {
-      error: `${inserted.error} Your login exists without a seller profile — finish it on the next screen.`,
+      error: `${inserted.error} Your login exists without a seller profile. Finish it on the next screen.`,
       resumeProfile: true,
     };
   }
@@ -191,6 +237,8 @@ export async function completeSellerProfile(
       businessName: fields.businessName,
       phone: fields.phone,
       template: fields.template,
+      pricingTier: fields.pricingTier,
+      productCategory: fields.productCategory,
       baseSlug: fields.baseSlug,
     });
 
@@ -216,58 +264,63 @@ async function insertSellerRow(
     businessName: string;
     phone: string;
     template: Seller["template"];
+    pricingTier: PricingTier;
+    productCategory: string;
     baseSlug: string;
   }
 ): Promise<{ ok: true } | { ok: false; error: string; alreadyHasProfile?: boolean }> {
-  let storeSlug = input.baseSlug;
+  const row = newSellerInsertRow({
+    userId: input.userId,
+    businessName: input.businessName,
+    storeSlug: input.baseSlug,
+    email: input.email,
+    phone: input.phone,
+    template: input.template,
+    pricingTier: input.pricingTier,
+  });
 
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const row = newSellerInsertRow({
-      userId: input.userId,
-      businessName: input.businessName,
-      storeSlug,
-      email: input.email,
-      phone: input.phone,
-      template: input.template,
-    });
-
-    const { error: insertError } = await admin.from("sellers").insert(row);
-    if (!insertError) {
-      trackEvent("seller_signed_up");
-      return { ok: true };
+  const { error: insertError } = await admin.from("sellers").insert(row);
+  if (!insertError) {
+    if (input.productCategory) {
+      const { error: categoryError } = await admin.from("product_categories").insert({
+        seller_id: input.userId,
+        name: input.productCategory,
+      });
+      if (categoryError) {
+        console.error("[signup-seller] product category insert failed", categoryError);
+      }
     }
-
-    console.error("[signup-seller] sellers insert failed", {
-      code: insertError.code,
-      message: insertError.message,
-      details: insertError.details,
-      hint: insertError.hint,
-      userId: input.userId,
-      storeSlug,
-    });
-
-    const isSlugTaken =
-      insertError.code === "23505" &&
-      (insertError.message.includes("store_slug") || insertError.message.includes("sellers_store_slug"));
-    const isIdTaken =
-      insertError.code === "23505" &&
-      (insertError.message.includes("sellers_pkey") ||
-        insertError.message.includes("sellers_uid") ||
-        insertError.message.includes("(id)") ||
-        insertError.message.includes("(uid)"));
-
-    if (isIdTaken) {
-      return { ok: false, error: formatPostgresError(insertError), alreadyHasProfile: true };
-    }
-    if (isSlugTaken) {
-      storeSlug = `${input.baseSlug}-${randomSuffix()}`;
-      continue;
-    }
-
-    return { ok: false, error: formatPostgresError(insertError) };
+    trackEvent("seller_signed_up");
+    return { ok: true };
   }
 
-  return { ok: false, error: "That store URL is taken. Try a different slug." };
+  console.error("[signup-seller] sellers insert failed", {
+    code: insertError.code,
+    message: insertError.message,
+    details: insertError.details,
+    hint: insertError.hint,
+    userId: input.userId,
+    storeSlug: input.baseSlug,
+  });
+
+  const isSlugTaken =
+    insertError.code === "23505" &&
+    (insertError.message.includes("store_slug") || insertError.message.includes("sellers_store_slug"));
+  const isIdTaken =
+    insertError.code === "23505" &&
+    (insertError.message.includes("sellers_pkey") ||
+      insertError.message.includes("sellers_uid") ||
+      insertError.message.includes("(id)") ||
+      insertError.message.includes("(uid)"));
+
+  if (isIdTaken) {
+    return { ok: false, error: formatPostgresError(insertError), alreadyHasProfile: true };
+  }
+  if (isSlugTaken) {
+    return { ok: false, error: "That store URL is taken. Go back and choose a different slug." };
+  }
+
+  return { ok: false, error: formatPostgresError(insertError) };
 }
 
 async function rollbackAuthUser(admin: SupabaseClient, userId: string) {

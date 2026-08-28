@@ -114,12 +114,12 @@ export default function CustomersPage() {
                         className="hover:underline"
                         onClick={(event) => event.stopPropagation()}
                       >
-                        {customer.name || "—"}
+                        {customer.name || "Not set"}
                       </Link>
                     </td>
-                    <td className="px-4 py-3.5 text-muted-foreground">{customer.email || "—"}</td>
+                    <td className="px-4 py-3.5 text-muted-foreground">{customer.email || "Not set"}</td>
                     <td className="px-4 py-3.5 font-mono text-xs tracking-wide text-muted-foreground">
-                      {customer.phone || "—"}
+                      {customer.phone || "Not set"}
                     </td>
                     <td className="px-4 py-3.5 text-muted-foreground">{customer.orderCount}</td>
                     <td className="px-4 py-3.5 font-tabular text-ink-950">

@@ -208,9 +208,9 @@ export function OrderDetail({ orderId }: { orderId: string }) {
           <section className="rounded-xl border border-black/8 bg-white p-5 shadow-card">
             <h2 className="text-sm font-medium text-ink-950">Buyer</h2>
             <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-              <DetailField label="Name" value={order.buyerName || "—"} />
-              <DetailField label="Phone" value={order.buyerPhone || "—"} mono />
-              <DetailField label="Delivery address" value={order.deliveryAddress || "—"} className="sm:col-span-2" />
+              <DetailField label="Name" value={order.buyerName || "Not set"} />
+              <DetailField label="Phone" value={order.buyerPhone || "Not set"} mono />
+              <DetailField label="Delivery address" value={order.deliveryAddress || "Not set"} className="sm:col-span-2" />
               {order.paymentReference ? (
                 <DetailField label="Payment reference" value={order.paymentReference} mono className="sm:col-span-2" />
               ) : null}

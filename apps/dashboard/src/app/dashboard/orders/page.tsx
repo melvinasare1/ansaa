@@ -150,7 +150,7 @@ export default function OrdersPage() {
                         #{shortOrderId(order.id)}
                       </Link>
                     </td>
-                    <td className="px-4 py-3.5 font-medium text-ink-950">{order.buyerName || "—"}</td>
+                    <td className="px-4 py-3.5 font-medium text-ink-950">{order.buyerName || "Not set"}</td>
                     <td className="px-4 py-3.5 text-muted-foreground">{orderItemCount(order)}</td>
                     <td className="px-4 py-3.5 font-tabular text-ink-950">
                       {formatOrderMoney(order.subtotalCedis)}

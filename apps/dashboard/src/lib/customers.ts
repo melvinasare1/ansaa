@@ -29,7 +29,7 @@ export function customersWithStats(
 }
 
 export function orderItemsLabel(order: Order): string {
-  if (order.items.length === 0) return "—";
+  if (order.items.length === 0) return "None";
   return order.items
     .map((item) => (item.quantity > 1 ? `${item.name} × ${item.quantity}` : item.name))
     .join(", ");

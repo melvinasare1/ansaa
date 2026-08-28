@@ -53,7 +53,7 @@ function variationCount(product: Product): number {
 }
 
 function formatProductDate(ms: number): string {
-  if (!ms) return "—";
+  if (!ms) return "Not set";
   return new Date(ms).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
@@ -305,7 +305,7 @@ export default function ProductsPage() {
             );
           })}
         </div>
-        {/* Export is visual-only for now — CSV/download is not wired. */}
+        {/* Export is visual-only for now. CSV/download is not wired. */}
         <button
           type="button"
           className="inline-flex items-center gap-1.5 rounded-lg border border-black/8 bg-white px-3 py-1.5 text-sm text-ink-950"
@@ -403,9 +403,9 @@ export default function ProductsPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3.5 font-mono text-xs tracking-wide text-muted-foreground uppercase">
-                          {product.sku || "—"}
+                          {product.sku || "Not set"}
                         </td>
-                        <td className="px-4 py-3.5 text-ink-950">{variations > 0 ? variations : "—"}</td>
+                        <td className="px-4 py-3.5 text-ink-950">{variations > 0 ? variations : "None"}</td>
                         <td className="px-4 py-3.5 font-tabular text-ink-950">
                           {formatPrice(product.priceCedis)}
                         </td>
@@ -592,7 +592,7 @@ function ProductThumb({ name, src }: { name: string; src?: string }) {
         />
       ) : (
         <span className="flex size-full items-center justify-center text-xs font-medium text-muted-foreground">
-          {name.charAt(0).toUpperCase() || "—"}
+          {name.charAt(0).toUpperCase() || "?"}
         </span>
       )}
     </div>

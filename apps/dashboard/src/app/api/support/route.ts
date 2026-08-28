@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     const subjectLabel = supportSubjectLabel(subjectValue);
     const businessName = session.seller?.businessName || name;
-    const storeSlug = session.seller?.storeSlug || "—";
+    const storeSlug = session.seller?.storeSlug || "Not set";
     const sellerId = session.seller?.id || session.user.uid;
 
     const html = `
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
       from: fromEmail,
       to: inboxEmail,
       replyTo: email,
-      subject: `[Support] ${subjectLabel} — ${businessName}`,
+      subject: `[Support] ${subjectLabel}: ${businessName}`,
       html,
     });
 

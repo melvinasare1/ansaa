@@ -13,6 +13,7 @@ import {
   Youtube,
 } from "lucide-react";
 import { CartLink } from "@/components/store/template-d/CartLink";
+import { DEFAULT_STORE_NAME } from "@/lib/store-name";
 
 const footerLinkGroups = [
   { heading: "About", links: ["Company", "Leadership", "Press", "Careers"] },
@@ -21,14 +22,7 @@ const footerLinkGroups = [
   { heading: "Company", links: ["Privacy Policy", "Terms of Use", "FAQ"] },
 ];
 
-function sellerDisplayName(slug: string) {
-  const name = slug
-    .split(/[-_]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-  return name || "Stylehive";
-}
+const pillLinks = ["New Arrivals", "Sales", "Man", "Women", "Kid's", "Brand"];
 
 function PinterestIcon({ className }: { className?: string }) {
   return (
@@ -61,8 +55,6 @@ const body = Work_Sans({
   weight: ["400", "500", "600"],
 });
 
-const pillLinks = ["New Arrivals", "Sales", "Man", "Women", "Kid's", "Brand"];
-
 export default function TemplateDLayout({
   children,
   params,
@@ -71,7 +63,6 @@ export default function TemplateDLayout({
   params: { slug: string };
 }) {
   const base = `/store/template-d/${params.slug}`;
-  const sellerName = sellerDisplayName(params.slug);
 
   return (
     <div
@@ -90,7 +81,7 @@ export default function TemplateDLayout({
             className="text-center text-[22px] font-extrabold uppercase tracking-[0.12em] md:text-[26px]"
             style={{ fontFamily: "var(--font-stylehive-display), ui-sans-serif, system-ui" }}
           >
-            Stylehive
+            {DEFAULT_STORE_NAME}
           </Link>
 
           <div className="flex items-center justify-end gap-5">
@@ -168,7 +159,7 @@ export default function TemplateDLayout({
                 className="text-[20px] font-extrabold uppercase tracking-[0.12em] md:text-[22px]"
                 style={{ fontFamily: "var(--font-stylehive-display), ui-sans-serif, system-ui" }}
               >
-                Stylehive
+                {DEFAULT_STORE_NAME}
               </p>
               <p className="mt-4 max-w-sm text-[13px] leading-relaxed text-white/45">
                 Seamless transactions, personalized insights, and innovative solutions for a
@@ -215,7 +206,7 @@ export default function TemplateDLayout({
           </div>
 
           <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-[12px] text-white/40 md:flex-row md:items-center md:justify-between">
-            <p>Copyright © 2026 {sellerName}. All Rights Reserved.</p>
+            <p>Copyright © 2026 {DEFAULT_STORE_NAME}. All Rights Reserved.</p>
             <a href="#" className="transition-colors hover:text-white/70">
               Privacy Policy
             </a>

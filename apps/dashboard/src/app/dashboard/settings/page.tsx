@@ -1,12 +1,13 @@
 "use client";
 
+import { STOREFRONT_TEMPLATE_OPTIONS } from "@/lib/storefront-templates";
 import { useSeller } from "@/lib/seller-context";
 import { storefrontUrl } from "@/lib/storefront-url";
+import { VerificationUpload } from "./verification-upload";
 
-const templateLabels = {
-  "template-a": "Template A — Minimal",
-  "template-b": "Template B — Market",
-} as const;
+const templateLabels = Object.fromEntries(
+  STOREFRONT_TEMPLATE_OPTIONS.map((option) => [option.id, option.name])
+) as Record<(typeof STOREFRONT_TEMPLATE_OPTIONS)[number]["id"], string>;
 
 const tierLabels = {
   website_admin: "Website & Admin",
@@ -17,10 +18,10 @@ export default function SettingsPage() {
   const { seller } = useSeller();
   const storeUrl = storefrontUrl(seller);
 
-  const templateLabel = seller ? templateLabels[seller.template] : "—";
+  const templateLabel = seller ? templateLabels[seller.template] : "Not set";
   const billingLabel = seller
-    ? `${tierLabels[seller.pricingTier]} — GHS ${seller.baseFeeCedis}/mo base`
-    : "—";
+    ? `${tierLabels[seller.pricingTier]}, GHS ${seller.baseFeeCedis}/mo base`
+    : "Not set";
 
   return (
     <div className="max-w-2xl px-4 py-4 md:py-6 lg:px-6">
@@ -29,10 +30,10 @@ export default function SettingsPage() {
       <section className="mt-6 rounded-xl border border-wire bg-white p-6">
         <h2 className="font-display text-base font-semibold text-ink-950">Business</h2>
         <div className="mt-4 space-y-4">
-          <SettingRow label="Business name" value={seller?.businessName || "—"} />
+          <SettingRow label="Business name" value={seller?.businessName || "Not set"} />
           <SettingRow
             label="Storefront domain"
-            value={seller?.domain || "—"}
+            value={seller?.domain || "Not set"}
             hint="Your own domain, e.g. yourbrand.com"
           />
           <SettingRow
@@ -57,6 +58,15 @@ export default function SettingsPage() {
           <SettingRow label="Included orders" value="20 orders / month" />
           <SettingRow label="Overage rate" value="3 GHS / order (21–50), then tiered down" />
         </div>
+      </section>
+
+      <section className="mt-6 rounded-xl border border-wire bg-white p-6">
+        <h2 className="font-display text-base font-semibold text-ink-950">Identity documents</h2>
+        <p className="mt-2 text-sm text-ink-700/60">
+          Test upload to private storage. Files are stored under your seller id and can only be
+          viewed through a short-lived signed URL, not a public link.
+        </p>
+        <VerificationUpload />
       </section>
 
       <section className="mt-6 rounded-xl border border-wire bg-white p-6">

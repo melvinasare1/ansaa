@@ -1,15 +1,16 @@
-import type {
-  Customer,
-  Order,
-  OrderItem,
-  OrderStatus,
-  PricingTier,
-  Product,
-  ProductVariant,
-  Seller,
-  SignupLead,
-  StorefrontEvent,
-  StorefrontEventType,
+import {
+  parseStorefrontTemplate,
+  type Customer,
+  type Order,
+  type OrderItem,
+  type OrderStatus,
+  type PricingTier,
+  type Product,
+  type ProductVariant,
+  type Seller,
+  type SignupLead,
+  type StorefrontEvent,
+  type StorefrontEventType,
 } from "./types";
 
 const ORDER_STATUSES: OrderStatus[] = [
@@ -153,13 +154,17 @@ export function sellerFromRow(row: unknown): Seller {
     businessName: String(fields.business_name ?? ""),
     domain: String(fields.domain ?? ""),
     storeSlug: String(fields.store_slug ?? ""),
-    template: fields.template === "template-b" ? "template-b" : "template-a",
+    template: parseStorefrontTemplate(fields.template),
     email: String(fields.email ?? ""),
     phone: String(fields.phone ?? ""),
     pricingTier: pricingTierFromColumn(fields.pricing_tier),
     baseFeeCedis: Number(fields.base_fee_cedis ?? 0),
     status: (fields.status as Seller["status"]) ?? "onboarding",
     createdAt: epochMs(fields.created_at),
+    idDocumentUrl: String(fields.id_document_url ?? "") || undefined,
+    profilePhotoUrl: String(fields.profile_photo_url ?? "") || undefined,
+    businessRegistrationUrl: String(fields.business_registration_url ?? "") || undefined,
+    hasBusinessRegistration: Boolean(fields.has_business_registration),
   };
 }
 

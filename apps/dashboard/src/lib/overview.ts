@@ -29,7 +29,7 @@ export async function getRecentDashboardOrders(
     const order = orderFromRow(row);
     return {
       id: order.id,
-      buyer: order.buyerName.trim() || "—",
+      buyer: order.buyerName.trim() || "Not set",
       items: orderItemCount(order),
       amount: formatOrderMoney(order.subtotalCedis),
       status: order.status,

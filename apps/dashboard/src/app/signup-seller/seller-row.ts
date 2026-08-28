@@ -1,7 +1,5 @@
 import { sellerToInsert } from "@ansaa/shared/mappers";
-import { PRICING_TIER_BASE_FEE_CEDIS, type Seller } from "@ansaa/shared/types";
-
-export const DEFAULT_SIGNUP_PRICING_TIER = "website_admin" as const;
+import { PRICING_TIER_BASE_FEE_CEDIS, type PricingTier, type Seller } from "@ansaa/shared/types";
 
 export function newSellerInsertRow(input: {
   userId: string;
@@ -10,6 +8,7 @@ export function newSellerInsertRow(input: {
   email: string;
   phone: string;
   template: Seller["template"];
+  pricingTier: PricingTier;
 }) {
   return sellerToInsert({
     id: input.userId,
@@ -20,9 +19,10 @@ export function newSellerInsertRow(input: {
     template: input.template,
     email: input.email,
     phone: input.phone,
-    pricingTier: DEFAULT_SIGNUP_PRICING_TIER,
-    baseFeeCedis: PRICING_TIER_BASE_FEE_CEDIS[DEFAULT_SIGNUP_PRICING_TIER],
+    pricingTier: input.pricingTier,
+    baseFeeCedis: PRICING_TIER_BASE_FEE_CEDIS[input.pricingTier],
     status: "onboarding",
     createdAt: Date.now(),
+    hasBusinessRegistration: false,
   });
 }

@@ -103,7 +103,7 @@ export default function SignupPage() {
             disabled={loading}
             className="w-full rounded-full bg-navy px-7 py-3 font-medium text-white transition hover:bg-navy/90 disabled:opacity-50"
           >
-            {loading ? "Sending…" : "Join the list"}
+            {loading ? "Sending…" : "Get your website"}
           </button>
         </form>
       </div>

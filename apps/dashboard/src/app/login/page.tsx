@@ -3,31 +3,39 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AUTH_INPUT_CLASS, AuthFrame } from "@/components/auth-frame";
 import { createClient } from "@ansaa/shared/supabase/client";
-import { getWebUrl } from "@ansaa/shared/supabase/env";
+import { getDashboardUrl } from "@ansaa/shared/supabase/env";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setNotice(null);
     setLoading(true);
 
     const form = e.currentTarget;
-    const email = String(new FormData(form).get("email") ?? "").trim();
     const password = String(new FormData(form).get("password") ?? "");
 
     try {
       const supabase = createClient();
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
       if (signInError) {
-        setError(signInError.message);
+        setError(
+          signInError.message === "Invalid login credentials"
+            ? "No account found for that email and password."
+            : signInError.message
+        );
         return;
       }
       router.replace("/dashboard");
@@ -39,63 +47,95 @@ export default function LoginPage() {
     }
   }
 
+  async function handleResetPassword() {
+    setError(null);
+    setNotice(null);
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setError("Enter your email first, then reset your password.");
+      return;
+    }
+
+    setResetting(true);
+    try {
+      const supabase = createClient();
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(trimmed, {
+        redirectTo: `${getDashboardUrl()}/auth/confirm?next=${encodeURIComponent("/auth/reset-password")}`,
+      });
+      if (resetError) {
+        setError(resetError.message);
+        return;
+      }
+      setNotice("Check your inbox for a link to choose a new password.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send a reset email.");
+    } finally {
+      setResetting(false);
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-ink-950 px-6 py-24 text-canvas">
-      <div className="mx-auto max-w-lg">
-        <p className="font-mono text-sm uppercase tracking-[0.2em] text-signal">Seller access</p>
-        <h1 className="mt-4 font-display text-3xl font-semibold">Log in to your dashboard</h1>
-        <p className="mt-3 text-canvas/60">
-          Use the email and password Fulfil set up for your store. Storefronts stay public — this
-          is only for the seller backend.
-        </p>
+    <AuthFrame
+      kicker="Seller access"
+      title="Log in to your dashboard"
+      description="Use the email and password you created for your store."
+    >
+      <form
+        onSubmit={handleSubmit}
+        className="mt-8 space-y-5 rounded-2xl border border-black/8 bg-white p-6 shadow-card"
+      >
+        <label className="block">
+          <span className="text-sm font-medium">Email</span>
+          <input
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={AUTH_INPUT_CLASS}
+          />
+        </label>
 
-        <form onSubmit={handleSubmit} className="mt-10 space-y-6">
+        <div>
           <label className="block">
-            <span className="text-sm text-canvas/70">Email</span>
-            <input
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              className="mt-2 w-full rounded-lg border border-ink-700 bg-ink-900 px-4 py-3 text-canvas outline-none focus:border-signal"
-            />
-          </label>
-
-          <label className="block">
-            <span className="text-sm text-canvas/70">Password</span>
+            <span className="text-sm font-medium">Password</span>
             <input
               name="password"
               type="password"
               required
               autoComplete="current-password"
-              className="mt-2 w-full rounded-lg border border-ink-700 bg-ink-900 px-4 py-3 text-canvas outline-none focus:border-signal"
+              className={AUTH_INPUT_CLASS}
             />
           </label>
-
-          {error ? <p className="text-sm text-red-400">{error}</p> : null}
-
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-full bg-signal px-7 py-3 font-medium text-ink-950 transition hover:bg-signal/90 disabled:opacity-50"
+            type="button"
+            onClick={handleResetPassword}
+            disabled={loading || resetting}
+            className="mt-2 text-sm font-medium text-navy hover:underline disabled:opacity-50"
           >
-            {loading ? "Logging in…" : "Log in"}
+            {resetting ? "Sending reset email…" : "Reset password"}
           </button>
-        </form>
+        </div>
 
-        <p className="mt-8 text-sm text-canvas/50">
-          Already onboarded?{" "}
-          <Link href="/signup-seller" className="text-signal underline underline-offset-4">
-            Create your seller login
-          </Link>
-        </p>
-        <p className="mt-3 text-sm text-canvas/50">
-          Not onboarded yet?{" "}
-          <Link href={`${getWebUrl()}/signup`} className="text-signal underline underline-offset-4">
-            Join the early access list
-          </Link>
-        </p>
-      </div>
-    </main>
+        {error ? <p className="text-sm text-delta-down">{error}</p> : null}
+        {notice ? <p className="text-sm text-delta-up">{notice}</p> : null}
+
+        <button
+          type="submit"
+          disabled={loading || resetting}
+          className="w-full rounded-full bg-navy px-6 py-2.5 text-sm font-medium text-white transition hover:bg-navy/90 disabled:opacity-50"
+        >
+          {loading ? "Logging in…" : "Log in"}
+        </button>
+      </form>
+
+      <p className="mt-8 text-sm text-muted-foreground">
+        New seller?{" "}
+        <Link href="/signup-seller" className="font-medium text-navy hover:underline">
+          Get your website
+        </Link>
+      </p>
+    </AuthFrame>
   );
 }

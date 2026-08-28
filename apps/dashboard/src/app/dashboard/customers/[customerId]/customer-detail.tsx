@@ -119,12 +119,12 @@ export function CustomerDetail({ customerId }: { customerId: string }) {
           <section className="rounded-xl border border-black/8 bg-white p-5 shadow-card">
             <h2 className="text-sm font-medium text-ink-950">Profile</h2>
             <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-              <DetailField label="Name" value={customer.name || "—"} />
-              <DetailField label="Email" value={customer.email || "—"} />
-              <DetailField label="Phone" value={customer.phone || "—"} mono />
+              <DetailField label="Name" value={customer.name || "Not set"} />
+              <DetailField label="Email" value={customer.email || "Not set"} />
+              <DetailField label="Phone" value={customer.phone || "Not set"} mono />
               <DetailField
                 label="Delivery address"
-                value={customer.deliveryAddress || "—"}
+                value={customer.deliveryAddress || "Not set"}
                 className="sm:col-span-2"
               />
             </dl>

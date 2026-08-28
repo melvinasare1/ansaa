@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Create seller login — Fulfil",
+  title: "Create your store",
 };
 
 export default function SignupSellerLayout({ children }: { children: React.ReactNode }) {

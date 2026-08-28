@@ -44,8 +44,8 @@ In production you want each seller's own domain to serve their storefront direct
 (`makeup.com` → template-a page for slug "makeup"), and the dashboard to live on a
 subdomain (`dashboard.makeup.com`). That's a `middleware.ts` job on each app: read
 the incoming `Host` header, look up which seller/template owns that domain, and
-rewrite the request to the right internal route. Not built yet — flagged here so
-it's not forgotten before you onboard a real seller onto their own domain.
+rewrite the request to the right internal route. Not built yet — see
+[docs/follow-ups.md](docs/follow-ups.md) (trigger: before customer #4).
 
 ## Setup
 
@@ -96,6 +96,9 @@ Seller login / Supabase Auth is a separate step. The dashboard currently
 redirects unauthenticated visits to `/login`.
 
 ## What's mocked and needs wiring next
+
+Current deferred work and pre-scale triggers live in
+[docs/follow-ups.md](docs/follow-ups.md). The list below is older scaffold notes.
 
 1. **Auth** — seller login for the dashboard (Supabase Auth). Ask before wiring this.
 2. **Products CRUD** — list/create against Postgres; next is edit/delete and image storage.
