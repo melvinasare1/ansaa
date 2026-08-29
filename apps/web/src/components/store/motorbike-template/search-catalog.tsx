@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { ChevronDown } from "lucide-react";
 import {
   productMatchesColour,
   type RideCatalogCard,
@@ -121,6 +122,7 @@ export function RideSearchCatalog({
   const [minDraft, setMinDraft] = useState(urlMin);
   const [maxDraft, setMaxDraft] = useState(urlMax);
   const [queryDraft, setQueryDraft] = useState(urlQuery);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     setMinDraft(urlMin);
@@ -337,15 +339,40 @@ export function RideSearchCatalog({
       </div>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
-        <aside className="rounded-[24px] border border-[#D9D6CE] bg-[#FFFDFA] p-6">
+        <aside className="rounded-[24px] border border-[#D9D6CE] bg-[#FFFDFA]">
+          <button
+            type="button"
+            className="flex w-full items-center justify-between px-6 py-4 text-left lg:hidden"
+            aria-expanded={filtersOpen}
+            aria-controls="ride-search-filters"
+            onClick={() => setFiltersOpen((open) => !open)}
+          >
+            <span
+              className="text-[15px] font-extrabold text-[#141414]"
+              style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
+            >
+              Filter
+            </span>
+            <ChevronDown
+              className={`h-5 w-5 shrink-0 text-[#141414] transition-transform ${
+                filtersOpen ? "rotate-180" : ""
+              }`}
+              strokeWidth={1.8}
+              aria-hidden
+            />
+          </button>
           <p
-            className="text-[15px] font-extrabold text-[#141414]"
+            className="hidden px-6 pt-6 text-[15px] font-extrabold text-[#141414] lg:block"
             style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
           >
             Filter
           </p>
 
-          <label className="mt-6 block">
+          <div
+            id="ride-search-filters"
+            className={`px-6 pb-6 ${filtersOpen ? "block" : "hidden"} lg:block`}
+          >
+          <label className="mt-2 block lg:mt-6">
             <span className="text-[13px] font-semibold text-[#141414]">Search</span>
             <input
               type="search"
@@ -457,6 +484,7 @@ export function RideSearchCatalog({
               </label>
             </div>
           </fieldset>
+          </div>
         </aside>
 
         <section>
@@ -544,7 +572,7 @@ export function RideSearchSkeleton() {
     <div className="mx-auto max-w-[1400px] px-6 py-10 md:px-10 md:py-14">
       <div className="h-10 w-40 animate-pulse rounded bg-[#E8E6E1]" />
       <div className="mt-10 grid gap-10 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <div className="h-72 animate-pulse rounded-[24px] bg-[#E8E6E1]" />
+        <div className="h-14 animate-pulse rounded-[24px] bg-[#E8E6E1] lg:h-72" />
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }, (_, index) => (
             <div key={index} className="aspect-square animate-pulse rounded-[24px] bg-[#E8E6E1]" />

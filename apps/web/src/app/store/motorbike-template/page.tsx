@@ -151,13 +151,13 @@ export default async function MotorbikeTemplateHome() {
             people who know the machines.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-3.5">
-            <a
-              href="#shop"
+            <Link
+              href={`${base}/search`}
               className="inline-flex items-center rounded-lg px-7 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: ORANGE }}
             >
               Shop Now
-            </a>
+            </Link>
             <Link
               href={`${base}/contact`}
               className="inline-flex items-center rounded-lg border border-white/90 bg-transparent px-7 py-3 text-sm font-semibold text-white"
