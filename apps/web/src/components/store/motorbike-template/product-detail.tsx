@@ -1,32 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useState, type ReactNode } from "react";
+import { Check, ShoppingBag } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { ShoppingBag } from "lucide-react";
 import { rideCartHrefFromPath } from "@/components/store/motorbike-template/demo-catalog";
 import { MotorbikePlaceholder } from "@/components/store/motorbike-template/placeholders";
+import { PdpFaqs } from "@/components/store/pdp/PdpFaqs";
+import { PdpGallery, PdpQuantity, productFeatures } from "@/components/store/pdp/PdpGallery";
+import { PdpReviews } from "@/components/store/pdp/PdpReviews";
+import { RIDE_CHROME } from "@/components/store/pdp/chrome";
 import { useCart } from "@/lib/cart-context";
 import { formatCedis } from "@/lib/price";
-import type { Product } from "@ansaa/shared/types";
+import type { Product, StoreFaq } from "@ansaa/shared/types";
 
-const ORANGE = "#E8622C";
+const ORANGE = RIDE_CHROME.accent;
 
-export function RideProductDetail({ product }: { product: Product }) {
+export function RideProductDetail({
+  product,
+  faqs,
+  children,
+}: {
+  product: Product;
+  faqs: StoreFaq[];
+  children?: ReactNode;
+}) {
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const { addItem, hydrated } = useCart();
   const [added, setAdded] = useState(false);
-  const photo = product.images[0] ?? "";
+  const [quantity, setQuantity] = useState(1);
+  const features = productFeatures(product);
+  const photos = product.images.filter(Boolean);
+  const photo = photos[0] ?? "";
 
   function handleAdd() {
     if (!hydrated) return;
+    const qty = Math.min(99, Math.max(1, Math.floor(quantity) || 1));
     addItem({
       productId: product.id,
       name: product.name,
       priceCedis: product.priceCedis,
       image: photo,
-      quantity: 1,
+      quantity: qty,
     });
     setAdded(true);
   }
@@ -37,65 +52,90 @@ export function RideProductDetail({ product }: { product: Product }) {
   }
 
   return (
-    <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
-      <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-[24px] border border-[#D9D6CE] bg-[#E8E6E1]">
-        {photo ? (
-          <div className="relative h-[85%] w-[85%]">
-            <Image
-              src={photo}
-              alt={product.name}
-              fill
-              unoptimized
-              priority
-              sizes="(min-width: 1024px) 40vw, 90vw"
-              className="object-contain"
+    <div>
+      <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
+        {photos.length > 0 ? (
+          <PdpGallery
+            images={photos}
+            alt={product.name}
+            accent={ORANGE}
+            aspectClass="aspect-square"
+            frameClass="rounded-[24px] border border-[#D9D6CE] bg-[#E8E6E1]"
+            thumbClass="relative flex aspect-square w-16 shrink-0 overflow-hidden rounded-lg border border-[#D9D6CE] bg-[#E8E6E1]"
+            objectFit="contain"
+            unoptimized
+          />
+        ) : (
+          <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-[24px] border border-[#D9D6CE] bg-[#E8E6E1]">
+            <MotorbikePlaceholder className="h-[70%] w-[80%]" />
+          </div>
+        )}
+
+        <div className="lg:pt-4">
+          {product.category ? (
+            <p className="text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: ORANGE }}>
+              {product.category}
+            </p>
+          ) : null}
+          <h1
+            className="mt-2 text-[32px] font-extrabold leading-tight tracking-tight text-[#141414] md:text-[40px]"
+            style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
+          >
+            {product.name}
+          </h1>
+          <p className="mt-3 text-[22px] font-semibold" style={{ color: ORANGE }}>
+            {formatCedis(product.priceCedis)}
+          </p>
+          {product.description ? (
+            <p className="mt-5 max-w-md text-[15px] leading-relaxed text-[#141414]/60">{product.description}</p>
+          ) : null}
+
+          {features.length > 0 ? (
+            <ul className="mt-5 space-y-2">
+              {features.map((feature) => (
+                <li key={feature} className="flex items-start gap-2 text-[14px] text-[#141414]/75">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2} color={ORANGE} />
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <div className="mt-6">
+            <p className="text-sm font-semibold text-[#141414]">Quantity</p>
+            <PdpQuantity
+              value={quantity}
+              onChange={setQuantity}
+              wrapClass="mt-3 inline-flex h-12 items-center rounded-lg border border-[#141414] bg-[#FFFDFA]"
             />
           </div>
-        ) : (
-          <MotorbikePlaceholder className="h-[70%] w-[80%]" />
-        )}
-      </div>
 
-      <div className="lg:pt-4">
-        {product.category ? (
-          <p className="text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: ORANGE }}>
-            {product.category}
-          </p>
-        ) : null}
-        <h1
-          className="mt-2 text-[32px] font-extrabold leading-tight tracking-tight text-[#141414] md:text-[40px]"
-          style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
-        >
-          {product.name}
-        </h1>
-        <p className="mt-3 text-[22px] font-semibold" style={{ color: ORANGE }}>
-          {formatCedis(product.priceCedis)}
-        </p>
-        {product.description ? (
-          <p className="mt-5 max-w-md text-[15px] leading-relaxed text-[#141414]/60">{product.description}</p>
-        ) : null}
-
-        <div className="mt-8 flex w-full items-center gap-2 sm:w-auto">
-          <button
-            type="button"
-            aria-label={added ? `${product.name} added to cart` : `Add ${product.name} to cart`}
-            onClick={handleAdd}
-            disabled={!hydrated}
-            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[#141414] text-[#141414] transition-colors hover:bg-[#141414] hover:text-white disabled:cursor-wait disabled:opacity-60"
-          >
-            <ShoppingBag className="h-5 w-5" strokeWidth={1.75} />
-          </button>
-          <button
-            type="button"
-            onClick={handleBuy}
-            disabled={!hydrated}
-            className="inline-flex h-12 min-w-0 flex-1 items-center justify-center rounded-lg px-7 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-60 sm:min-w-[220px]"
-            style={{ backgroundColor: ORANGE }}
-          >
-            Buy
-          </button>
+          <div className="mt-8 flex w-full items-center gap-2 sm:w-auto">
+            <button
+              type="button"
+              aria-label={added ? `${product.name} added to cart` : `Add ${product.name} to cart`}
+              onClick={handleAdd}
+              disabled={!hydrated}
+              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[#141414] text-[#141414] transition-colors hover:bg-[#141414] hover:text-white disabled:cursor-wait disabled:opacity-60"
+            >
+              <ShoppingBag className="h-5 w-5" strokeWidth={1.75} />
+            </button>
+            <button
+              type="button"
+              onClick={handleBuy}
+              disabled={!hydrated}
+              className="inline-flex h-12 min-w-0 flex-1 items-center justify-center rounded-lg px-7 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-wait disabled:opacity-60 sm:min-w-[220px]"
+              style={{ backgroundColor: ORANGE }}
+            >
+              Buy
+            </button>
+          </div>
         </div>
       </div>
+
+      {children}
+      <PdpReviews productId={product.id} chrome={RIDE_CHROME} />
+      <PdpFaqs faqs={faqs} chrome={RIDE_CHROME} />
     </div>
   );
 }

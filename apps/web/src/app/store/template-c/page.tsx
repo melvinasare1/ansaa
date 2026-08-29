@@ -1,8 +1,7 @@
 import Image from "next/image";
 import { ArrowRight, Github, Globe, Instagram, Leaf, Linkedin, Quote, Sprout, Twitter } from "lucide-react";
-import ProductCarousel, {
-  type KitchenProduct,
-} from "@/components/store/template-c/ProductCarousel";
+import ProductCarousel from "@/components/store/template-c/ProductCarousel";
+import { listTemplateCCarousel } from "@/components/store/template-c/catalog";
 import CategoryCarousel, {
   type KitchenCategory,
 } from "@/components/store/template-c/CategoryCarousel";
@@ -75,8 +74,8 @@ const mockReviews = [
   },
 ];
 
-export default function TemplateCHome() {
-  const products: KitchenProduct[] = [];
+export default async function TemplateCHome() {
+  const products = await listTemplateCCarousel();
 
   return (
     <div>

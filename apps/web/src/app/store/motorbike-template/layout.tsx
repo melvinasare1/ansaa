@@ -21,7 +21,7 @@ const body = Public_Sans({
 });
 
 const navLinks = [
-  { label: "Shop", href: "#shop" },
+  { label: "Shop", href: "/search" },
   { label: "Parts", href: "#accessories" },
   { label: "About Us", href: "#about" },
   { label: "Service & Repair", href: "#service" },
@@ -127,9 +127,9 @@ export default function MotorbikeTemplateLayout({
 
           <nav className="hidden flex-1 items-center justify-center gap-8 text-[14px] font-medium tracking-wide text-white/90 md:flex lg:gap-10">
             {headerNav.map((item) => (
-              <a key={item.label} href={item.href} className="transition-opacity hover:text-white">
+              <Link key={item.label} href={item.href} className="transition-opacity hover:text-white">
                 {item.label}
-              </a>
+              </Link>
             ))}
           </nav>
 

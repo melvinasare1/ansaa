@@ -9,13 +9,24 @@ import {
   useProductImageSlots,
   type ImageSlot,
 } from "@/components/dashboard/ProductImagePicker";
+import { RepeatableStringList, cleanStringList } from "@/components/dashboard/RepeatableStringList";
+import { OptionManager } from "@/components/dashboard/OptionManager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   createSellerCategory,
   deleteSellerCategory,
   listSellerCategories,
+  renameSellerCategory,
   type SellerCategory,
 } from "@/lib/product-categories";
+import {
+  createSellerFilterOption,
+  deleteSellerFilterOption,
+  listSellerFilterOptions,
+  renameSellerFilterOption,
+  type FilterOptionKind,
+  type FilterOptionSets,
+} from "@/lib/product-filter-options";
 import {
   emptyManualVariant,
   storefrontSizesAndColors,
@@ -29,7 +40,7 @@ import { productToInsert } from "@ansaa/shared/mappers";
 import { createClient } from "@ansaa/shared/supabase/client";
 import { trackEvent } from "@/lib/vercel-track";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
-import type { ProductVariant } from "@ansaa/shared/types";
+import type { ProductCondition, ProductVariant } from "@ansaa/shared/types";
 
 const TABS = ["basic", "variations", "images"] as const;
 type TabId = (typeof TABS)[number];
@@ -53,6 +64,17 @@ export function NewProductForm() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState<SellerCategory[]>([]);
+  const [filterOptions, setFilterOptions] = useState<FilterOptionSets>({
+    tag: [],
+    engine_size: [],
+    colour: [],
+    year: [],
+  });
+  const [tags, setTags] = useState<string[]>([]);
+  const [engineSize, setEngineSize] = useState("");
+  const [condition, setCondition] = useState<ProductCondition | "">("");
+  const [year, setYear] = useState("");
+  const [colourNames, setColourNames] = useState<string[]>([]);
   const [variants, setVariants] = useState<DraftVariant[]>([]);
   const [price, setPrice] = useState("");
   const [compareAtPrice, setCompareAtPrice] = useState("");
@@ -60,6 +82,7 @@ export function NewProductForm() {
   const [stock, setStock] = useState("0");
   const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
+  const [features, setFeatures] = useState<string[]>([""]);
   const [variantImages, setVariantImages] = useState<Record<string, string[]>>({});
   const [savedId, setSavedId] = useState<string | null>(null);
   const [saving, setSaving] = useState<SaveMode | null>(null);
@@ -100,8 +123,14 @@ export function NewProductForm() {
     async function loadCategories() {
       try {
         const supabase = createClient();
-        const rows = await listSellerCategories(supabase, sellerId);
-        if (!cancelled) setCategories(rows);
+        const [rows, filters] = await Promise.all([
+          listSellerCategories(supabase, sellerId),
+          listSellerFilterOptions(supabase, sellerId),
+        ]);
+        if (!cancelled) {
+          setCategories(rows);
+          setFilterOptions(filters);
+        }
       } catch (err) {
         console.error("Failed to load categories", err);
       }
@@ -123,6 +152,26 @@ export function NewProductForm() {
   function parsedStock(raw: string): number {
     const value = Number(raw);
     return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+  }
+
+  function parseYear(raw: string): number | null {
+    const value = Number(raw.trim());
+    if (!Number.isInteger(value) || value < 1900 || value > 2100) return null;
+    return value;
+  }
+
+  function uniqueNames(values: string[]): string[] {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const raw of values) {
+      const name = raw.trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(name);
+    }
+    return out;
   }
 
   function urlsForSlots(
@@ -192,8 +241,16 @@ export function NewProductForm() {
       category: category.trim(),
       active,
       sizes: storefrontSizesAndColors(variants).sizes,
-      colors: storefrontSizesAndColors(variants).colors,
+      colors: uniqueNames([
+        ...storefrontSizesAndColors(variants).colors,
+        ...colourNames,
+      ]),
       variants: persistVariants(uploaded),
+      features: cleanStringList(features),
+      tags: uniqueNames(tags),
+      engine_size: engineSize.trim(),
+      condition: condition || null,
+      year: parseYear(year),
     };
   }
 
@@ -264,6 +321,11 @@ export function NewProductForm() {
               sizes: fields.sizes,
               colors: fields.colors,
               variants: fields.variants,
+              features: fields.features,
+              tags: uniqueNames(tags),
+              engineSize: engineSize.trim() || undefined,
+              condition: condition || undefined,
+              year: parseYear(year) ?? undefined,
             })
           )
           .select("id")
@@ -343,6 +405,105 @@ export function NewProductForm() {
     if (category === row.name) setCategory("");
   }
 
+  async function handleRenameCategory(row: SellerCategory, nextName: string) {
+    try {
+      const supabase = seller && isSupabaseConfigured() ? createClient() : null;
+      const renamed = supabase
+        ? await renameSellerCategory(supabase, seller!.id, row, nextName)
+        : { id: row.id.startsWith("local:") ? `local:${nextName}` : row.id, name: nextName.trim() };
+      setCategories((prev) =>
+        prev
+          .map((item) => (item.id === row.id ? renamed : item))
+          .sort((a, b) => a.name.localeCompare(b.name))
+      );
+      if (category === row.name) setCategory(renamed.name);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not rename category.");
+    }
+  }
+
+  function patchFilterKind(kind: FilterOptionKind, mutate: (rows: SellerCategory[]) => SellerCategory[]) {
+    setFilterOptions((prev) => ({ ...prev, [kind]: mutate(prev[kind]) }));
+  }
+
+  async function handleCreateFilter(kind: FilterOptionKind, rawName: string) {
+    const nameValue = rawName.trim();
+    if (!nameValue) return;
+    if (!seller || !isSupabaseConfigured()) {
+      patchFilterKind(kind, (rows) =>
+        rows.some((row) => row.name.toLowerCase() === nameValue.toLowerCase())
+          ? rows
+          : [...rows, { id: `local:${kind}:${nameValue}`, name: nameValue }].sort((a, b) =>
+              a.name.localeCompare(b.name)
+            )
+      );
+      selectFilterValue(kind, nameValue);
+      return;
+    }
+    try {
+      const supabase = createClient();
+      const created = await createSellerFilterOption(supabase, seller.id, kind, rawName);
+      patchFilterKind(kind, (rows) => {
+        if (rows.some((row) => row.name.toLowerCase() === created.name.toLowerCase())) return rows;
+        return [...rows, created].sort((a, b) => a.name.localeCompare(b.name));
+      });
+      selectFilterValue(kind, created.name);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not add that option.");
+    }
+  }
+
+  function selectFilterValue(kind: FilterOptionKind, name: string) {
+    if (kind === "tag") setTags((prev) => (prev.includes(name) ? prev : [...prev, name]));
+    if (kind === "engine_size") setEngineSize(name);
+    if (kind === "colour") setColourNames((prev) => (prev.includes(name) ? prev : [...prev, name]));
+    if (kind === "year") setYear(name);
+  }
+
+  async function handleRenameFilter(kind: FilterOptionKind, row: SellerCategory, nextName: string) {
+    try {
+      const supabase = seller && isSupabaseConfigured() ? createClient() : null;
+      const renamed = supabase
+        ? await renameSellerFilterOption(supabase, seller!.id, row, kind, nextName)
+        : { id: `local:${kind}:${nextName.trim()}`, name: nextName.trim() };
+      patchFilterKind(kind, (rows) =>
+        rows
+          .map((item) => (item.id === row.id ? renamed : item))
+          .sort((a, b) => a.name.localeCompare(b.name))
+      );
+      remapSelectedFilter(kind, row.name, renamed.name);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not rename that option.");
+    }
+  }
+
+  function remapSelectedFilter(kind: FilterOptionKind, from: string, to: string) {
+    if (kind === "tag") setTags((prev) => prev.map((item) => (item === from ? to : item)));
+    if (kind === "engine_size" && engineSize === from) setEngineSize(to);
+    if (kind === "colour") setColourNames((prev) => prev.map((item) => (item === from ? to : item)));
+    if (kind === "year" && year === from) setYear(to);
+  }
+
+  async function handleDeleteFilter(kind: FilterOptionKind, row: SellerCategory) {
+    if (seller && isSupabaseConfigured()) {
+      try {
+        const supabase = createClient();
+        await deleteSellerFilterOption(supabase, seller.id, row);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Could not delete that option.");
+        return;
+      }
+    }
+    patchFilterKind(kind, (rows) => rows.filter((item) => item.id !== row.id));
+    if (kind === "tag") setTags((prev) => prev.filter((item) => item !== row.name));
+    if (kind === "engine_size" && engineSize === row.name) setEngineSize("");
+    if (kind === "colour") setColourNames((prev) => prev.filter((item) => item !== row.name));
+    if (kind === "year" && year === row.name) setYear("");
+  }
+
   function patchVariant(id: string, patch: Partial<DraftVariant>) {
     setVariants((prev) => prev.map((row) => (row.id === id ? { ...row, ...patch } : row)));
   }
@@ -406,13 +567,91 @@ export function NewProductForm() {
                 />
               </label>
 
-              <CategoryManager
-                categories={categories}
-                selectedName={category}
-                onSelect={setCategory}
+              <OptionManager
+                label="Categories"
+                hint="Create categories here, then select one to attach to this product. Pencil to rename."
+                options={categories}
+                selectedNames={category ? [category] : []}
+                placeholder="New category name"
+                onSelect={(names) => setCategory(names[0] ?? "")}
                 onCreate={handleCreateCategory}
+                onRename={handleRenameCategory}
                 onDelete={handleDeleteCategory}
               />
+
+              {seller?.template === "motorbike-template" ? (
+                <div className="space-y-5 rounded-lg border border-black/8 p-4">
+                  <p className="text-sm font-semibold text-ink-950">Listing filters</p>
+                  <p className="text-sm text-muted-foreground">
+                    These show on the Ride search page. Add or rename the options, then select the
+                    ones that apply to this product.
+                  </p>
+                  <OptionManager
+                    label="Tags"
+                    multiple
+                    options={filterOptions.tag}
+                    selectedNames={tags}
+                    placeholder="New tag"
+                    onSelect={setTags}
+                    onCreate={(name) => handleCreateFilter("tag", name)}
+                    onRename={(row, name) => handleRenameFilter("tag", row, name)}
+                    onDelete={(row) => handleDeleteFilter("tag", row)}
+                  />
+                  <OptionManager
+                    label="Engine size"
+                    options={filterOptions.engine_size}
+                    selectedNames={engineSize ? [engineSize] : []}
+                    placeholder="e.g. 250cc"
+                    onSelect={(names) => setEngineSize(names[0] ?? "")}
+                    onCreate={(name) => handleCreateFilter("engine_size", name)}
+                    onRename={(row, name) => handleRenameFilter("engine_size", row, name)}
+                    onDelete={(row) => handleDeleteFilter("engine_size", row)}
+                  />
+                  <div>
+                    <span className="text-sm font-semibold text-ink-950">Condition</span>
+                    <div className="mt-2 flex gap-2">
+                      {(["new", "used"] as const).map((value) => {
+                        const selected = condition === value;
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setCondition(selected ? "" : value)}
+                            className={cn(
+                              "rounded-full px-3 py-1.5 text-sm capitalize",
+                              selected ? "bg-ink-950 text-white" : "bg-muted text-ink-950"
+                            )}
+                          >
+                            {value}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <OptionManager
+                    label="Colour"
+                    multiple
+                    hint="Used on the search filters. Variant colours are still saved separately."
+                    options={filterOptions.colour}
+                    selectedNames={colourNames}
+                    placeholder="New colour"
+                    onSelect={setColourNames}
+                    onCreate={(name) => handleCreateFilter("colour", name)}
+                    onRename={(row, name) => handleRenameFilter("colour", row, name)}
+                    onDelete={(row) => handleDeleteFilter("colour", row)}
+                  />
+                  <OptionManager
+                    label="Year"
+                    options={filterOptions.year}
+                    selectedNames={year ? [year] : []}
+                    placeholder="e.g. 2024"
+                    onSelect={(names) => setYear(names[0] ?? "")}
+                    onCreate={(name) => handleCreateFilter("year", name)}
+                    onRename={(row, name) => handleRenameFilter("year", row, name)}
+                    onDelete={(row) => handleDeleteFilter("year", row)}
+                  />
+                </div>
+              ) : null}
 
               <label className="block">
                 <span className="text-sm font-semibold text-ink-950">Short description</span>
@@ -438,6 +677,12 @@ export function NewProductForm() {
                   className={cn(FIELD_INPUT_CLASS, "min-h-40 resize-y")}
                 />
               </label>
+              <RepeatableStringList
+                label="Features"
+                hint="Short ticks on the product page, e.g. Vegan & Cruelty-free."
+                values={features}
+                onChange={setFeatures}
+              />
             </div>
           </TabsContent>
 
@@ -567,100 +812,6 @@ export function NewProductForm() {
           </div>
         </div>
       </Tabs>
-    </div>
-  );
-}
-
-function CategoryManager({
-  categories,
-  selectedName,
-  onSelect,
-  onCreate,
-  onDelete,
-}: {
-  categories: SellerCategory[];
-  selectedName: string;
-  onSelect: (name: string) => void;
-  onCreate: (name: string) => Promise<void>;
-  onDelete: (category: SellerCategory) => Promise<void>;
-}) {
-  const [draft, setDraft] = useState("");
-  const [creating, setCreating] = useState(false);
-
-  async function submit() {
-    const name = draft.trim();
-    if (!name || creating) return;
-    setCreating(true);
-    try {
-      await onCreate(name);
-      setDraft("");
-    } finally {
-      setCreating(false);
-    }
-  }
-
-  return (
-    <div>
-      <span className="text-sm font-semibold text-ink-950">Categories</span>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Create categories here, then select one to attach to this product.
-      </p>
-      <div className="mt-2 flex gap-2">
-        <input
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              void submit();
-            }
-          }}
-          placeholder="New category name"
-          className={cn(FIELD_INPUT_CLASS, "mt-0")}
-        />
-        <button
-          type="button"
-          disabled={creating || !draft.trim()}
-          onClick={() => void submit()}
-          className="shrink-0 rounded-lg bg-ink-950 px-3 text-sm font-medium text-white hover:bg-ink-800 disabled:opacity-50"
-        >
-          Add
-        </button>
-      </div>
-      {categories.length > 0 ? (
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {categories.map((row) => {
-            const selected = selectedName === row.name;
-            return (
-              <li key={row.id}>
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm",
-                    selected ? "bg-ink-950 text-white" : "bg-muted text-ink-950"
-                  )}
-                >
-                  <button type="button" onClick={() => onSelect(selected ? "" : row.name)}>
-                    {row.name}
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={`Delete ${row.name}`}
-                    onClick={() => void onDelete(row)}
-                    className={selected ? "text-white/70 hover:text-white" : "text-muted-foreground hover:text-ink-950"}
-                  >
-                    <XIcon className="size-3.5" />
-                  </button>
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p className="mt-2 text-sm text-muted-foreground">No categories yet.</p>
-      )}
-      {selectedName ? (
-        <p className="mt-2 text-xs text-muted-foreground">Attached: {selectedName}</p>
-      ) : null}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import type { Product } from "@ansaa/shared/types";
+import type { Product, ProductCondition } from "@ansaa/shared/types";
 
 export const RIDE_TEMPLATE_BASE = "/store/motorbike-template";
 
@@ -10,8 +10,15 @@ export type RideDemoProduct = {
   category: string;
   createdAt: number;
   image: string;
+  gallery?: string[];
   colors: string[];
   rating?: number;
+  features?: string[];
+  tags?: string[];
+  engineSize?: string;
+  condition?: ProductCondition;
+  year?: number;
+  filterColours?: string[];
 };
 
 const IMAGES = {
@@ -37,7 +44,14 @@ export const RIDE_DEMO_VEHICLES: RideDemoProduct[] = [
     category: "Motorbikes",
     createdAt: 4,
     image: IMAGES.motorbike,
+    gallery: [IMAGES.moped, IMAGES.classic],
     colors: ["#111111", "#E8622C"],
+    features: ["Upright seating", "Town and open-road range", "Punchy street engine"],
+    tags: ["Sport", "Commuter"],
+    engineSize: "650cc",
+    condition: "new",
+    year: 2025,
+    filterColours: ["Black", "Orange"],
   },
   {
     id: "demo-bicycle-1",
@@ -48,7 +62,14 @@ export const RIDE_DEMO_VEHICLES: RideDemoProduct[] = [
     category: "Bicycles",
     createdAt: 3,
     image: IMAGES.ebike,
+    gallery: [IMAGES.classic, IMAGES.motorbike],
     colors: ["#111111", "#FFFFFF"],
+    features: ["Removable battery", "Disc brakes", "Composed in traffic"],
+    tags: ["Electric", "Commuter"],
+    engineSize: "Electric",
+    condition: "new",
+    year: 2025,
+    filterColours: ["Black", "White"],
   },
   {
     id: "demo-moped-1",
@@ -59,7 +80,14 @@ export const RIDE_DEMO_VEHICLES: RideDemoProduct[] = [
     category: "Mopeds",
     createdAt: 2,
     image: IMAGES.moped,
+    gallery: [IMAGES.classic, IMAGES.ebike],
     colors: ["#111111", "#ADB5BD"],
+    features: ["Light and easy to park", "Tight-street commuter", "Daily errands"],
+    tags: ["Commuter"],
+    engineSize: "50cc",
+    condition: "used",
+    year: 2023,
+    filterColours: ["Black", "Grey"],
   },
   {
     id: "demo-scooter-1",
@@ -70,7 +98,14 @@ export const RIDE_DEMO_VEHICLES: RideDemoProduct[] = [
     category: "Scooters",
     createdAt: 1,
     image: IMAGES.classic,
+    gallery: [IMAGES.moped, IMAGES.ebike],
     colors: ["#111111", "#FFFFFF"],
+    features: ["Step-through frame", "Under-seat storage", "Easy sit-up ride"],
+    tags: ["Commuter"],
+    engineSize: "125cc",
+    condition: "new",
+    year: 2024,
+    filterColours: ["Black", "White"],
   },
 ];
 
@@ -84,7 +119,13 @@ export const RIDE_DEMO_ACCESSORIES: RideDemoProduct[] = [
     createdAt: 10,
     image: IMAGES.helmet,
     colors: ["#111111", "#3A3A3A"],
+    gallery: [IMAGES.jacket, IMAGES.gopro],
     rating: 5,
+    features: ["Full-face shell", "Wide visor", "Secure daily fit"],
+    tags: ["Gear"],
+    condition: "new",
+    year: 2024,
+    filterColours: ["Black"],
   },
   {
     id: "demo-jacket",
@@ -95,7 +136,13 @@ export const RIDE_DEMO_ACCESSORIES: RideDemoProduct[] = [
     createdAt: 9,
     image: IMAGES.jacket,
     colors: ["#111111", "#FFFFFF", "#C0392B"],
+    gallery: [IMAGES.trousers, IMAGES.gloves],
     rating: 5,
+    features: ["Armor-ready shell", "Weather-ready", "Comfortable on longer rides"],
+    tags: ["Gear"],
+    condition: "new",
+    year: 2024,
+    filterColours: ["Black", "White", "Red"],
   },
   {
     id: "demo-gloves",
@@ -106,7 +153,13 @@ export const RIDE_DEMO_ACCESSORIES: RideDemoProduct[] = [
     createdAt: 8,
     image: IMAGES.gloves,
     colors: ["#111111", "#ADB5BD"],
+    gallery: [IMAGES.jacket, IMAGES.boots],
     rating: 4,
+    features: ["Palm grip", "Knuckle coverage", "All-weather control"],
+    tags: ["Gear"],
+    condition: "new",
+    year: 2023,
+    filterColours: ["Black", "Grey"],
   },
   {
     id: "demo-gopro",
@@ -117,7 +170,13 @@ export const RIDE_DEMO_ACCESSORIES: RideDemoProduct[] = [
     createdAt: 7,
     image: IMAGES.gopro,
     colors: ["#111111", "#3B82F6"],
+    gallery: [IMAGES.helmet, IMAGES.motorbike],
     rating: 5,
+    features: ["Compact action cam", "Street and trail", "Workshop setups"],
+    tags: ["Gear"],
+    condition: "new",
+    year: 2025,
+    filterColours: ["Black"],
   },
   {
     id: "demo-trousers",
@@ -128,7 +187,13 @@ export const RIDE_DEMO_ACCESSORIES: RideDemoProduct[] = [
     createdAt: 6,
     image: IMAGES.trousers,
     colors: ["#111111", "#FFFFFF"],
+    gallery: [IMAGES.jacket, IMAGES.boots],
     rating: 4,
+    features: ["Reinforced panels", "Stretch for commuting", "Armor pockets"],
+    tags: ["Gear"],
+    condition: "used",
+    year: 2022,
+    filterColours: ["Black", "White"],
   },
   {
     id: "demo-boots",
@@ -139,13 +204,41 @@ export const RIDE_DEMO_ACCESSORIES: RideDemoProduct[] = [
     createdAt: 5,
     image: IMAGES.boots,
     colors: ["#111111", "#FFFFFF"],
+    gallery: [IMAGES.trousers, IMAGES.gloves],
     rating: 4,
+    features: ["Ankle support", "Grips wet pavement", "Sturdy touring sole"],
+    tags: ["Gear"],
+    condition: "new",
+    year: 2024,
+    filterColours: ["Black", "White"],
   },
 ];
+
+export const RIDE_DEMO_FILTER_FACETS = {
+  tags: ["Commuter", "Sport", "Adventure", "Electric", "Gear"],
+  engineSizes: ["50cc", "125cc", "250cc", "400cc", "650cc", "Electric"],
+  colours: ["Black", "White", "Orange", "Grey", "Red"],
+  years: [2022, 2023, 2024, 2025, 2026],
+};
 
 export const RIDE_DEMO_PRODUCTS: RideDemoProduct[] = [
   ...RIDE_DEMO_VEHICLES,
   ...RIDE_DEMO_ACCESSORIES,
+];
+
+export const RIDE_DEMO_FAQS = [
+  {
+    question: "Do you deliver bikes assembled?",
+    answer: "Yes. Vehicles arrive inspected and ride-ready. Accessories ship packed for the trip.",
+  },
+  {
+    question: "Can I test ride before buying?",
+    answer: "Book a slot after checkout confirmation. We'll match you to the model you ordered.",
+  },
+  {
+    question: "What's covered on first service?",
+    answer: "First service is included on vehicles. Bring your ANS- order number when you come in.",
+  },
 ];
 
 export function getRideDemoProduct(id: string): RideDemoProduct | undefined {
@@ -166,13 +259,18 @@ export function rideDemoToProduct(item: RideDemoProduct): Product {
     name: item.name,
     description: item.description,
     priceCedis: item.priceCedis,
-    images: item.image ? [item.image] : [],
+    images: [item.image, ...(item.gallery ?? [])].filter(Boolean),
+    features: item.features,
     stockQuantity: 8,
     sku: item.id.replace(/-/g, "").toUpperCase(),
     category: item.category,
     active: true,
     createdAt: item.createdAt,
     colors: item.colors,
+    tags: item.tags,
+    engineSize: item.engineSize,
+    condition: item.condition,
+    year: item.year,
   };
 }
 

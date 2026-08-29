@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ImagePlusIcon, Loader2Icon, XIcon } from "lucide-react";
+import { RepeatableStringList, cleanStringList } from "@/components/dashboard/RepeatableStringList";
+import type { Product, ProductCondition } from "@ansaa/shared/types";
 import { productToInsert } from "@ansaa/shared/mappers";
 import { useSeller } from "@/lib/seller-context";
 import { trackEvent } from "@/lib/vercel-track";
@@ -12,7 +14,6 @@ import {
   validateProductImage,
 } from "@/lib/product-images";
 import { createClient } from "@ansaa/shared/supabase/client";
-import type { Product } from "@ansaa/shared/types";
 
 type ProductFormDialogProps = {
   open: boolean;
@@ -59,12 +60,23 @@ export default function ProductFormDialog({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [slots, setSlots] = useState<ImageSlot[]>(() => slotsFromProduct(product));
+  const [features, setFeatures] = useState<string[]>(() => product?.features ?? [""]);
+  const [tags, setTags] = useState<string[]>(() => product?.tags?.length ? product.tags : [""]);
+  const [engineSize, setEngineSize] = useState(() => product?.engineSize ?? "");
+  const [condition, setCondition] = useState<ProductCondition | "">(() => product?.condition ?? "");
+  const [year, setYear] = useState(() => (product?.year ? String(product.year) : ""));
+  const isRide = seller?.template === "motorbike-template";
   const isEdit = Boolean(product);
   slotsRef.current = slots;
 
   useEffect(() => {
     if (!open) return;
     setError(null);
+    setFeatures(product?.features?.length ? product.features : [""]);
+    setTags(product?.tags?.length ? product.tags : [""]);
+    setEngineSize(product?.engineSize ?? "");
+    setCondition(product?.condition ?? "");
+    setYear(product?.year ? String(product.year) : "");
     setSlots((prev) => {
       for (const slot of prev) revokeIfBlob(slot.previewUrl);
       return slotsFromProduct(product);
@@ -210,6 +222,11 @@ export default function ProductFormDialog({
       }
 
       const images = uploadResults.map((result) => result.url).filter((url): url is string => Boolean(url));
+      const featureList = cleanStringList(features);
+      const tagList = cleanStringList(tags);
+      const yearValue = Number(year.trim());
+      const parsedYear =
+        Number.isInteger(yearValue) && yearValue >= 1900 && yearValue <= 2100 ? yearValue : null;
       const fields = {
         name,
         description,
@@ -219,6 +236,11 @@ export default function ProductFormDialog({
         sku,
         category,
         active,
+        features: featureList,
+        tags: tagList,
+        engine_size: engineSize.trim(),
+        condition: condition || null,
+        year: parsedYear,
       };
 
       if (product) {
@@ -241,6 +263,11 @@ export default function ProductFormDialog({
             category,
             active,
             createdAt: Date.now(),
+            features: featureList,
+            tags: tagList,
+            engineSize: engineSize.trim() || undefined,
+            condition: condition || undefined,
+            year: parsedYear ?? undefined,
           })
         );
         if (insertError) throw insertError;
@@ -300,6 +327,51 @@ export default function ProductFormDialog({
           <Field label="Name" name="name" required defaultValue={product?.name} />
           <Field label="SKU" name="sku" required defaultValue={product?.sku} />
           <Field label="Category" name="category" defaultValue={product?.category} />
+          {isRide ? (
+            <>
+              <RepeatableStringList
+                label="Tags"
+                hint="Shown on Ride search filters."
+                values={tags}
+                onChange={setTags}
+                placeholder="e.g. Commuter"
+                addLabel="Add tag"
+              />
+              <label className="block">
+                <span className="text-sm font-medium text-ink-950">Engine size</span>
+                <input
+                  value={engineSize}
+                  onChange={(event) => setEngineSize(event.target.value)}
+                  placeholder="e.g. 250cc"
+                  className="mt-1.5 w-full rounded-lg border border-black/8 px-4 py-2.5 text-sm outline-none focus:border-brand"
+                />
+              </label>
+              <label className="block">
+                <span className="text-sm font-medium text-ink-950">Condition</span>
+                <select
+                  value={condition}
+                  onChange={(event) =>
+                    setCondition((event.target.value || "") as ProductCondition | "")
+                  }
+                  className="mt-1.5 w-full rounded-lg border border-black/8 px-4 py-2.5 text-sm outline-none focus:border-brand"
+                >
+                  <option value="">Not set</option>
+                  <option value="new">New</option>
+                  <option value="used">Used</option>
+                </select>
+              </label>
+              <label className="block">
+                <span className="text-sm font-medium text-ink-950">Year</span>
+                <input
+                  value={year}
+                  onChange={(event) => setYear(event.target.value)}
+                  inputMode="numeric"
+                  placeholder="2024"
+                  className="mt-1.5 w-full rounded-lg border border-black/8 px-4 py-2.5 text-sm outline-none focus:border-brand"
+                />
+              </label>
+            </>
+          ) : null}
           <div className="grid grid-cols-2 gap-3">
             <Field
               label="Price (GHS)"
@@ -325,6 +397,12 @@ export default function ProductFormDialog({
               className="mt-1.5 w-full rounded-lg border border-black/8 px-4 py-2.5 text-sm outline-none focus:border-brand"
             />
           </label>
+          <RepeatableStringList
+            label="Features"
+            hint="Short ticks on the product page, e.g. Vegan & Cruelty-free."
+            values={features}
+            onChange={setFeatures}
+          />
           <div>
             <span className="text-sm font-medium text-ink-950">Images</span>
             <div className="mt-1.5 grid grid-cols-4 gap-2">

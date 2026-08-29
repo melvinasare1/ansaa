@@ -5,6 +5,7 @@ import { AddToCartButton } from "@/components/store/template-d/AddToCartButton";
 import { StorefrontTracker } from "@/components/store/StorefrontTracker";
 import { formatCedis } from "@/lib/price";
 import { fillFromId, swatchHex } from "@/lib/swatch";
+import { listTemplateDProducts } from "@/components/store/template-d/catalog";
 import type { Product } from "@ansaa/shared/types";
 
 const avatars = [
@@ -59,9 +60,9 @@ function cartImage(product: Product): string {
   return fillFromId(product.id);
 }
 
-export default function TemplateDHome() {
+export default async function TemplateDHome() {
   const base = "/store/template-d";
-  const products: Product[] = [];
+  const products = await listTemplateDProducts();
 
   return (
     <div className="pb-16 pt-6 md:pb-24 md:pt-8">

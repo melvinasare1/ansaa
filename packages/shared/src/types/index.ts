@@ -37,6 +37,11 @@ export function parseStorefrontTemplate(value: unknown): StorefrontTemplate {
     : "template-a";
 }
 
+export type StoreFaq = {
+  question: string;
+  answer: string;
+};
+
 export interface Seller {
   id: string;
   uid: string; // Intended auth uid of the seller who owns this tenant
@@ -61,6 +66,8 @@ export interface Seller {
   hasBusinessRegistration: boolean;
   /** Editable storefront copy and image URLs, keyed by template field keys. */
   storeContent: Record<string, string>;
+  /** Store-wide FAQs reused on every product page. */
+  faqs: StoreFaq[];
 }
 
 /** Templates that show a blog on the storefront and a Blog nav in the dashboard. */
@@ -85,6 +92,8 @@ export interface StoreBlogPost {
   createdAt: number;
   updatedAt: number;
 }
+
+export type ProductCondition = "new" | "used";
 
 export type ProductVariant = {
   id: string;
@@ -119,6 +128,24 @@ export interface Product {
   colors?: string[];
   /** Named options the seller adds (e.g. Color with values Black, White). */
   variants?: ProductVariant[];
+  /** Short strings shown as a tick-list on the product page. */
+  features?: string[];
+  /** Ride / listing filters. */
+  tags?: string[];
+  engineSize?: string;
+  condition?: ProductCondition;
+  year?: number;
+}
+
+export interface ProductReview {
+  id: string;
+  productId: string;
+  sellerId: string;
+  orderId: string;
+  reviewerName: string;
+  rating: number;
+  comment: string;
+  createdAt: number;
 }
 
 export type OrderStatus =

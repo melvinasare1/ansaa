@@ -3,6 +3,7 @@
 import { STOREFRONT_TEMPLATE_OPTIONS } from "@/lib/storefront-templates";
 import { useSeller } from "@/lib/seller-context";
 import { storefrontUrl } from "@/lib/storefront-url";
+import { SettingsFaqs } from "@/components/dashboard/SettingsFaqs";
 import { VerificationUpload } from "./verification-upload";
 
 const templateLabels = Object.fromEntries(
@@ -74,6 +75,8 @@ export default function SettingsPage() {
         </p>
         <VerificationUpload />
       </section>
+
+      <SettingsFaqs />
 
       <section className="mt-6 rounded-xl border border-wire bg-white p-6">
         <h2 className="font-display text-base font-semibold text-ink-950">Returns policy</h2>

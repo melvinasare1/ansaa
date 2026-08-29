@@ -6,6 +6,7 @@ import { ShirtPlaceholder } from "@/components/store/template-a/ShirtPlaceholder
 import { formatCedis } from "@/lib/price";
 import { fillFromId, swatchHex } from "@/lib/swatch";
 import { StorefrontTracker } from "@/components/store/StorefrontTracker";
+import { listTemplateAProducts } from "@/components/store/template-a/catalog";
 import type { Product } from "@ansaa/shared/types";
 
 const ACCENT = "#FF7A1A";
@@ -137,9 +138,9 @@ function FilterSidebar() {
   );
 }
 
-export default function TemplateAHome() {
+export default async function TemplateAHome() {
   const base = "/store/template-a";
-  const products: Product[] = [];
+  const products = await listTemplateAProducts();
   const heroHeadline = FALLBACK_HERO_HEADLINE;
   const heroSubtext = FALLBACK_HERO_SUBTEXT;
   const heroImageUrl = "";

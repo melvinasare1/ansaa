@@ -1,19 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import {
-  getRideDemoProduct,
-  isRideDemoProductId,
-  RIDE_DEMO_MOMO_NUMBER,
-} from "@/components/store/motorbike-template/demo-catalog";
 import type { CartItem } from "@/lib/cart-context";
-import {
-  checkoutItemsPayload,
-  momoDetails,
-  paymentReference,
-  submitCheckout,
-  type CheckoutSuccess,
-} from "@/lib/checkout";
+import type { CheckoutSuccess } from "@/lib/checkout";
+import { checkoutCart } from "@/lib/preview-checkout";
 import { formatCedis } from "@/lib/price";
 import { DEFAULT_STORE_NAME } from "@/lib/store-name";
 
@@ -21,33 +11,6 @@ const ORANGE = "#E8622C";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const fieldClass =
   "mt-1.5 h-11 w-full rounded-lg border border-[#D9D6CE] bg-[#FFFDFA] px-4 text-sm text-[#141414] outline-none placeholder:text-[#141414]/35 focus:border-[#141414]";
-
-function rideDemoCheckout(items: CartItem[]): { ok: true; receipt: CheckoutSuccess } | { ok: false; error: string } {
-  let subtotalCedis = 0;
-  for (const item of items) {
-    const product = getRideDemoProduct(item.productId);
-    if (!product || !Number.isInteger(item.quantity) || item.quantity < 1) {
-      return { ok: false, error: "Your bag has an invalid item. Remove it and try again." };
-    }
-    subtotalCedis += product.priceCedis * item.quantity;
-  }
-
-  const reference = paymentReference();
-  return {
-    ok: true,
-    receipt: {
-      orderId: crypto.randomUUID(),
-      paymentReference: reference,
-      subtotalCedis,
-      momo: momoDetails({
-        businessName: DEFAULT_STORE_NAME,
-        phone: RIDE_DEMO_MOMO_NUMBER,
-        paymentReference: reference,
-        subtotalCedis,
-      }),
-    },
-  };
-}
 
 export function RideCheckoutForm({
   storeSlug,
@@ -98,24 +61,14 @@ export function RideCheckoutForm({
       return;
     }
 
-    const demoCount = items.filter((item) => isRideDemoProductId(item.productId)).length;
-    if (demoCount > 0 && demoCount < items.length) {
-      setError("Your bag has an invalid item. Remove it and try again.");
-      setSubmitting(false);
-      return;
-    }
-
-    const result =
-      demoCount === items.length
-        ? rideDemoCheckout(items)
-        : await submitCheckout({
-            storeSlug,
-            buyerName: buyerNameTrimmed,
-            buyerEmail: buyerEmailTrimmed,
-            buyerPhone: buyerPhoneTrimmed,
-            deliveryAddress: deliveryTrimmed,
-            items: checkoutItemsPayload(items),
-          });
+    const result = await checkoutCart({
+      storeSlug,
+      buyerName: buyerNameTrimmed,
+      buyerEmail: buyerEmailTrimmed,
+      buyerPhone: buyerPhoneTrimmed,
+      deliveryAddress: deliveryTrimmed,
+      items,
+    });
 
     if (!result.ok) {
       setError(result.error);

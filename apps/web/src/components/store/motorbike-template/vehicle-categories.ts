@@ -63,6 +63,42 @@ export function parseSearchSort(value: string | undefined): SearchSort {
   return "newest";
 }
 
+export function parseRepeatParam(value: string | string[] | undefined): string[] {
+  const raw = Array.isArray(value) ? value : value ? [value] : [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const entry of raw) {
+    const name = entry.trim();
+    if (!name) continue;
+    const key = name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(name);
+  }
+  return out;
+}
+
+export function parseConditionParam(value: string | string[] | undefined): Array<"new" | "used"> {
+  const out: Array<"new" | "used"> = [];
+  for (const entry of parseRepeatParam(value)) {
+    const key = entry.toLowerCase();
+    if (key === "new" || key === "used") {
+      if (!out.includes(key)) out.push(key);
+    }
+  }
+  return out;
+}
+
+export function parseYearParam(value: string | string[] | undefined): number[] {
+  const years: number[] = [];
+  for (const entry of parseRepeatParam(value)) {
+    const year = Number(entry);
+    if (!Number.isInteger(year) || years.includes(year)) continue;
+    years.push(year);
+  }
+  return years;
+}
+
 export function parsePriceBound(value: string | undefined): number | null {
   if (value == null || value.trim() === "") return null;
   const amount = Number(value);

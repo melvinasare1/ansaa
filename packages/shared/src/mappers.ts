@@ -7,8 +7,11 @@ import {
   type OrderStatus,
   type PricingTier,
   type Product,
+  type ProductCondition,
+  type ProductReview,
   type ProductVariant,
   type Seller,
+  type StoreFaq,
   type SignupLead,
   type StoreBlogPost,
   type StorefrontEvent,
@@ -114,6 +117,52 @@ function variantsFromUnknown(value: unknown): ProductVariant[] | undefined {
   return items.length ? items : undefined;
 }
 
+export function featuresFromUnknown(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((entry) => String(entry).trim()).filter(Boolean);
+}
+
+function conditionFromUnknown(value: unknown): ProductCondition | undefined {
+  const raw = String(value ?? "").trim().toLowerCase();
+  if (raw === "new" || raw === "used") return raw;
+  return undefined;
+}
+
+function yearFromUnknown(value: unknown): number | undefined {
+  if (value == null || value === "") return undefined;
+  const year = Number(value);
+  if (!Number.isInteger(year) || year < 1900 || year > 2100) return undefined;
+  return year;
+}
+
+export function faqsFromUnknown(value: unknown): StoreFaq[] {
+  if (!Array.isArray(value)) return [];
+  const items: StoreFaq[] = [];
+  for (const entry of value) {
+    const fields = asRecord(entry);
+    const question = String(fields.question ?? "").trim();
+    const answer = String(fields.answer ?? "").trim();
+    if (!question && !answer) continue;
+    items.push({ question, answer });
+  }
+  return items;
+}
+
+export function productReviewFromRow(row: unknown): ProductReview {
+  const fields = asRecord(row);
+  const rating = Number(fields.rating ?? 0);
+  return {
+    id: String(fields.id ?? ""),
+    productId: String(fields.product_id ?? ""),
+    sellerId: String(fields.seller_id ?? ""),
+    orderId: String(fields.order_id ?? ""),
+    reviewerName: String(fields.reviewer_name ?? ""),
+    rating: Number.isInteger(rating) ? rating : 0,
+    comment: String(fields.comment ?? ""),
+    createdAt: epochMs(fields.created_at),
+  };
+}
+
 /** Map a products row (snake_case) to the Product type (camelCase). */
 export function productFromRow(row: unknown): Product {
   const fields = asRecord(row);
@@ -134,6 +183,11 @@ export function productFromRow(row: unknown): Product {
     sizes: optionalStringArray(fields.sizes),
     colors: optionalStringArray(fields.colors),
     variants: variantsFromUnknown(fields.variants),
+    features: featuresFromUnknown(fields.features),
+    tags: featuresFromUnknown(fields.tags),
+    engineSize: String(fields.engine_size ?? "").trim() || undefined,
+    condition: conditionFromUnknown(fields.condition),
+    year: yearFromUnknown(fields.year),
   };
 }
 
@@ -178,6 +232,7 @@ export function sellerFromRow(row: unknown): Seller {
     businessRegistrationUrl: String(fields.business_registration_url ?? "") || undefined,
     hasBusinessRegistration: Boolean(fields.has_business_registration),
     storeContent: parseStorefrontContent(fields.store_content),
+    faqs: faqsFromUnknown(fields.faqs),
   };
 }
 
@@ -306,6 +361,11 @@ export function productToInsert(product: Omit<Product, "id">) {
     sizes: product.sizes ?? [],
     colors: product.colors ?? [],
     variants: product.variants ?? [],
+    features: product.features ?? [],
+    tags: product.tags ?? [],
+    engine_size: product.engineSize ?? "",
+    condition: product.condition ?? null,
+    year: product.year ?? null,
   };
 }
 

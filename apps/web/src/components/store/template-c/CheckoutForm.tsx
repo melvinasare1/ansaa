@@ -2,11 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import type { CartItem } from "@/lib/cart-context";
-import {
-  checkoutItemsPayload,
-  submitCheckout,
-  type CheckoutSuccess,
-} from "@/lib/checkout";
+import type { CheckoutSuccess } from "@/lib/checkout";
+import { checkoutCart } from "@/lib/preview-checkout";
 import { formatCedis } from "@/lib/price";
 
 const fieldClass =
@@ -35,13 +32,13 @@ export function CheckoutForm({
     setSubmitting(true);
     setError(null);
 
-    const result = await submitCheckout({
+    const result = await checkoutCart({
       storeSlug,
       buyerName,
       buyerEmail,
       buyerPhone,
       deliveryAddress,
-      items: checkoutItemsPayload(items),
+      items,
     });
 
     if (!result.ok) {

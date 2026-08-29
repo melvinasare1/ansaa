@@ -4,6 +4,7 @@ import { AddToCartButton } from "@/components/store/template-b/AddToCartButton";
 import { StorefrontTracker } from "@/components/store/StorefrontTracker";
 import { formatCedis } from "@/lib/price";
 import { fillFromId, swatchHex } from "@/lib/swatch";
+import { listTemplateBProducts } from "@/components/store/template-b/catalog";
 import type { Product } from "@ansaa/shared/types";
 
 function cartImage(product: Product): string {
@@ -14,9 +15,9 @@ function cartImage(product: Product): string {
   return fillFromId(product.id);
 }
 
-export default function TemplateBHome() {
+export default async function TemplateBHome() {
   const path = "/store/template-b";
-  const products: Product[] = [];
+  const products = await listTemplateBProducts();
 
   return (
     <div>
@@ -46,7 +47,10 @@ export default function TemplateBHome() {
                 className="border-2 border-[#0B1220] p-3 transition hover:bg-[#0B1220]/5"
               >
                 <Link href={`${path}/product/${product.id}`}>
-                  <div className="relative aspect-square w-full overflow-hidden bg-[#0B1220]/10">
+                  <div
+                    className="relative aspect-square w-full overflow-hidden bg-[#0B1220]/10"
+                    style={photo ? undefined : { backgroundColor: cartImage(product) }}
+                  >
                     {photo ? (
                       <Image
                         src={photo}

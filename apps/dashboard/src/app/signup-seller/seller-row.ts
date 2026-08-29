@@ -27,5 +27,6 @@ export function newSellerInsertRow(input: {
     trialEndsAt: trialEndsAtFromNow(),
     hasBusinessRegistration: false,
     storeContent: {},
+    faqs: [],
   });
 }

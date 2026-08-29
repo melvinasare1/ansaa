@@ -75,6 +75,28 @@ export async function createSellerCategory(
   throw new Error(error?.message ?? "Could not create category.");
 }
 
+export async function renameSellerCategory(
+  supabase: SupabaseClient,
+  sellerId: string,
+  category: SellerCategory,
+  rawName: string
+): Promise<SellerCategory> {
+  const name = rawName.trim();
+  if (!name) throw new Error("Enter a category name.");
+  if (category.id.startsWith("local:")) {
+    return { id: `local:${name}`, name };
+  }
+  const { data, error } = await supabase
+    .from("product_categories")
+    .update({ name })
+    .eq("id", category.id)
+    .eq("seller_id", sellerId)
+    .select("id, name")
+    .single();
+  if (error) throw new Error(error.message);
+  return { id: String(data.id), name: String(data.name) };
+}
+
 export async function deleteSellerCategory(
   supabase: SupabaseClient,
   sellerId: string,

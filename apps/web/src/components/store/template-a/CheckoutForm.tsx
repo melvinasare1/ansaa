@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import type { CartItem } from "@/lib/cart-context";
 import type { CheckoutSuccess } from "@/lib/checkout";
+import { checkoutCart } from "@/lib/preview-checkout";
 import { formatCedis } from "@/lib/price";
 
 const ACCENT = "#FF7A1A";
@@ -32,50 +33,23 @@ export function CheckoutForm({
     setSubmitting(true);
     setError(null);
 
-    try {
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          storeSlug,
-          buyerName,
-          buyerEmail,
-          buyerPhone,
-          deliveryAddress,
-          items: items.map((item) => ({
-            productId: item.productId,
-            name: item.name,
-            quantity: item.quantity,
-            size: item.size,
-            color: item.color,
-          })),
-        }),
-      });
+    const result = await checkoutCart({
+      storeSlug,
+      buyerName,
+      buyerEmail,
+      buyerPhone,
+      deliveryAddress,
+      items,
+    });
 
-      const payload: unknown = await response.json().catch(() => null);
-      const message =
-        payload && typeof payload === "object" && "error" in payload
-          ? String((payload as { error?: unknown }).error ?? "")
-          : "";
-
-      if (!response.ok) {
-        setError(message || "Could not place your order. Please try again.");
-        return;
-      }
-
-      const receipt = payload as CheckoutSuccess;
-      if (!receipt?.orderId || !receipt.paymentReference) {
-        setError("Order was created but the confirmation was incomplete. Check with the seller.");
-        return;
-      }
-
-      onSuccess(receipt);
-    } catch (err) {
-      console.error("Checkout request failed", err);
-      setError("Could not reach checkout. Check your connection and try again.");
-    } finally {
+    if (!result.ok) {
+      setError(result.error);
       setSubmitting(false);
+      return;
     }
+
+    onSuccess(result.receipt);
+    setSubmitting(false);
   }
 
   return (
