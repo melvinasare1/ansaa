@@ -11,14 +11,12 @@ import type { Product } from "@ansaa/shared/types";
 
 export function ProductDetail({
   product,
-  slug,
 }: {
   product: Product;
-  slug: string;
 }) {
   const { addItem } = useCart();
   const router = useRouter();
-  const cartHref = `/store/template-b/${slug}/cart`;
+  const cartHref = "/store/template-b/cart";
   const sizes = product.sizes ?? [];
   const colors = product.colors ?? [];
   const photo = product.images[0];
@@ -131,7 +129,7 @@ export function ProductDetail({
           Add to cart
         </button>
         <p className="mt-3 text-xs text-[#0B1220]/40">
-          Packed and dispatched by Fulfil
+          Packed and dispatched with care
         </p>
       </div>
     </div>

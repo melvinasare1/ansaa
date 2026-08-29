@@ -249,7 +249,7 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
         {mode === "complete" ? "Finish setup" : "Create your store"}
       </p>
       <h1 className="mt-3 font-display text-3xl font-semibold text-ink-950">
-        {mode === "complete" ? "Complete your seller profile" : "Set up your Fulfil store"}
+        {mode === "complete" ? "Complete your seller profile" : "Set up your Ansaa store"}
       </h1>
       <p className="mt-2 max-w-xl text-sm text-ink-700">
         {mode === "complete"
@@ -499,7 +499,7 @@ function BusinessStep({
           ? "That store URL is taken. Try another."
           : slugStatus === "invalid"
             ? "Use letters or numbers."
-            : "Public path on your storefront.";
+            : "Used when we copy this template into your store.";
 
   return (
     <div className="space-y-5 rounded-2xl border border-black/8 bg-white p-6 shadow-card">
@@ -559,7 +559,7 @@ function BusinessStep({
             slugStatus === "taken" || slugStatus === "invalid" ? "text-delta-down" : "text-muted-foreground"
           )}
         >
-          {slugHint} /store/{draft.template}/{draft.storeSlug || "your-store"}
+          {slugHint} {draft.storeSlug || "your-store"}
         </span>
       </label>
 
@@ -703,7 +703,7 @@ function ConfirmStep({
           <Row label="Template" value={templateLabel(draft.template)} />
           <Row label="Business name" value={draft.businessName || "Not set"} />
           <Row label="Product category" value={draft.productCategory || "Not set"} />
-          <Row label="Store URL" value={`/store/${draft.template}/${draft.storeSlug}`} />
+          <Row label="Store URL" value={`/store/${draft.template}`} />
           <Row label="Domain (placeholder)" value={placeholderDomain(draft.storeSlug)} />
           <Row label="Plan" value={planLabel} />
         </dl>

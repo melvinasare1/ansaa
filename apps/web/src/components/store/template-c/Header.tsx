@@ -6,9 +6,9 @@ import { Search, ShoppingBag, User } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { DEFAULT_STORE_NAME } from "@/lib/store-name";
 
-export function Header({ slug }: { slug: string }) {
+export function Header() {
   const pathname = usePathname() ?? "";
-  const base = `/store/template-c/${slug}`;
+  const base = "/store/template-c";
   const onHome = pathname === base || pathname === `${base}/`;
   const { totalItems, hydrated } = useCart();
   const count = hydrated ? totalItems : 0;

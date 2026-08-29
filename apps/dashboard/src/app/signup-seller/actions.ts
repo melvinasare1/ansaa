@@ -228,7 +228,7 @@ export async function completeSellerProfile(
 
     const email = (user.email ?? "").trim().toLowerCase();
     if (!email) {
-      return { error: "This account has no email. Contact Fulfil." };
+      return { error: "This account has no email. Contact Ansaa." };
     }
 
     const inserted = await insertSellerRow(admin, {

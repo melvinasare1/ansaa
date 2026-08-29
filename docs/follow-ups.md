@@ -10,7 +10,7 @@ build an item when its trigger is hit, or when we explicitly decide to.
 ## Before onboarding customer #4 (custom domains)
 
 **Problem:** Sellers currently get a placeholder domain (`{slug}.local`) and a
-path-based storefront URL (`/store/template-a/{slug}`). Real custom domains
+template preview URL (`/store/{template}`). Real custom domains
 (`makeup.com`) need manual setup per seller right now — fine for the first 2–3
 manually onboarded sellers, not fine past that.
 

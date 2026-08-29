@@ -75,14 +75,12 @@ function cartLineId(productId: string, size?: string, color?: string) {
 
 export function ProductDetail({
   product,
-  slug,
 }: {
   product: Product;
-  slug: string;
 }) {
   const { addItem } = useCart();
   const router = useRouter();
-  const cartHref = `/store/template-a/${slug}/cart`;
+  const cartHref = "/store/template-a/cart";
   const sizes = product.sizes ?? [];
   const colors = product.colors ?? [];
 

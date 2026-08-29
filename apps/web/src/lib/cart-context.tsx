@@ -51,9 +51,14 @@ function storageKey(sellerId: string) {
   return `cart:${sellerId}`;
 }
 
+const RESERVED_STORE_SEGMENTS = new Set(["product", "cart", "search", "blog"]);
+
 function sellerIdFromPath(pathname: string): string {
-  const match = pathname.match(/^\/store\/[^/]+\/([^/]+)/);
-  return match?.[1] ?? "";
+  const match = pathname.match(/^\/store\/([^/]+)(?:\/([^/]+))?/);
+  const template = match?.[1] ?? "";
+  const segment = match?.[2] ?? "";
+  if (!segment || RESERVED_STORE_SEGMENTS.has(segment)) return template;
+  return segment;
 }
 
 function isCartItem(value: unknown): value is CartItem {

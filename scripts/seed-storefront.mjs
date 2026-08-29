@@ -6,7 +6,7 @@
  * or a root .env.local):
  *   npm run seed:storefront
  *
- * Then open: http://localhost:3000/store/template-a/styleco
+ * Then open: http://localhost:3000/store/template-a
  *
  * Run supabase/migrations/20260827120000_init.sql first.
  */
@@ -142,5 +142,5 @@ const { error: productError } = await supabase.from("products").upsert(products,
 if (productError) throw productError;
 
 console.log(`Seeded seller "${STORE_SLUG}" (${SELLER_ID}) with ${products.length} products.`);
-console.log(`Visit: http://localhost:3000/store/template-a/${STORE_SLUG}`);
+console.log(`Visit: http://localhost:3000/store/template-a`);
 console.log("Inactive product (should be hidden): 21111111-1111-4111-8111-111111111114");

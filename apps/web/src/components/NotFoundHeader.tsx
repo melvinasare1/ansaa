@@ -13,7 +13,7 @@ export function NotFoundHeader() {
     <header className="border-b border-black/10 bg-white">
       <div className="mx-auto flex max-w-[1170px] items-center gap-4 px-4 py-4 sm:px-6 md:gap-8 md:py-5">
         <Link href="/" className="shrink-0 text-xl font-bold tracking-tight text-black md:text-2xl">
-          Fulfil
+          Ansaa
         </Link>
 
         <nav className="hidden flex-1 items-center justify-center gap-8 text-base text-black lg:flex">

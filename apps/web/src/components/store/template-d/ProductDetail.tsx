@@ -12,14 +12,12 @@ import type { Product } from "@ansaa/shared/types";
 
 export function ProductDetail({
   product,
-  slug,
 }: {
   product: Product;
-  slug: string;
 }) {
   const { addItem } = useCart();
   const router = useRouter();
-  const cartHref = `/store/template-d/${slug}/cart`;
+  const cartHref = "/store/template-d/cart";
   const sizes = product.sizes ?? [];
   const colors = product.colors ?? [];
   const photo = product.images[0];

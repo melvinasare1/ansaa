@@ -37,11 +37,13 @@ snake_case (`seller_id`, `price_cedis`). Mapping happens in `@ansaa/shared/mappe
 
 ## Routing model (important)
 
-Right now storefronts are path-based for local dev:
-`/store/template-a/styleco` or `/store/template-b/makeup` on the **web** app.
+Right now storefronts are path-based template previews on the **web** app:
+`/store/template-a`, `/store/template-b`, `/store/template-c`, `/store/template-d`,
+or `/store/motorbike-template`. Templates are generic — they are not tied to a
+seller. When a client site is needed, copy a template and customize that copy.
 
 In production you want each seller's own domain to serve their storefront directly
-(`makeup.com` → template-a page for slug "makeup"), and the dashboard to live on a
+(`makeup.com` → a copied client site), and the dashboard to live on a
 subdomain (`dashboard.makeup.com`). That's a `middleware.ts` job on each app: read
 the incoming `Host` header, look up which seller/template owns that domain, and
 rewrite the request to the right internal route. Not built yet — see
@@ -62,7 +64,7 @@ rewrite the request to the right internal route. Not built yet — see
    - `SUPABASE_SERVICE_ROLE_KEY` (server-only; Project Settings → API)
 4. `npm run seed:storefront` — optional, seeds the Styleco demo catalog
 5. Run one or both apps (see below)
-6. Open http://localhost:3000/store/template-a/styleco (web)
+6. Open http://localhost:3000/store/template-a (web)
    and http://localhost:3001/login (dashboard)
 
 ## Running apps independently

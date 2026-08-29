@@ -21,10 +21,8 @@ const VISIBLE = 4;
 
 export default function ProductCarousel({
   products,
-  slug,
 }: {
   products: KitchenProduct[];
-  slug: string;
 }) {
   const { addItem } = useCart();
   const [start, setStart] = useState(0);
@@ -60,7 +58,7 @@ export default function ProductCarousel({
         {visible.map((p) => (
           <article key={p.id} className="group">
             <Link
-              href={`/store/template-c/${slug}/product/${p.id}`}
+              href={`/store/template-c/product/${p.id}`}
               className="relative block aspect-[4/5] overflow-hidden bg-[#EDE8DC]"
             >
               <span className="absolute left-3 top-3 z-10 rounded-full bg-[#F5F1E4] px-3 py-1 text-[11px] font-medium text-[#2B4239]">
@@ -86,7 +84,7 @@ export default function ProductCarousel({
                 />
               ))}
             </div>
-            <Link href={`/store/template-c/${slug}/product/${p.id}`}>
+            <Link href={`/store/template-c/product/${p.id}`}>
               <p className="mt-2 text-[15px] font-semibold leading-snug text-[#2B4239]">{p.name}</p>
             </Link>
             <div className="mt-3 flex items-center justify-between gap-3">

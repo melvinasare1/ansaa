@@ -1,2 +1,2 @@
-/** Fallback brand shown in every storefront template until a seller name is wired in. */
+/** Brand shown on storefront templates. Client sites get a custom name later. */
 export const DEFAULT_STORE_NAME = "Store";
