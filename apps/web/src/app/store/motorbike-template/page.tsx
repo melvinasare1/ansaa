@@ -6,10 +6,11 @@ import {
   Bike,
   Calendar,
   ChevronRight,
+  CreditCard,
   Handshake,
   Tag,
-  MessageCircle,
   Shield,
+  Truck,
   User,
   Users,
   Wrench,
@@ -54,7 +55,7 @@ const categories = [
 const trustFeatures = [
   {
     label: "Trusted Brands",
-    body: "Machines and parts from names riders already know — stocked because they last.",
+    body: "Machines and parts from names riders already know, stocked because they last.",
     Icon: Award,
   },
   {
@@ -82,16 +83,16 @@ const valueFeatures = [
     href: "#featured",
   },
   {
-    label: "Amazing Events",
-    body: "Shop rides, demo days, and weekend loops — show up, clip in, ride with the floor.",
-    Icon: Calendar,
-    href: "#blog",
+    label: "Instalment Plans",
+    body: "Pay a deposit and spread the rest over 2-3 months. Get in touch to arrange terms.",
+    Icon: CreditCard,
+    href: "/contact",
   },
   {
-    label: "Human Reviews",
-    body: "Notes from riders who commute, tour, and wrench — not a star average from nowhere.",
-    Icon: MessageCircle,
-    href: "#accessories",
+    label: "Delivery Across Accra",
+    body: "We arrange delivery anywhere in Accra once payment is confirmed.",
+    Icon: Truck,
+    href: "/contact",
   },
 ] as const;
 
@@ -146,7 +147,7 @@ export default async function MotorbikeTemplateHome() {
             Ride Together.
           </h1>
           <p className="mt-6 max-w-[420px] text-[15px] leading-relaxed text-white/70 md:text-[16px]">
-            Motorbikes, bicycles, mopeds, and scooters — chosen for the ride, backed by
+            Motorbikes, bicycles, mopeds, and scooters, chosen for the ride and backed by
             people who know the machines.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-3.5">
@@ -157,12 +158,12 @@ export default async function MotorbikeTemplateHome() {
             >
               Shop Now
             </a>
-            <a
-              href="#about"
+            <Link
+              href={`${base}/contact`}
               className="inline-flex items-center rounded-lg border border-white/90 bg-transparent px-7 py-3 text-sm font-semibold text-white"
             >
-              Learn More
-            </a>
+              Contact Us
+            </Link>
           </div>
           <div className="relative mt-10 w-full md:hidden">
             <Image
@@ -273,13 +274,13 @@ export default async function MotorbikeTemplateHome() {
                 >
                   More Info
                 </Link>
-                <a
-                  href="#shop"
+                <Link
+                  href={`${base}/search?category=motorbikes`}
                   className="inline-flex items-center gap-2 rounded-lg border border-white/90 px-7 py-3 text-sm font-semibold text-white"
                 >
                   View Collections
                   <ArrowRight className="h-4 w-4" strokeWidth={2} />
-                </a>
+                </Link>
               </div>
             </div>
             <Link
@@ -349,13 +350,13 @@ export default async function MotorbikeTemplateHome() {
             ))}
           </div>
           <div className="mt-12 flex justify-center md:mt-14">
-            <a
-              href="#accessories"
-              className="inline-flex items-center rounded-lg border px-10 py-3.5 text-[12px] font-semibold uppercase tracking-[0.16em]"
-              style={{ borderColor: ORANGE, color: ORANGE }}
+            <Link
+              href={`${base}/search?category=accessories`}
+              className="inline-flex items-center rounded-lg px-7 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: ORANGE }}
             >
               View All Accessories
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -376,7 +377,7 @@ export default async function MotorbikeTemplateHome() {
                 </h3>
                 <p className="mt-3 max-w-[280px] text-[14px] leading-relaxed text-[#141414]/50">{body}</p>
                 <a
-                  href={href}
+                  href={href.startsWith("/") ? `${base}${href}` : href}
                   className="mt-6 inline-flex items-center rounded-lg border border-[#141414] px-5 py-2 text-[13px] font-semibold text-[#141414] transition-colors hover:bg-[#141414] hover:text-white"
                 >
                   Learn More
@@ -426,7 +427,7 @@ export default async function MotorbikeTemplateHome() {
                 From {formatCedis(9450)}
               </p>
               <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-white/70 md:text-[15px]">
-                Quiet power for city hops and weekend loops — a removable battery, disc
+                Quiet power for city hops and weekend loops. A removable battery, disc
                 brakes, and a ride that stays composed in traffic.
               </p>
               <Link

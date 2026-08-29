@@ -23,6 +23,17 @@ export const VEHICLE_CATEGORIES = [
 
 export type VehicleCategorySlug = (typeof VEHICLE_CATEGORIES)[number]["slug"];
 
+export const ACCESSORY_CATEGORY_SLUG = "accessories" as const;
+
+export type RideCategorySlug = VehicleCategorySlug | typeof ACCESSORY_CATEGORY_SLUG;
+
+export const SEARCH_CATEGORIES = [
+  ...VEHICLE_CATEGORIES,
+  { slug: ACCESSORY_CATEGORY_SLUG, label: "Accessories" },
+] as const;
+
+const ACCESSORY_PARAM_ALIASES = new Set(["accessories", "accessory", "gear"]);
+
 function normalizeCategoryValue(value: string): string {
   return value.trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
 }
@@ -33,11 +44,15 @@ function categoryKey(value: string): string {
 
 export function parseVehicleCategoryParam(
   value: string | string[] | undefined
-): VehicleCategorySlug[] {
+): RideCategorySlug[] {
   const raw = Array.isArray(value) ? value : value ? [value] : [];
-  const seen = new Set<VehicleCategorySlug>();
+  const seen = new Set<RideCategorySlug>();
   for (const entry of raw) {
     const key = categoryKey(entry);
+    if (ACCESSORY_PARAM_ALIASES.has(key)) {
+      if (!seen.has(ACCESSORY_CATEGORY_SLUG)) seen.add(ACCESSORY_CATEGORY_SLUG);
+      continue;
+    }
     const match = VEHICLE_CATEGORIES.find(
       (category) => category.slug === key || category.aliases.some((alias) => categoryKey(alias) === key)
     );
@@ -48,8 +63,9 @@ export function parseVehicleCategoryParam(
 
 export function productMatchesVehicleCategory(
   productCategory: string,
-  slug: VehicleCategorySlug
+  slug: RideCategorySlug
 ): boolean {
+  if (slug === ACCESSORY_CATEGORY_SLUG) return isAccessoryCategory(productCategory);
   const key = categoryKey(productCategory);
   const category = VEHICLE_CATEGORIES.find((item) => item.slug === slug);
   if (!category || !key) return false;

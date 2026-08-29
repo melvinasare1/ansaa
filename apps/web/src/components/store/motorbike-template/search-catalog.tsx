@@ -9,7 +9,7 @@ import {
 } from "@/components/store/motorbike-template/search-filters";
 import { RideProductCard } from "@/components/store/motorbike-template/product-card";
 import {
-  VEHICLE_CATEGORIES,
+  SEARCH_CATEGORIES,
   parseConditionParam,
   parsePriceBound,
   parseRepeatParam,
@@ -17,8 +17,8 @@ import {
   parseVehicleCategoryParam,
   parseYearParam,
   productMatchesVehicleCategory,
+  type RideCategorySlug,
   type SearchSort,
-  type VehicleCategorySlug,
 } from "@/components/store/motorbike-template/vehicle-categories";
 
 const ORANGE = "#E8622C";
@@ -144,7 +144,7 @@ export function RideSearchCatalog({
     [pathname, router, searchParams]
   );
 
-  const toggleCategory = (slug: VehicleCategorySlug) => {
+  const toggleCategory = (slug: RideCategorySlug) => {
     replaceParams((params) => {
       const next = parseVehicleCategoryParam(params.getAll("category"));
       const updated = next.includes(slug)
@@ -365,7 +365,7 @@ export function RideSearchCatalog({
           <fieldset className="mt-7">
             <legend className="text-[13px] font-semibold text-[#141414]">Category</legend>
             <div className="mt-3 flex flex-wrap gap-2">
-              {VEHICLE_CATEGORIES.map((category) => (
+              {SEARCH_CATEGORIES.map((category) => (
                 <Chip
                   key={category.slug}
                   label={category.label}

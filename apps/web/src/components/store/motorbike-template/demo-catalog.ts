@@ -57,7 +57,7 @@ export const RIDE_DEMO_VEHICLES: RideDemoProduct[] = [
     id: "demo-bicycle-1",
     name: "City E-Bike",
     description:
-      "Quiet power for city hops and weekend loops — a removable battery, disc brakes, and a ride that stays composed in traffic.",
+      "Quiet power for city hops and weekend loops. A removable battery, disc brakes, and a ride that stays composed in traffic.",
     priceCedis: 9450,
     category: "Bicycles",
     createdAt: 3,
@@ -75,7 +75,7 @@ export const RIDE_DEMO_VEHICLES: RideDemoProduct[] = [
     id: "demo-moped-1",
     name: "Urban Moped",
     description:
-      "A compact commuter for short trips and tight streets — light, easy to park, and ready for daily errands.",
+      "A compact commuter for short trips and tight streets. Light, easy to park, and ready for daily errands.",
     priceCedis: 6200,
     category: "Mopeds",
     createdAt: 2,
@@ -93,7 +93,7 @@ export const RIDE_DEMO_VEHICLES: RideDemoProduct[] = [
     id: "demo-scooter-1",
     name: "Classic Scooter",
     description:
-      "A simple, stylish scooter for neighborhood runs — step-through frame, under-seat storage, and an easy sit-up ride.",
+      "A simple, stylish scooter for neighborhood runs, with a step-through frame, under-seat storage, and an easy sit-up ride.",
     priceCedis: 4800,
     category: "Scooters",
     createdAt: 1,

@@ -3,7 +3,7 @@
 // near-black / cream / orange.
 import Link from "next/link";
 import { Outfit, Public_Sans } from "next/font/google";
-import { ArrowRight, Facebook, Instagram, Linkedin, Search, Twitter, User } from "lucide-react";
+import { ArrowRight, Facebook, Instagram, Linkedin, Search, Twitter } from "lucide-react";
 import { RideCartLink } from "@/components/store/motorbike-template/cart-link";
 import { RideMobileNav } from "@/components/store/motorbike-template/mobile-nav";
 import { DEFAULT_STORE_NAME } from "@/lib/store-name";
@@ -20,12 +20,11 @@ const body = Public_Sans({
   weight: ["400", "500", "600"],
 });
 
+// Header only: Shop + Contact Us. Parts / About / Service sections stay on the
+// homepage for now, but are not linked from the top nav.
 const navLinks = [
   { label: "Shop", href: "/search" },
-  { label: "Parts", href: "#accessories" },
-  { label: "About Us", href: "#about" },
-  { label: "Service & Repair", href: "#service" },
-  { label: "Contact Us", href: "#contact" },
+  { label: "Contact Us", href: "/contact" },
 ] as const;
 
 const footerLinkGroups = [
@@ -36,40 +35,7 @@ const footerLinkGroups = [
       { label: "Bicycles", href: "/search?category=bicycles" },
       { label: "Mopeds", href: "/search?category=mopeds" },
       { label: "Scooters", href: "/search?category=scooters" },
-      { label: "Accessories", href: "#accessories" },
-    ],
-  },
-  {
-    heading: "Support",
-    id: "service",
-    links: [
-      { label: "FAQ", href: "#contact" },
-      { label: "Returns", href: "#contact" },
-      { label: "Warranty", href: "#service" },
-      { label: "Shipping", href: "#contact" },
-      { label: "Service & Repair", href: "#service" },
-      { label: "Contact Us", href: "#contact" },
-    ],
-  },
-  {
-    heading: "Resources",
-    links: [
-      { label: "Blog", href: "#blog" },
-      { label: "Community", href: "#blog" },
-      { label: "Bike Maintenance", href: "#service" },
-      { label: "Trail Guides", href: "#blog" },
-      { label: "Ride With Us", href: "#blog" },
-    ],
-  },
-  {
-    heading: "About",
-    id: "about",
-    links: [
-      { label: "Our Story", href: "#about" },
-      { label: "Sustainability", href: "#about" },
-      { label: "Careers", href: "#about" },
-      { label: "Press", href: "#about" },
-      { label: "Our Dealers", href: "#contact" },
+      { label: "Accessories", href: "/search?category=accessories" },
     ],
   },
 ] as const;
@@ -137,9 +103,6 @@ export default function MotorbikeTemplateLayout({
             <Link href={`${base}/search`} aria-label="Search" className="p-1 text-white">
               <Search className="h-5 w-5" strokeWidth={1.5} />
             </Link>
-            <button type="button" aria-label="Account" className="p-1 text-white">
-              <User className="h-5 w-5" strokeWidth={1.5} />
-            </button>
             <RideCartLink />
             <RideMobileNav links={headerNav} />
           </div>
@@ -150,8 +113,8 @@ export default function MotorbikeTemplateLayout({
 
       <footer className="bg-[#141414] text-white">
         <div className="mx-auto max-w-[1400px] px-6 pt-16 pb-8 md:px-10 md:pt-20">
-          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.45fr_repeat(4,minmax(0,1fr))] lg:gap-10">
-            <div id="contact" className="sm:col-span-2 lg:col-span-1">
+          <div className="flex flex-col gap-12 sm:flex-row sm:items-start sm:gap-16 lg:gap-24">
+            <div id="contact" className="max-w-md">
               <Link href={base} className="inline-flex items-center gap-2.5 text-white">
                 <BikeMark className="h-[18px] w-[30px]" />
                 <span
@@ -162,7 +125,7 @@ export default function MotorbikeTemplateLayout({
                 </span>
               </Link>
               <p className="mt-4 max-w-sm text-[13px] leading-relaxed text-white/45">
-                Motorbikes, bicycles, mopeds, and scooters — sold, fitted, and serviced by
+                Motorbikes, bicycles, mopeds, and scooters, sold, fitted, and serviced by
                 people who ride.
               </p>
               <p
@@ -212,7 +175,7 @@ export default function MotorbikeTemplateLayout({
             </div>
 
             {footerLinkGroups.map((group) => (
-              <div key={group.heading} id={"id" in group ? group.id : undefined}>
+              <div key={group.heading} className="lg:w-44 lg:shrink-0">
                 <p
                   className="text-[14px] font-semibold text-white"
                   style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}

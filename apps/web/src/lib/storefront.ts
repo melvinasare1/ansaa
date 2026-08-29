@@ -7,6 +7,7 @@ export type StorefrontSeller = {
   id: string;
   storeSlug: string;
   businessName: string;
+  phone: string;
   storeContent: StorefrontContent;
   faqs: StoreFaq[];
 };
@@ -19,7 +20,7 @@ export async function getSellerByStoreSlug(
 
   const { data, error } = await supabase
     .from("sellers")
-    .select("id, store_slug, business_name, store_content, faqs")
+    .select("id, store_slug, business_name, phone, store_content, faqs")
     .eq("store_slug", slug)
     .maybeSingle();
 
@@ -34,6 +35,7 @@ export async function getSellerByStoreSlug(
     id: seller.id,
     storeSlug: seller.storeSlug,
     businessName: seller.businessName,
+    phone: seller.phone,
     storeContent: seller.storeContent,
     faqs: seller.faqs,
   };
