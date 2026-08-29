@@ -1,5 +1,7 @@
 import { Check } from "lucide-react";
+import Link from "next/link";
 import { sellerOnboardingHref } from "@/components/marketing/nav";
+import { RIDE_TEMPLATE_BASE } from "@/components/store/motorbike-template/demo-catalog";
 
 const steps = [
   {
@@ -52,6 +54,7 @@ const templates = [
   {
     name: "Homedine",
     description: "Warm editorial layout, for home and kitchen goods.",
+    href: "/store/template-c",
   },
   {
     name: "Stylehive",
@@ -64,6 +67,7 @@ const templates = [
   {
     name: "Ride",
     description: "Dark vehicle-retail layout, for motorbikes, bicycles, mopeds, and scooters.",
+    href: RIDE_TEMPLATE_BASE,
   },
 ];
 
@@ -211,12 +215,21 @@ export default function LandingPage() {
               <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-700">
                 {template.description}
               </p>
-              <button
-                type="button"
-                className="mt-5 self-start rounded-full border border-navy px-4 py-1.5 text-sm font-medium text-navy transition hover:bg-navy hover:text-white"
-              >
-                Preview
-              </button>
+              {template.href ? (
+                <Link
+                  href={template.href}
+                  className="mt-5 self-start rounded-full border border-navy px-4 py-1.5 text-sm font-medium text-navy transition hover:bg-navy hover:text-white"
+                >
+                  Preview
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className="mt-5 self-start rounded-full border border-navy px-4 py-1.5 text-sm font-medium text-navy transition hover:bg-navy hover:text-white"
+                >
+                  Preview
+                </button>
+              )}
             </article>
           ))}
         </div>
