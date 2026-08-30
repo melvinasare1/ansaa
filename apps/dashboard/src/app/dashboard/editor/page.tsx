@@ -11,7 +11,7 @@ export default async function EditorPage() {
   const initialContent = { ...(seller?.storeContent ?? {}), ...stored };
 
   return (
-    <div className="max-w-2xl px-4 py-4 md:py-6 lg:px-6">
+    <div className="max-w-3xl px-4 py-4 md:py-6 lg:px-6">
       <p className="text-sm text-ink-700/50">
         Edit the text and images on your shop. Changes go live on your storefront when you save.
       </p>

@@ -1,10 +1,12 @@
 import { createClient } from "@ansaa/shared/supabase/server";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
-import type { Product, StoreFaq } from "@ansaa/shared/types";
+import type { Product, StoreBlogPost, StoreFaq } from "@ansaa/shared/types";
 import {
   getActiveProductsForSeller,
+  getPublishedBlogPosts,
   getSellerByStoreSlug,
   getStorefrontProduct,
+  type StorefrontSeller,
 } from "@/lib/storefront";
 
 export function liveStoreSlug(): string {
@@ -39,6 +41,17 @@ export async function getLiveProduct(productId: string): Promise<Product | null>
 export async function getLiveSellerFaqs(): Promise<StoreFaq[]> {
   const ctx = await liveSeller();
   return ctx?.seller.faqs ?? [];
+}
+
+export async function getLiveStorefrontSeller(): Promise<StorefrontSeller | null> {
+  const ctx = await liveSeller();
+  return ctx?.seller ?? null;
+}
+
+export async function getLivePublishedBlogPosts(limit = 3): Promise<StoreBlogPost[]> {
+  const ctx = await liveSeller();
+  if (!ctx) return [];
+  return getPublishedBlogPosts(ctx.supabase, ctx.seller.id, limit);
 }
 
 export type RideFilterFacets = {

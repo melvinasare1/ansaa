@@ -7,6 +7,8 @@ import { PdpFaqs } from "@/components/store/pdp/PdpFaqs";
 import { PdpGallery, PdpQuantity, productFeatures } from "@/components/store/pdp/PdpGallery";
 import { PdpReviews } from "@/components/store/pdp/PdpReviews";
 import { HOMEDINE_CHROME } from "@/components/store/pdp/chrome";
+import { useCartFeedback } from "@/components/store/kitchenware-template/CartFeedback";
+import { KITCHENWARE_TEMPLATE_BASE } from "@/components/store/kitchenware-template/demo-catalog";
 import { useCart } from "@/lib/cart-context";
 import { cartLineId } from "@/lib/checkout";
 import { formatCedis } from "@/lib/price";
@@ -25,8 +27,10 @@ export function ProductDetail({
   children?: ReactNode;
 }) {
   const { addItem } = useCart();
+  const feedback = useCartFeedback();
   const router = useRouter();
-  const cartHref = "/store/template-c/cart";
+  const cartHref = `${KITCHENWARE_TEMPLATE_BASE}/cart`;
+  const [added, setAdded] = useState(false);
   const sizes = product.sizes ?? [];
   const colors = product.colors ?? [];
   const features = productFeatures(product);
@@ -35,6 +39,7 @@ export function ProductDetail({
   const [quantity, setQuantity] = useState(1);
 
   function handleAdd() {
+    if (added) return;
     const size = selectedSize || undefined;
     const color = selectedColor || undefined;
     const variantLabel = [size, color].filter(Boolean).join(" / ");
@@ -50,7 +55,9 @@ export function ProductDetail({
       color,
       quantity: qty,
     });
-    router.push(cartHref);
+    feedback?.notifyAdded();
+    setAdded(true);
+    window.setTimeout(() => router.push(cartHref), 700);
   }
 
   return (
@@ -157,7 +164,7 @@ export function ProductDetail({
             onClick={handleAdd}
             className="mt-10 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#2B4239] text-sm font-medium text-[#F5F1E4] transition hover:opacity-90"
           >
-            Add to cart
+            {added ? "Added" : "Add to cart"}
           </button>
         </div>
       </div>

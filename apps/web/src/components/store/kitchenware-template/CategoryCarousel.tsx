@@ -1,12 +1,16 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
+import { KITCHENWARE_TEMPLATE_BASE } from "@/components/store/kitchenware-template/demo-catalog";
 
 export type KitchenCategory = {
   id: string;
   name: string;
+  /** Real `products.category` value used as `?category=` on search. */
+  category: string;
   image: string;
   imageAlt: string;
 };
@@ -61,12 +65,12 @@ export default function CategoryCarousel({ categories }: { categories: KitchenCa
               >
                 Explore <em className="italic">{c.name}</em>
               </p>
-              <a
-                href="#shop"
+              <Link
+                href={`${KITCHENWARE_TEMPLATE_BASE}/search?category=${encodeURIComponent(c.category)}`}
                 className="mt-3 inline-flex rounded-full bg-[#F5F1E4] px-5 py-1.5 text-[12px] font-medium text-[#2B4239]"
               >
                 Shop
-              </a>
+              </Link>
             </div>
           </article>
         ))}

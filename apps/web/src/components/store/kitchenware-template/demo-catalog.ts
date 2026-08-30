@@ -1,6 +1,8 @@
 import type { Product } from "@ansaa/shared/types";
 
-export type TemplateCDemoProduct = {
+export const KITCHENWARE_TEMPLATE_BASE = "/store/kitchenware-template";
+
+export type KitchenwareDemoProduct = {
   id: string;
   name: string;
   description: string;
@@ -13,7 +15,7 @@ export type TemplateCDemoProduct = {
   features?: string[];
 };
 
-export const TEMPLATE_C_DEMO_PRODUCTS: TemplateCDemoProduct[] = [
+export const KITCHENWARE_DEMO_PRODUCTS: KitchenwareDemoProduct[] = [
   {
     id: "demo-stoneware-mug",
     name: "CupEco Stoneware Mug",
@@ -88,7 +90,7 @@ export const TEMPLATE_C_DEMO_PRODUCTS: TemplateCDemoProduct[] = [
   },
 ];
 
-export const TEMPLATE_C_DEMO_FAQS = [
+export const KITCHENWARE_DEMO_FAQS = [
   {
     question: "Are the pieces dishwasher safe?",
     answer: "Stoneware and glass can go on the top rack. Wooden boards and utensils should be hand-washed and oiled.",
@@ -103,11 +105,11 @@ export const TEMPLATE_C_DEMO_FAQS = [
   },
 ];
 
-export function getTemplateCDemoProduct(id: string): TemplateCDemoProduct | undefined {
-  return TEMPLATE_C_DEMO_PRODUCTS.find((item) => item.id === id);
+export function getKitchenwareDemoProduct(id: string): KitchenwareDemoProduct | undefined {
+  return KITCHENWARE_DEMO_PRODUCTS.find((item) => item.id === id);
 }
 
-export function templateCDemoToProduct(item: TemplateCDemoProduct): Product {
+export function kitchenwareDemoToProduct(item: KitchenwareDemoProduct): Product {
   return {
     id: item.id,
     sellerId: "demo",

@@ -1,44 +1,61 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, Github, Globe, Instagram, Leaf, Linkedin, Quote, Sprout, Twitter } from "lucide-react";
-import ProductCarousel from "@/components/store/template-c/ProductCarousel";
-import { listTemplateCCarousel } from "@/components/store/template-c/catalog";
+import ProductCarousel from "@/components/store/kitchenware-template/ProductCarousel";
+import { listKitchenwareCarousel } from "@/components/store/kitchenware-template/catalog";
 import CategoryCarousel, {
   type KitchenCategory,
-} from "@/components/store/template-c/CategoryCarousel";
+} from "@/components/store/kitchenware-template/CategoryCarousel";
+import { KITCHENWARE_TEMPLATE_BASE } from "@/components/store/kitchenware-template/demo-catalog";
 import GalleryCarousel, {
   type GalleryPiece,
-} from "@/components/store/template-c/GalleryCarousel";
+} from "@/components/store/kitchenware-template/GalleryCarousel";
 import { StorefrontTracker } from "@/components/store/StorefrontTracker";
 import { DEFAULT_STORE_NAME } from "@/lib/store-name";
 
+const searchHref = (category?: string) =>
+  category
+    ? `${KITCHENWARE_TEMPLATE_BASE}/search?category=${encodeURIComponent(category)}`
+    : `${KITCHENWARE_TEMPLATE_BASE}/search`;
+
+/**
+ * Display names are brand-style homepage copy. `category` is the real
+ * `products.category` value used by search (`?category=`).
+ * Slugs: Drinkware, Cookware, Tools (Utensils pill), Serve (Serveware pill).
+ */
 const mockCategories: KitchenCategory[] = [
   {
     id: "c1",
     name: "CupEco",
+    category: "Drinkware",
     image: "/template-c/cups.jpg",
     imageAlt: "Stacked ceramic cups",
   },
   {
     id: "c2",
     name: "EcoSpoonery",
-    image: "/template-c/pots.jpg",
+    category: "Tools",
+    image: "/template-c/utensils.jpg",
     imageAlt: "Wooden spoons and utensils",
   },
   {
     id: "c3",
     name: "NatureSip",
+    category: "Drinkware",
     image: "/template-c/bottle.jpg",
     imageAlt: "Glass drinkware",
   },
   {
     id: "c4",
     name: "FreshPitcher",
+    category: "Serve",
     image: "/template-c/kettle.jpg",
     imageAlt: "Ceramic pitcher",
   },
   {
     id: "c5",
     name: "GroveBoard",
+    category: "Serve",
     image: "/template-c/bowls.jpg",
     imageAlt: "Wooden serving boards",
   },
@@ -74,12 +91,12 @@ const mockReviews = [
   },
 ];
 
-export default async function TemplateCHome() {
-  const products = await listTemplateCCarousel();
+export default async function KitchenwareTemplateHome() {
+  const products = await listKitchenwareCarousel();
 
   return (
     <div>
-      <StorefrontTracker storeSlug="template-c" path="/store/template-c" />
+      <StorefrontTracker storeSlug="kitchenware-template" path={KITCHENWARE_TEMPLATE_BASE} />
       <section className="relative min-h-[92vh] overflow-hidden bg-[#1F3830]">
         {/* Template photography — replace with the client's kitchen shots when
             copying this template into a client site. */}
@@ -92,7 +109,7 @@ export default async function TemplateCHome() {
           className="object-cover object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#142822]/55 via-[#142822]/25 to-transparent" />
-        <div className="relative mx-auto flex min-h-[92vh] max-w-[1400px] flex-col justify-center px-6 pb-24 pt-28 md:px-10">
+        <div className="relative mx-auto flex min-h-[92vh] max-w-[1400px] flex-col justify-center px-6 pb-24 pt-16 md:px-10">
           <h1
             className="max-w-xl text-[48px] font-medium leading-[1.08] text-white md:text-[64px]"
             style={{ fontFamily: "var(--font-homedine-serif), ui-serif, Georgia" }}
@@ -106,13 +123,13 @@ export default async function TemplateCHome() {
             Thoughtfully made tools for everyday cooking — durable materials, low-waste
             design, and pieces you&apos;ll keep for years, not a single season.
           </p>
-          <a
-            href="#shop"
+          <Link
+            href={searchHref()}
             className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-[#F5F1E4] px-6 py-2.5 text-sm font-medium text-[#2B4239]"
           >
             Shop now
             <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
-          </a>
+          </Link>
         </div>
 
         <aside className="absolute bottom-8 right-6 z-10 w-[200px] rounded-md bg-[#2B4239]/55 px-4 py-3 text-white backdrop-blur-sm md:right-10">
@@ -149,13 +166,13 @@ export default async function TemplateCHome() {
                 <span className="font-semibold">Products</span>
               </h2>
             </div>
-            <a
-              href="/store/template-c#shop"
+            <Link
+              href={searchHref()}
               className="mb-1 inline-flex items-center gap-1.5 text-sm text-[#2B4239]"
             >
               More products
               <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
-            </a>
+            </Link>
           </div>
 
           {products.length === 0 ? (
@@ -236,7 +253,7 @@ export default async function TemplateCHome() {
         </div>
       </section>
 
-      <section id="bestsellers" className="bg-white pt-16 md:pt-24">
+      <section id="bestsellers" className="scroll-mt-24 bg-white pt-16 md:pt-24">
         <div className="mx-auto grid max-w-[1400px] items-start gap-10 px-6 md:grid-cols-2 md:gap-16 md:px-10">
           <div className="md:pt-6">
             <h2 className="text-[40px] font-medium leading-none text-[#2B4239] md:text-[52px]">
@@ -253,13 +270,13 @@ export default async function TemplateCHome() {
               actually seals, and a pot handsome enough to go from hob to table without a
               second dish.
             </p>
-            <a
-              href="#shop"
+            <Link
+              href={searchHref()}
               className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-[#2B4239] px-5 py-2 text-sm font-medium text-[#F5F1E4]"
             >
               Shop now
               <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
-            </a>
+            </Link>
           </div>
           <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-[#EDE8DC]">
             <Image
@@ -298,18 +315,18 @@ export default async function TemplateCHome() {
               A quieter cooker for slower evenings: recycled steel, a matte forest finish,
               and a footprint that leaves room on the counter for the rest of dinner.
             </p>
-            <a
-              href="#shop"
+            <Link
+              href={searchHref()}
               className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-[#2B4239] px-5 py-2 text-sm font-medium text-[#F5F1E4]"
             >
               Shop now
               <ArrowRight className="h-4 w-4" strokeWidth={1.75} />
-            </a>
+            </Link>
           </div>
         </div>
       </section>
 
-      <section id="gallery" className="bg-white py-16 md:py-24">
+      <section id="gallery" className="scroll-mt-24 bg-white py-16 md:py-24">
         <div className="mx-auto max-w-[1400px] px-6 md:px-10">
           <GalleryCarousel pieces={mockGallery} />
         </div>
@@ -344,7 +361,7 @@ export default async function TemplateCHome() {
         </div>
       </section>
 
-      <section id="about" className="bg-white py-16 md:py-24">
+      <section id="about" className="scroll-mt-24 bg-white py-16 md:py-24">
         <div className="relative mx-auto mb-14 h-[280px] max-w-3xl md:h-[340px]">
           <div className="absolute left-[4%] top-6 w-[38%] overflow-hidden rounded-2xl md:w-[34%]">
             <div className="relative aspect-[4/5]">
@@ -409,19 +426,19 @@ export default async function TemplateCHome() {
                 {DEFAULT_STORE_NAME} makes planet-kind kitchenware for everyday cooking — durable pieces that
                 are easier to keep, share, and cook with for years, not a single season.
               </p>
-              <div className="mt-5 flex items-center gap-4 text-[#2B4239]">
-                <a href="#" aria-label="X">
+              <div className="mt-5 flex items-center gap-4 text-[#2B4239]/35" title="Social profiles are not configured on this template">
+                <span aria-hidden>
                   <Twitter className="h-4 w-4" strokeWidth={1.6} />
-                </a>
-                <a href="#" aria-label="Instagram">
+                </span>
+                <span aria-hidden>
                   <Instagram className="h-4 w-4" strokeWidth={1.6} />
-                </a>
-                <a href="#" aria-label="LinkedIn">
+                </span>
+                <span aria-hidden>
                   <Linkedin className="h-4 w-4" strokeWidth={1.6} />
-                </a>
-                <a href="#" aria-label="GitHub">
+                </span>
+                <span aria-hidden>
                   <Github className="h-4 w-4" strokeWidth={1.6} />
-                </a>
+                </span>
               </div>
             </div>
 
@@ -429,16 +446,16 @@ export default async function TemplateCHome() {
               <p className="text-sm font-semibold text-[#2B4239]">Shop</p>
               <ul className="mt-4 space-y-2.5 text-sm text-[#2B4239]/65">
                 <li>
-                  <a href="#shop">Drinkware</a>
+                  <Link href={searchHref("Drinkware")}>Drinkware</Link>
                 </li>
                 <li>
-                  <a href="#shop">Cookware</a>
+                  <Link href={searchHref("Cookware")}>Cookware</Link>
                 </li>
                 <li>
-                  <a href="#shop">Utensils</a>
+                  <Link href={searchHref("Tools")}>Utensils</Link>
                 </li>
                 <li>
-                  <a href="#shop">Serveware</a>
+                  <Link href={searchHref("Serve")}>Serveware</Link>
                 </li>
               </ul>
             </div>
@@ -446,16 +463,16 @@ export default async function TemplateCHome() {
               <p className="text-sm font-semibold text-[#2B4239]">Explore</p>
               <ul className="mt-4 space-y-2.5 text-sm text-[#2B4239]/65">
                 <li>
-                  <a href="#bestsellers">Bestsellers</a>
+                  <Link href={`${KITCHENWARE_TEMPLATE_BASE}#bestsellers`}>Bestsellers</Link>
                 </li>
                 <li>
-                  <a href="#gallery">Gallery</a>
+                  <Link href={`${KITCHENWARE_TEMPLATE_BASE}#gallery`}>Gallery</Link>
                 </li>
                 <li>
-                  <a href="#about">Our story</a>
+                  <Link href={`${KITCHENWARE_TEMPLATE_BASE}#about`}>Our story</Link>
                 </li>
                 <li>
-                  <a href="#shop">New arrivals</a>
+                  <Link href={searchHref()}>New arrivals</Link>
                 </li>
               </ul>
             </div>
@@ -463,16 +480,22 @@ export default async function TemplateCHome() {
               <p className="text-sm font-semibold text-[#2B4239]">Company</p>
               <ul className="mt-4 space-y-2.5 text-sm text-[#2B4239]/65">
                 <li>
-                  <a href="#about">About</a>
+                  <Link href={`${KITCHENWARE_TEMPLATE_BASE}#about`}>About</Link>
                 </li>
                 <li>
-                  <a href="#">Careers</a>
+                  <span className="cursor-default text-[#2B4239]/40" title="No careers page yet">
+                    Careers
+                  </span>
                 </li>
                 <li>
-                  <a href="#">Contact</a>
+                  <span className="cursor-default text-[#2B4239]/40" title="No contact page yet">
+                    Contact
+                  </span>
                 </li>
                 <li>
-                  <a href="#">Partners</a>
+                  <span className="cursor-default text-[#2B4239]/40" title="No partners page yet">
+                    Partners
+                  </span>
                 </li>
               </ul>
             </div>
@@ -480,16 +503,16 @@ export default async function TemplateCHome() {
 
           <div className="mt-12 flex flex-col gap-4 border-t border-[#2B4239]/12 pt-6 text-sm text-[#2B4239]/55 md:flex-row md:items-center md:justify-between">
             <p>© 2026 {DEFAULT_STORE_NAME}. All rights reserved.</p>
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              <a href="#" className="underline underline-offset-4">
+            <div className="flex flex-wrap gap-x-6 gap-y-2 text-[#2B4239]/40">
+              <span className="underline underline-offset-4" title="No privacy policy page yet">
                 Privacy Policy
-              </a>
-              <a href="#" className="underline underline-offset-4">
+              </span>
+              <span className="underline underline-offset-4" title="No terms page yet">
                 Terms of Service
-              </a>
-              <a href="#" className="underline underline-offset-4">
+              </span>
+              <span className="underline underline-offset-4" title="No cookie settings yet">
                 Cookies Settings
-              </a>
+              </span>
             </div>
           </div>
         </div>

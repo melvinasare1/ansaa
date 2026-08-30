@@ -1,11 +1,12 @@
 import { parseStorefrontContent } from "./storefront-content-schema";
 import {
+  parsePricingTier,
+  parseSellerStatus,
   parseStorefrontTemplate,
   type Customer,
   type Order,
   type OrderItem,
   type OrderStatus,
-  type PricingTier,
   type Product,
   type ProductCondition,
   type ProductReview,
@@ -29,17 +30,6 @@ const ORDER_STATUSES: OrderStatus[] = [
   "cancelled",
   "refunded",
 ];
-
-/** Postgres CHECK still allows only early_bird | standard. */
-const PRICING_TIER_TO_COLUMN: Record<PricingTier, "early_bird" | "standard"> = {
-  website_admin: "early_bird",
-  fulfilment: "standard",
-};
-
-function pricingTierFromColumn(value: unknown): PricingTier {
-  if (value === "fulfilment" || value === "standard") return "fulfilment";
-  return "website_admin";
-}
 
 function optionalStringArray(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
@@ -201,7 +191,7 @@ export function sellerToInsert(seller: Omit<Seller, "createdAt"> & { createdAt?:
     template: seller.template,
     email: seller.email,
     phone: seller.phone,
-    pricing_tier: PRICING_TIER_TO_COLUMN[seller.pricingTier] ?? "early_bird",
+    pricing_tier: seller.pricingTier,
     base_fee_cedis: seller.baseFeeCedis,
     status: seller.status,
     created_at: new Date(seller.createdAt ?? Date.now()).toISOString(),
@@ -221,9 +211,9 @@ export function sellerFromRow(row: unknown): Seller {
     template: parseStorefrontTemplate(fields.template),
     email: String(fields.email ?? ""),
     phone: String(fields.phone ?? ""),
-    pricingTier: pricingTierFromColumn(fields.pricing_tier),
+    pricingTier: parsePricingTier(fields.pricing_tier),
     baseFeeCedis: Number(fields.base_fee_cedis ?? 0),
-    status: (fields.status as Seller["status"]) ?? "onboarding",
+    status: parseSellerStatus(fields.status),
     createdAt: epochMs(fields.created_at),
     trialEndsAt: optionalEpochMs(fields.trial_ends_at),
     billingReference: String(fields.billing_reference ?? "").trim() || undefined,

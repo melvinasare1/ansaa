@@ -71,7 +71,7 @@ const seller = {
   template: "template-a",
   email: "styleco@example.com",
   phone: "+233000000000",
-  pricing_tier: "early_bird",
+  pricing_tier: "website_admin",
   base_fee_cedis: 250,
   status: "active",
 };

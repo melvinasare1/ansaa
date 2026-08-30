@@ -16,85 +16,31 @@ import {
   Wrench,
 } from "lucide-react";
 import { StorefrontTracker } from "@/components/store/StorefrontTracker";
-import { listRideAccessories } from "@/components/store/motorbike-template/catalog";
+import {
+  getLiveRideBlogPosts,
+  getLiveRideStorefrontSeller,
+  listRideAccessories,
+} from "@/components/store/motorbike-template/catalog";
 import { rideProductPath } from "@/components/store/motorbike-template/demo-catalog";
 import { RideProductCard } from "@/components/store/motorbike-template/product-card";
 import { MotorbikePlaceholder } from "@/components/store/motorbike-template/placeholders";
-import { formatCedis } from "@/lib/price";
+import {
+  RIDE_FEATURE_STRIP_FALLBACKS,
+  RIDE_SHOP_CATEGORY_FALLBACKS,
+  RIDE_TRUST_BADGE_FALLBACKS,
+  RIDE_VALUE_PROP_FALLBACKS,
+  rideList,
+  rideOptionalList,
+  rideText,
+} from "@/components/store/motorbike-template/ride-content";
+import { formatCedis, parsePriceCedis } from "@/lib/price";
 
 const ORANGE = "#E8622C";
 
-const RIDE_IMAGES = {
-  hero: "/store/motorbike-template/hero.png",
-  motorbike: "/store/motorbike-template/motorbike.png",
-  moped: "/store/motorbike-template/moped.png",
-  classic: "/store/motorbike-template/classic.png",
-  ebike: "/store/motorbike-template/ebike.png",
-  helmet: "/store/motorbike-template/helmet.png",
-  jacket: "/store/motorbike-template/jacket.png",
-  gloves: "/store/motorbike-template/gloves.png",
-  gopro: "/store/motorbike-template/gopro.png",
-  trousers: "/store/motorbike-template/trousers.png",
-  boots: "/store/motorbike-template/boots.png",
-} as const;
-
-const trustBadges = [
-  { label: "Affordable Prices", Icon: Tag },
-  { label: "Knowledgeable Staff", Icon: User },
-  { label: "Warranty", Icon: Shield },
-  { label: "Installment plans", Icon: Calendar },
-] as const;
-
-const categories = [
-  { slug: "motorbikes", label: "Motorbikes", image: RIDE_IMAGES.motorbike },
-  { slug: "bicycles", label: "Bicycles", image: RIDE_IMAGES.ebike },
-  { slug: "mopeds", label: "Mopeds", image: RIDE_IMAGES.moped },
-  { slug: "scooters", label: "Scooters", image: RIDE_IMAGES.classic },
-] as const;
-
-const trustFeatures = [
-  {
-    label: "Trusted Brands",
-    body: "Machines and parts from names riders already know, stocked because they last.",
-    Icon: Award,
-  },
-  {
-    label: "Certified Repair Specialists",
-    body: "Workshop techs trained on motorbikes, mopeds, scooters, and bicycles.",
-    Icon: Wrench,
-  },
-  {
-    label: "Community Support",
-    body: "Fit advice, group rides, and a shop floor that talks riding, not just SKUs.",
-    Icon: Users,
-  },
-  {
-    label: "Tailored Service",
-    body: "Setup, servicing, and gear recommendations sized to how you actually ride.",
-    Icon: Handshake,
-  },
-] as const;
-
-const valueFeatures = [
-  {
-    label: "Special Offers",
-    body: "Seasonal drops, bundle pricing, and trade-in credit on machines you already ride.",
-    Icon: Bike,
-    href: "#featured",
-  },
-  {
-    label: "Instalment Plans",
-    body: "Pay a deposit and spread the rest over 2-3 months. Get in touch to arrange terms.",
-    Icon: CreditCard,
-    href: "/contact",
-  },
-  {
-    label: "Delivery Across Accra",
-    body: "We arrange delivery anywhere in Accra once payment is confirmed.",
-    Icon: Truck,
-    href: "/contact",
-  },
-] as const;
+const TRUST_ICONS = [Tag, User, Shield, Calendar];
+const FEATURE_ICONS = [Award, Wrench, Users, Handshake];
+const VALUE_ICONS = [Bike, CreditCard, Truck];
+const VALUE_HREFS = ["#featured", "/contact", "/contact"] as const;
 
 function formatBlogDate(ms: number): string {
   return new Date(ms).toLocaleDateString("en-GB", {
@@ -104,16 +50,81 @@ function formatBlogDate(ms: number): string {
   });
 }
 
+function categorySlug(label: string, linkCategory: string): string {
+  const fromLink = linkCategory.trim().toLowerCase().replace(/\s+/g, "");
+  if (fromLink) return fromLink;
+  return label.trim().toLowerCase().replace(/\s+/g, "");
+}
+
 export default async function MotorbikeTemplateHome() {
   const base = "/store/motorbike-template";
-  const accessories = await listRideAccessories();
-  const blogPosts: Array<{
-    id: string;
-    title: string;
-    excerpt: string;
-    publishedAt: number;
-    imageUrl: string;
-  }> = [];
+  const seller = await getLiveRideStorefrontSeller();
+  const content = seller?.storeContent ?? {};
+  const catalogAccessories = await listRideAccessories();
+  const contentAccessories = rideOptionalList(content, "accessories");
+  const accessories =
+    contentAccessories.length > 0
+      ? contentAccessories.map((item, index) => ({
+          id: item.productId.trim() || `content-accessory-${index}`,
+          name: item.name,
+          priceCedis: parsePriceCedis(item.price),
+          image: item.image,
+          colors: [] as string[],
+          rating: undefined as number | undefined,
+          href: item.productId.trim()
+            ? rideProductPath(item.productId.trim())
+            : `${base}/search?category=accessories`,
+        }))
+      : catalogAccessories.map((item) => ({
+          id: item.id,
+          name: item.name,
+          priceCedis: item.priceCedis,
+          image: item.image,
+          colors: item.colors,
+          rating: item.rating,
+          href: rideProductPath(item.id),
+        }));
+
+  const contentBlog = rideOptionalList(content, "blogPosts");
+  const cmsBlog = contentBlog.length > 0 ? [] : await getLiveRideBlogPosts();
+  const blogPosts =
+    contentBlog.length > 0
+      ? contentBlog.map((post, index) => ({
+          id: `content-blog-${index}`,
+          title: post.title,
+          excerpt: post.excerpt,
+          dateLabel: post.date,
+          imageUrl: post.image,
+          href: post.href.trim() || `${base}/blog/${index + 1}`,
+        }))
+      : cmsBlog.map((post) => ({
+          id: post.id,
+          title: post.title,
+          excerpt: post.excerpt,
+          dateLabel: formatBlogDate(post.publishedAt),
+          imageUrl: post.imageUrl,
+          href: `${base}/blog/${post.id}`,
+        }));
+
+  const heroHeadline = rideText(content, "heroHeadline");
+  const heroSubtext = rideText(content, "heroSubtext");
+  const heroImage = rideText(content, "heroImage");
+  const shopHeading = rideText(content, "shopHeading");
+  const categories = rideList(content, "shopCategories", RIDE_SHOP_CATEGORY_FALLBACKS);
+  const trustBadges = rideList(content, "trustBadges", RIDE_TRUST_BADGE_FALLBACKS);
+  const trustFeatures = rideList(content, "featureStrip", RIDE_FEATURE_STRIP_FALLBACKS);
+  const valueFeatures = rideList(content, "valueProps", RIDE_VALUE_PROP_FALLBACKS);
+  const promoHeadline = rideText(content, "promoHeadline");
+  const promoKicker = rideText(content, "promoKicker");
+  const promoBody = rideText(content, "promoBody");
+  const promoImage = rideText(content, "promoImage");
+  const accessoriesHeading = rideText(content, "accessoriesHeading");
+  const darkBannerHeadline = rideText(content, "darkBannerHeadline");
+  const darkBannerBody = rideText(content, "darkBannerBody");
+  const darkBannerImage = rideText(content, "darkBannerImage");
+  const darkBannerCalloutTitle = rideText(content, "darkBannerCalloutTitle");
+  const darkBannerCalloutBody = rideText(content, "darkBannerCalloutBody");
+  const blogHeading = rideText(content, "blogHeading");
 
   return (
     <div>
@@ -125,7 +136,7 @@ export default async function MotorbikeTemplateHome() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_78%_42%,#6a4a32_0%,transparent_42%),radial-gradient(ellipse_at_60%_70%,#2a1c14_0%,transparent_50%)]" />
           <div className="absolute right-0 top-[20%] hidden h-[52%] w-[56%] md:block md:right-4 md:top-[18%] md:h-[50%]">
             <Image
-              src={RIDE_IMAGES.hero}
+              src={heroImage}
               alt=""
               fill
               unoptimized
@@ -139,16 +150,13 @@ export default async function MotorbikeTemplateHome() {
 
         <div className="relative z-10 mx-auto flex w-full max-w-[1400px] flex-1 flex-col justify-center px-6 pb-8 pt-12 md:px-10 md:pb-36 md:pt-24">
           <h1
-            className="max-w-xl text-[42px] font-extrabold leading-[1.02] tracking-tight text-white md:text-[58px] lg:text-[68px]"
+            className="max-w-xl whitespace-pre-line text-[42px] font-extrabold leading-[1.02] tracking-tight text-white md:text-[58px] lg:text-[68px]"
             style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
           >
-            Ride Better.
-            <br />
-            Ride Together.
+            {heroHeadline}
           </h1>
           <p className="mt-6 max-w-[420px] text-[15px] leading-relaxed text-white/70 md:text-[16px]">
-            Motorbikes, bicycles, mopeds, and scooters, chosen for the ride and backed by
-            people who know the machines.
+            {heroSubtext}
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-3.5">
             <Link
@@ -167,7 +175,7 @@ export default async function MotorbikeTemplateHome() {
           </div>
           <div className="relative mt-10 w-full md:hidden">
             <Image
-              src={RIDE_IMAGES.hero}
+              src={heroImage}
               alt=""
               width={1200}
               height={800}
@@ -180,12 +188,15 @@ export default async function MotorbikeTemplateHome() {
 
         <div className="relative z-10 bg-black/45 backdrop-blur-[2px] md:absolute md:inset-x-0 md:bottom-0">
           <ul className="mx-auto grid max-w-[1400px] grid-cols-2 justify-items-center gap-y-5 px-6 py-5 md:flex md:flex-wrap md:items-center md:justify-center md:gap-x-16 md:px-10 md:py-6">
-            {trustBadges.map(({ label, Icon }) => (
-              <li key={label} className="flex items-center gap-3 text-white">
-                <Icon className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.6} />
-                <span className="text-[13px] font-medium tracking-wide">{label}</span>
-              </li>
-            ))}
+            {trustBadges.map((badge, index) => {
+              const Icon = TRUST_ICONS[index % TRUST_ICONS.length];
+              return (
+                <li key={`${badge.label}-${index}`} className="flex items-center gap-3 text-white">
+                  <Icon className="h-[18px] w-[18px] shrink-0 text-white" strokeWidth={1.6} />
+                  <span className="text-[13px] font-medium tracking-wide">{badge.label}</span>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </section>
@@ -196,13 +207,15 @@ export default async function MotorbikeTemplateHome() {
             className="text-[40px] font-extrabold tracking-tight text-[#141414] md:text-[48px]"
             style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
           >
-            Shop
+            {shopHeading}
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 md:mt-12 md:gap-8">
-            {categories.map((category) => (
+            {categories.map((category, index) => {
+              const slug = categorySlug(category.label, category.linkCategory);
+              return (
               <article
-                key={category.slug}
-                id={category.slug}
+                key={`${slug}-${index}`}
+                id={slug}
                 className="flex flex-col rounded-[28px] border border-[#D9D6CE] px-8 pb-9 pt-10 shadow-[0_8px_28px_rgba(20,20,20,0.06)] md:px-10 md:pb-11 md:pt-12"
                 style={{ backgroundColor: "#FFFDFA" }}
               >
@@ -223,14 +236,15 @@ export default async function MotorbikeTemplateHome() {
                   {category.label}
                 </p>
                 <Link
-                  href={`${base}/search?category=${category.slug}`}
+                  href={`${base}/search?category=${slug}`}
                   className="mx-auto mt-4 inline-flex items-center gap-1 rounded-full border border-[#141414] px-5 py-1.5 text-[12px] font-semibold text-[#141414] transition-colors hover:bg-[#141414] hover:text-white"
                 >
                   View {category.label}
                   <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.25} />
                 </Link>
               </article>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -254,17 +268,16 @@ export default async function MotorbikeTemplateHome() {
                 className="text-[30px] font-extrabold tracking-tight text-white md:text-[38px]"
                 style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
               >
-                Apex R9
+                {promoHeadline}
               </h2>
               <p className="mt-1.5 text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: ORANGE }}>
-                Street Motorbike
+                {promoKicker}
               </p>
               <p className="mt-2 text-[22px] font-semibold" style={{ color: ORANGE }}>
                 {formatCedis(18900)}
               </p>
               <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-white/70 md:text-[15px]">
-                Street-ready motorbike with a punchy engine, upright seating, and the range
-                to cover town and the open road.
+                {promoBody}
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3.5">
                 <Link
@@ -288,8 +301,8 @@ export default async function MotorbikeTemplateHome() {
               className="relative flex min-h-[280px] items-center justify-center px-4 py-6 md:min-h-[420px] md:px-6 md:py-8"
             >
               <Image
-                src={RIDE_IMAGES.motorbike}
-                alt="Apex R9 street motorbike"
+                src={promoImage}
+                alt={promoHeadline}
                 width={1536}
                 height={1024}
                 unoptimized
@@ -303,9 +316,11 @@ export default async function MotorbikeTemplateHome() {
       <section className="bg-[#FFFFFF]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-10 md:py-20">
           <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-            {trustFeatures.map(({ label, body, Icon }) => (
+            {trustFeatures.map((feature, index) => {
+              const Icon = FEATURE_ICONS[index % FEATURE_ICONS.length];
+              return (
               <li
-                key={label}
+                key={`${feature.label}-${index}`}
                 className="rounded-[24px] bg-[#FFFDFA] px-6 py-8 shadow-[0_8px_28px_rgba(20,20,20,0.06)] md:px-7 md:py-9"
               >
                 <span
@@ -318,11 +333,12 @@ export default async function MotorbikeTemplateHome() {
                   className="mt-5 text-[17px] font-extrabold leading-snug text-[#141414]"
                   style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
                 >
-                  {label}
+                  {feature.label}
                 </h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-[#141414]/50">{body}</p>
+                <p className="mt-2 text-[13px] leading-relaxed text-[#141414]/50">{feature.body}</p>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       </section>
@@ -333,13 +349,13 @@ export default async function MotorbikeTemplateHome() {
             className="text-[40px] font-extrabold tracking-tight text-[#141414] md:text-[48px]"
             style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
           >
-            Gear &amp; Accessories
+            {accessoriesHeading}
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 md:mt-12">
             {accessories.map((item) => (
               <RideProductCard
                 key={item.id}
-                href={rideProductPath(item.id)}
+                href={item.href}
                 productId={item.id}
                 name={item.name}
                 priceCedis={item.priceCedis}
@@ -364,8 +380,11 @@ export default async function MotorbikeTemplateHome() {
       <section className="bg-[#FFFFFF]">
         <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-10 md:py-20">
           <ul className="grid grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-8 lg:gap-12">
-            {valueFeatures.map(({ label, body, Icon, href }) => (
-              <li key={label} className="flex flex-col items-center text-center">
+            {valueFeatures.map((feature, index) => {
+              const Icon = VALUE_ICONS[index % VALUE_ICONS.length];
+              const href = VALUE_HREFS[index] ?? "/contact";
+              return (
+              <li key={`${feature.label}-${index}`} className="flex flex-col items-center text-center">
                 <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#141414]">
                   <Icon className="h-7 w-7 text-white" strokeWidth={1.6} color="#fff" />
                 </span>
@@ -373,9 +392,9 @@ export default async function MotorbikeTemplateHome() {
                   className="mt-6 text-[20px] font-extrabold text-[#141414]"
                   style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
                 >
-                  {label}
+                  {feature.label}
                 </h3>
-                <p className="mt-3 max-w-[280px] text-[14px] leading-relaxed text-[#141414]/50">{body}</p>
+                <p className="mt-3 max-w-[280px] text-[14px] leading-relaxed text-[#141414]/50">{feature.body}</p>
                 <a
                   href={href.startsWith("/") ? `${base}${href}` : href}
                   className="mt-6 inline-flex items-center rounded-lg border border-[#141414] px-5 py-2 text-[13px] font-semibold text-[#141414] transition-colors hover:bg-[#141414] hover:text-white"
@@ -383,7 +402,8 @@ export default async function MotorbikeTemplateHome() {
                   Learn More
                 </a>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       </section>
@@ -396,8 +416,8 @@ export default async function MotorbikeTemplateHome() {
               className="relative flex min-h-[280px] items-center justify-center px-6 py-8 md:min-h-[400px] md:px-8 md:py-10"
             >
               <Image
-                src={RIDE_IMAGES.ebike}
-                alt="E-Bike"
+                src={darkBannerImage}
+                alt={darkBannerHeadline}
                 width={1619}
                 height={971}
                 unoptimized
@@ -406,10 +426,10 @@ export default async function MotorbikeTemplateHome() {
               <div className="absolute left-[8%] top-[22%] z-10 flex items-center">
                 <div className="max-w-[210px] rounded-xl bg-black/55 px-3.5 py-2.5 ring-1 ring-white/15 backdrop-blur-sm">
                   <p className="text-[12px] font-semibold leading-snug text-white">
-                    Super Powerful Battery
+                    {darkBannerCalloutTitle}
                   </p>
                   <p className="mt-0.5 text-[11px] leading-snug text-white/55">
-                    The best range ever seen for a bike like this.
+                    {darkBannerCalloutBody}
                   </p>
                 </div>
                 <span className="hidden h-px w-12 bg-white/70 sm:block" aria-hidden />
@@ -421,14 +441,13 @@ export default async function MotorbikeTemplateHome() {
                 className="text-[30px] font-extrabold tracking-tight text-white md:text-[36px]"
                 style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
               >
-                E-Bike
+                {darkBannerHeadline}
               </h2>
               <p className="mt-2 text-[16px] font-medium text-white/55">
                 From {formatCedis(9450)}
               </p>
               <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-white/70 md:text-[15px]">
-                Quiet power for city hops and weekend loops. A removable battery, disc
-                brakes, and a ride that stays composed in traffic.
+                {darkBannerBody}
               </p>
               <Link
                 href={rideProductPath("demo-bicycle-1")}
@@ -448,7 +467,7 @@ export default async function MotorbikeTemplateHome() {
             className="text-[40px] font-extrabold tracking-tight text-[#141414] md:text-[48px]"
             style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
           >
-            Recent Blog Posts
+            {blogHeading}
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3 md:mt-12 md:gap-6">
             {blogPosts.map((post) => (
@@ -460,9 +479,11 @@ export default async function MotorbikeTemplateHome() {
                     <MotorbikePlaceholder className="h-[70%] w-[80%] drop-shadow-[0_12px_16px_rgba(20,20,20,0.14)]" />
                   )}
                 </div>
-                <p className="mt-5 text-[12px] font-medium uppercase tracking-[0.14em] text-[#141414]/40">
-                  {formatBlogDate(post.publishedAt)}
-                </p>
+                {post.dateLabel ? (
+                  <p className="mt-5 text-[12px] font-medium uppercase tracking-[0.14em] text-[#141414]/40">
+                    {post.dateLabel}
+                  </p>
+                ) : null}
                 <h3
                   className="mt-2 max-w-[280px] text-[18px] font-extrabold leading-snug text-[#141414]"
                   style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
@@ -473,7 +494,7 @@ export default async function MotorbikeTemplateHome() {
                   <p className="mt-2 text-[14px] leading-relaxed text-[#141414]/50">{post.excerpt}</p>
                 ) : null}
                 <Link
-                  href={`${base}/blog/${post.id}`}
+                  href={post.href}
                   className="mt-5 inline-flex items-center rounded-lg border border-[#141414] px-4 py-2 text-[13px] font-semibold text-[#141414] transition-colors hover:bg-[#141414] hover:text-white"
                 >
                   Read More

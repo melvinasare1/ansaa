@@ -38,7 +38,7 @@ snake_case (`seller_id`, `price_cedis`). Mapping happens in `@ansaa/shared/mappe
 ## Routing model (important)
 
 Right now storefronts are path-based template previews on the **web** app:
-`/store/template-a`, `/store/template-b`, `/store/template-c`, `/store/template-d`,
+`/store/template-a`, `/store/template-b`, `/store/kitchenware-template`, `/store/template-d`,
 or `/store/motorbike-template`. Templates are generic — they are not tied to a
 seller. When a client site is needed, copy a template and customize that copy.
 

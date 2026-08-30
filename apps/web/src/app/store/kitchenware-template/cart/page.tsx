@@ -7,7 +7,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 import {
   CheckoutForm,
   PaymentInstructions,
-} from "@/components/store/template-c/CheckoutForm";
+} from "@/components/store/kitchenware-template/CheckoutForm";
 import { useCart } from "@/lib/cart-context";
 import type { CheckoutSuccess } from "@/lib/checkout";
 import { formatCedis } from "@/lib/price";
@@ -16,8 +16,8 @@ function isImageSrc(value: string) {
   return value.startsWith("http") || value.startsWith("/");
 }
 
-export default function TemplateCCartPage() {
-  const shopHref = "/store/template-c";
+export default function KitchenwareTemplateCartPage() {
+  const shopHref = "/store/kitchenware-template";
   const { items, updateQuantity, removeItem, clearCart, totalCedis, hydrated } = useCart();
   const [receipt, setReceipt] = useState<CheckoutSuccess | null>(null);
 
@@ -109,7 +109,7 @@ export default function TemplateCCartPage() {
           </div>
 
           <CheckoutForm
-            storeSlug="template-c"
+            storeSlug="kitchenware-template"
             items={items}
             onSuccess={handleCheckoutSuccess}
           />

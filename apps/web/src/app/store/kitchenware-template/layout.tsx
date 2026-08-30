@@ -1,7 +1,8 @@
-// Template C — "Homedine": a warm, editorial home/lifestyle storefront for
+// Kitchenware template: a warm, editorial home/lifestyle storefront for
 // kitchenware and houseware sellers. Serif display + forest/cream palette.
 import { Cormorant_Garamond, Figtree } from "next/font/google";
-import { Header } from "@/components/store/template-c/Header";
+import { CartFeedbackProvider } from "@/components/store/kitchenware-template/CartFeedback";
+import { Header } from "@/components/store/kitchenware-template/Header";
 
 const display = Cormorant_Garamond({
   subsets: ["latin"],
@@ -16,14 +17,16 @@ const sans = Figtree({
   weight: ["400", "500", "600"],
 });
 
-export default function TemplateCLayout({ children }: { children: React.ReactNode }) {
+export default function KitchenwareTemplateLayout({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={`${display.variable} ${sans.variable} min-h-screen bg-white text-[#2B4239]`}
       style={{ fontFamily: "var(--font-homedine-sans), ui-sans-serif, system-ui" }}
     >
-      <Header />
-      <main>{children}</main>
+      <CartFeedbackProvider>
+        <Header />
+        <main>{children}</main>
+      </CartFeedbackProvider>
     </div>
   );
 }

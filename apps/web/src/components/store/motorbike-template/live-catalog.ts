@@ -1,6 +1,8 @@
 export {
   getLiveProduct as getLiveRideProduct,
+  getLivePublishedBlogPosts as getLiveRideBlogPosts,
   getLiveRideFilterFacets,
+  getLiveStorefrontSeller as getLiveRideStorefrontSeller,
   isLiveStorefrontCatalog as isLiveRideCatalog,
   listLiveProducts as listLiveRideProducts,
   liveStoreSlug as rideLiveStoreSlug,

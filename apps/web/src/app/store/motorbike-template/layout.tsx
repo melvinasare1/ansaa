@@ -3,9 +3,23 @@
 // near-black / cream / orange.
 import Link from "next/link";
 import { Outfit, Public_Sans } from "next/font/google";
-import { ArrowRight, Facebook, Instagram, Linkedin, Search, Twitter } from "lucide-react";
+import {
+  ArrowRight,
+  Facebook,
+  Globe,
+  Instagram,
+  Linkedin,
+  Search,
+  Twitter,
+} from "lucide-react";
 import { RideCartLink } from "@/components/store/motorbike-template/cart-link";
 import { RideMobileNav } from "@/components/store/motorbike-template/mobile-nav";
+import { getLiveRideStorefrontSeller } from "@/components/store/motorbike-template/catalog";
+import {
+  RIDE_SOCIAL_LINK_FALLBACKS,
+  rideList,
+  rideText,
+} from "@/components/store/motorbike-template/ride-content";
 import { DEFAULT_STORE_NAME } from "@/lib/store-name";
 
 const display = Outfit({
@@ -62,17 +76,46 @@ function BikeMark({ className }: { className?: string }) {
   );
 }
 
-export default function MotorbikeTemplateLayout({
+function BrandMark({
+  logoUrl,
+  className,
+}: {
+  logoUrl: string;
+  className?: string;
+}) {
+  if (logoUrl) {
+    return (
+      <img src={logoUrl} alt="" className={`h-[22px] w-auto max-w-[120px] object-contain ${className ?? ""}`} />
+    );
+  }
+  return <BikeMark className={className ?? "h-[18px] w-[30px]"} />;
+}
+
+function SocialIcon({ network }: { network: string }) {
+  const key = network.trim().toLowerCase();
+  const className = "h-4 w-4";
+  if (key === "facebook") return <Facebook className={className} strokeWidth={1.6} />;
+  if (key === "instagram") return <Instagram className={className} strokeWidth={1.6} />;
+  if (key === "twitter" || key === "x") return <Twitter className={className} strokeWidth={1.6} />;
+  if (key === "linkedin") return <Linkedin className={className} strokeWidth={1.6} />;
+  return <Globe className={className} strokeWidth={1.6} />;
+}
+
+export default async function MotorbikeTemplateLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const seller = await getLiveRideStorefrontSeller();
+  const content = seller?.storeContent ?? {};
   const base = "/store/motorbike-template";
-  const brandName = DEFAULT_STORE_NAME;
+  const brandName = seller?.businessName || DEFAULT_STORE_NAME;
+  const logoUrl = rideText(content, "logoUrl");
   const headerNav = navLinks.map((item) => ({
     label: item.label,
     href: `${base}${item.href}`,
   }));
+  const socialLinks = rideList(content, "footerSocialLinks", RIDE_SOCIAL_LINK_FALLBACKS);
 
   return (
     <div
@@ -82,7 +125,7 @@ export default function MotorbikeTemplateLayout({
       <header className="relative bg-[#141414] text-white">
         <div className="mx-auto flex max-w-[1400px] items-center gap-4 px-6 py-5 md:gap-8 md:px-10">
           <Link href={base} className="flex shrink-0 items-center gap-2.5 text-white">
-            <BikeMark className="h-[18px] w-[30px]" />
+            <BrandMark logoUrl={logoUrl} />
             <span
               className="max-w-[180px] truncate text-[17px] font-extrabold uppercase leading-none tracking-[0.18em] md:max-w-[240px] md:text-[19px]"
               style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
@@ -116,7 +159,7 @@ export default function MotorbikeTemplateLayout({
           <div className="flex flex-col gap-12 sm:flex-row sm:items-start sm:gap-16 lg:gap-24">
             <div id="contact" className="max-w-md">
               <Link href={base} className="inline-flex items-center gap-2.5 text-white">
-                <BikeMark className="h-[18px] w-[30px]" />
+                <BrandMark logoUrl={logoUrl} />
                 <span
                   className="text-[17px] font-extrabold uppercase tracking-[0.18em]"
                   style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
@@ -125,14 +168,13 @@ export default function MotorbikeTemplateLayout({
                 </span>
               </Link>
               <p className="mt-4 max-w-sm text-[13px] leading-relaxed text-white/45">
-                Motorbikes, bicycles, mopeds, and scooters, sold, fitted, and serviced by
-                people who ride.
+                {rideText(content, "footerTagline")}
               </p>
               <p
                 className="mt-7 text-[13px] font-semibold"
                 style={{ color: "#E8622C" }}
               >
-                Signup for latest information
+                {rideText(content, "footerNewsletterHeading")}
               </p>
               <form
                 id="newsletter"
@@ -159,18 +201,16 @@ export default function MotorbikeTemplateLayout({
                 </button>
               </form>
               <div className="mt-7 flex items-center gap-4 text-white/50">
-                <a href="#" aria-label="Facebook" className="transition-colors hover:text-white">
-                  <Facebook className="h-4 w-4" strokeWidth={1.6} />
-                </a>
-                <a href="#" aria-label="Instagram" className="transition-colors hover:text-white">
-                  <Instagram className="h-4 w-4" strokeWidth={1.6} />
-                </a>
-                <a href="#" aria-label="Twitter" className="transition-colors hover:text-white">
-                  <Twitter className="h-4 w-4" strokeWidth={1.6} />
-                </a>
-                <a href="#" aria-label="LinkedIn" className="transition-colors hover:text-white">
-                  <Linkedin className="h-4 w-4" strokeWidth={1.6} />
-                </a>
+                {socialLinks.map((item, index) => (
+                  <a
+                    key={`${item.network}-${index}`}
+                    href={item.url || "#"}
+                    aria-label={item.network || "Social link"}
+                    className="transition-colors hover:text-white"
+                  >
+                    <SocialIcon network={item.network} />
+                  </a>
+                ))}
               </div>
             </div>
 
@@ -196,7 +236,7 @@ export default function MotorbikeTemplateLayout({
           </div>
 
           <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-[12px] text-white/40 md:flex-row md:items-center md:justify-between">
-            <p>© 2026 {brandName}. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} {brandName}. All rights reserved.</p>
             <div className="flex flex-wrap gap-x-6 gap-y-2">
               <a href="#" className="transition-colors hover:text-white/70">
                 Privacy Policy

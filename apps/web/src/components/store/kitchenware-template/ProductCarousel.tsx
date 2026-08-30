@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useCart } from "@/lib/cart-context";
+import { ProductCardActions } from "@/components/store/kitchenware-template/AddToCartButton";
+import { KITCHENWARE_TEMPLATE_BASE } from "@/components/store/kitchenware-template/demo-catalog";
 
 export type KitchenProduct = {
   id: string;
@@ -24,7 +25,6 @@ export default function ProductCarousel({
 }: {
   products: KitchenProduct[];
 }) {
-  const { addItem } = useCart();
   const [start, setStart] = useState(0);
   const maxStart = Math.max(0, products.length - VISIBLE);
 
@@ -58,7 +58,7 @@ export default function ProductCarousel({
         {visible.map((p) => (
           <article key={p.id} className="group">
             <Link
-              href={`/store/template-c/product/${p.id}`}
+              href={`${KITCHENWARE_TEMPLATE_BASE}/product/${p.id}`}
               className="relative block aspect-[4/5] overflow-hidden bg-[#EDE8DC]"
             >
               <span className="absolute left-3 top-3 z-10 rounded-full bg-[#F5F1E4] px-3 py-1 text-[11px] font-medium text-[#2B4239]">
@@ -84,27 +84,17 @@ export default function ProductCarousel({
                 />
               ))}
             </div>
-            <Link href={`/store/template-c/product/${p.id}`}>
+            <Link href={`${KITCHENWARE_TEMPLATE_BASE}/product/${p.id}`}>
               <p className="mt-2 text-[15px] font-semibold leading-snug text-[#2B4239]">{p.name}</p>
             </Link>
-            <div className="mt-3 flex items-center justify-between gap-3">
+            <div className="mt-3 flex items-center justify-between gap-2">
               <span className="text-sm font-semibold text-[#2B4239]">{p.price}</span>
-              <button
-                type="button"
-                aria-label={`Add ${p.name} to cart`}
-                onClick={() =>
-                  addItem({
-                    productId: p.id,
-                    name: p.name,
-                    priceCedis: p.priceCedis,
-                    image: p.image,
-                    quantity: 1,
-                  })
-                }
-                className="inline-flex shrink-0 items-center rounded-full bg-[#2B4239] px-3 py-1.5 text-[11px] font-medium text-[#F5F1E4]"
-              >
-                + Cart
-              </button>
+              <ProductCardActions
+                productId={p.id}
+                name={p.name}
+                priceCedis={p.priceCedis}
+                image={p.image}
+              />
             </div>
           </article>
         ))}

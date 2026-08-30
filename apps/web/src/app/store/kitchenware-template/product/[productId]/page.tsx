@@ -1,19 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ProductDetail } from "@/components/store/template-c/ProductDetail";
-import { getTemplateCProductPage, listTemplateCProducts } from "@/components/store/template-c/catalog";
+import { ProductDetail } from "@/components/store/kitchenware-template/ProductDetail";
+import { getKitchenwareProductPage, listKitchenwareProducts } from "@/components/store/kitchenware-template/catalog";
+import { KITCHENWARE_TEMPLATE_BASE } from "@/components/store/kitchenware-template/demo-catalog";
 import { formatCedis } from "@/lib/price";
 import { pickRelatedCatalogProducts } from "@/lib/related-products";
 
-export default async function TemplateCProductPage({
+export default async function KitchenwareTemplateProductPage({
   params,
 }: {
   params: { productId: string };
 }) {
   const [page, catalog] = await Promise.all([
-    getTemplateCProductPage(params.productId),
-    listTemplateCProducts(),
+    getKitchenwareProductPage(params.productId),
+    listKitchenwareProducts(),
   ]);
   if (!page) notFound();
   const related = pickRelatedCatalogProducts(page.product, catalog, 4);
@@ -32,7 +33,7 @@ export default async function TemplateCProductPage({
             {related.map((product) => {
               const photo = product.images[0];
               return (
-                <Link key={product.id} href={`/store/template-c/product/${product.id}`} className="group">
+                <Link key={product.id} href={`${KITCHENWARE_TEMPLATE_BASE}/product/${product.id}`} className="group">
                   <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-[#EDE8DC]">
                     {photo ? (
                       <Image src={photo} alt={product.name} fill sizes="25vw" className="object-cover" />

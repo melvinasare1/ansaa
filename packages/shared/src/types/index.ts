@@ -3,17 +3,28 @@
 // Everything tenant-scoped is keyed by sellerId (= sellers.id). Once Auth is
 // wired, create seller rows with id = auth.uid().
 
-/**
- * Product pricing: Website & Admin vs Fulfilment.
- * Postgres `sellers.pricing_tier` still checks `early_bird | standard`
- * (schema unchanged); mappers translate at the query layer.
- */
-export type PricingTier = "website_admin" | "fulfilment";
+export const PRICING_TIERS = ["website_admin", "fulfilment"] as const;
+
+export type PricingTier = (typeof PRICING_TIERS)[number];
+
+export function parsePricingTier(value: unknown): PricingTier {
+  return value === "fulfilment" ? "fulfilment" : "website_admin";
+}
 
 export const PRICING_TIER_BASE_FEE_CEDIS: Record<PricingTier, number> = {
   website_admin: 250,
   fulfilment: 400,
 };
+
+export const SELLER_STATUSES = ["onboarding", "active", "paused", "offboarded"] as const;
+
+export type SellerStatus = (typeof SELLER_STATUSES)[number];
+
+export function parseSellerStatus(value: unknown): SellerStatus {
+  return SELLER_STATUSES.includes(value as SellerStatus)
+    ? (value as SellerStatus)
+    : "onboarding";
+}
 
 export type SellerUser = {
   uid: string;
@@ -23,9 +34,8 @@ export type SellerUser = {
 export const STOREFRONT_TEMPLATES = [
   "template-a",
   "template-b",
-  "template-c",
+  "kitchenware-template",
   "template-d",
-  "template-e",
   "motorbike-template",
 ] as const;
 
@@ -53,7 +63,7 @@ export interface Seller {
   phone: string;
   pricingTier: PricingTier;
   baseFeeCedis: number; // 250 Website & Admin, 400 Fulfilment intro
-  status: "onboarding" | "active" | "paused" | "offboarded";
+  status: SellerStatus;
   createdAt: number;
   /** Epoch ms when the 14-day free trial ends. Unset for accounts that skip onboarding. */
   trialEndsAt?: number;
@@ -64,8 +74,8 @@ export interface Seller {
   profilePhotoUrl?: string;
   businessRegistrationUrl?: string;
   hasBusinessRegistration: boolean;
-  /** Editable storefront copy and image URLs, keyed by template field keys. */
-  storeContent: Record<string, string>;
+  /** Editable storefront copy, image URLs, and repeatable lists, keyed by template field keys. */
+  storeContent: Record<string, string | Array<Record<string, string>>>;
   /** Store-wide FAQs reused on every product page. */
   faqs: StoreFaq[];
 }

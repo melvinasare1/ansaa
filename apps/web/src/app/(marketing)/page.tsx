@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { sellerOnboardingHref } from "@/components/marketing/nav";
 import { RIDE_TEMPLATE_BASE } from "@/components/store/motorbike-template/demo-catalog";
@@ -7,7 +8,7 @@ const steps = [
   {
     n: "01",
     title: "Pick a template",
-    body: "Choose from six storefront templates and put your shop on your own domain. Your catalogue, your look, live in a few steps.",
+    body: "Choose from five storefront templates and put your shop on your own domain. Your catalogue, your look, live in a few steps.",
   },
   {
     n: "02",
@@ -28,7 +29,7 @@ const steps = [
 
 const websiteFeatures = [
   "Storefront on your own domain",
-  "Pick from 6 templates",
+  "Pick from 5 templates",
   "Admin dashboard for orders, products, and sales",
   "Manual MoMo payments. You mark orders paid, unpaid, or cancelled",
   "Email support",
@@ -52,22 +53,20 @@ const templates = [
     description: "Dense bold grid, for electronics and general goods.",
   },
   {
-    name: "Homedine",
+    name: "Kitchenware",
     description: "Warm editorial layout, for home and kitchen goods.",
-    href: "/store/template-c",
+    href: "/store/kitchenware-template",
+    image: "/marketing/kitchenware-preview.jpg",
   },
   {
     name: "Stylehive",
     description: "Monochrome streetwear layout, for apparel sellers.",
   },
   {
-    name: "Atelier",
-    description: "Fifth storefront template, coming soon.",
-  },
-  {
     name: "Ride",
     description: "Dark vehicle-retail layout, for motorbikes, bicycles, mopeds, and scooters.",
     href: RIDE_TEMPLATE_BASE,
+    image: "/marketing/ride-preview.jpg",
   },
 ];
 
@@ -201,16 +200,23 @@ export default function LandingPage() {
           Six storefront designs, ready to launch on your own domain.
         </p>
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
+        <div className="mt-10 grid gap-6 sm:grid-cols-2">
           {templates.map((template) => (
             <article
               key={template.name}
-              className="flex flex-col rounded-2xl border border-wire bg-white p-6 lg:col-span-2"
+              className="flex flex-col rounded-2xl border border-wire bg-white p-6"
             >
-              <div
-                className="aspect-[4/3] w-full rounded-xl bg-canvas"
-                aria-hidden="true"
-              />
+              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-canvas">
+                {template.image ? (
+                  <Image
+                    src={template.image}
+                    alt={`${template.name} storefront preview`}
+                    fill
+                    sizes="(min-width: 640px) 50vw, 100vw"
+                    className="object-cover object-top"
+                  />
+                ) : null}
+              </div>
               <h3 className="mt-5 font-display text-xl font-semibold">{template.name}</h3>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-700">
                 {template.description}

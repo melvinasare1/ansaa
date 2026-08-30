@@ -9,8 +9,10 @@ import {
   type RideDemoProduct,
 } from "@/components/store/motorbike-template/demo-catalog";
 import {
+  getLiveRideBlogPosts,
   getLiveRideFilterFacets,
   getLiveRideProduct,
+  getLiveRideStorefrontSeller,
   isLiveRideCatalog,
   listLiveRideProducts,
   rideLiveStoreSlug,
@@ -24,7 +26,7 @@ import {
   type RideFilterFacets,
 } from "@/components/store/motorbike-template/search-filters";
 
-export { isLiveRideCatalog, rideLiveStoreSlug };
+export { isLiveRideCatalog, rideLiveStoreSlug, getLiveRideStorefrontSeller, getLiveRideBlogPosts };
 export type { RideCatalogCard, RideFilterFacets };
 export { productMatchesColour } from "@/components/store/motorbike-template/search-filters";
 

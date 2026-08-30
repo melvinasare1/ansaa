@@ -6,6 +6,7 @@ import { trackEvent } from "@/lib/vercel-track-server";
 import { createAdminClient } from "@ansaa/shared/supabase/admin";
 import { createClient } from "@ansaa/shared/supabase/server";
 import {
+  parsePricingTier,
   parseStorefrontTemplate,
   type PricingTier,
   type Seller,
@@ -27,10 +28,6 @@ type SellerSignupFields = {
 
 function formatPostgresError(err: PostgrestError) {
   return [err.message, err.details, err.hint].filter(Boolean).join(". ");
-}
-
-function parsePricingTier(value: unknown): PricingTier {
-  return value === "fulfilment" ? "fulfilment" : "website_admin";
 }
 
 function normalizeSignupFields(input: SellerSignupFields) {

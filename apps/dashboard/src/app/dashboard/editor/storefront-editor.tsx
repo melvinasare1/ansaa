@@ -2,7 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ImagePlusIcon, Loader2Icon, XIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ImagePlusIcon,
+  Loader2Icon,
+  PlusIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   PRODUCT_IMAGE_ACCEPT,
@@ -12,24 +20,46 @@ import {
 import { storefrontUrl } from "@/lib/storefront-url";
 import { createClient } from "@ansaa/shared/supabase/client";
 import {
+  emptyRepeatableItem,
   getStorefrontContentFields,
   getStorefrontEditorPages,
+  isRepeatableField,
   parseStorefrontContent,
   storefrontContentForSave,
   storefrontPageLabel,
   type StorefrontContent,
   type StorefrontContentField,
+  type StorefrontContentItemField,
+  type StorefrontContentRepeatableField,
+  type StorefrontContentScalarType,
+  type StorefrontContentValue,
+  type StorefrontRepeatableItem,
 } from "@ansaa/shared/storefront-content-schema";
 import type { Seller } from "@ansaa/shared/types";
 
 const FIELD_CLASS =
   "mt-1.5 w-full rounded-lg border border-wire bg-white px-4 py-2.5 text-sm text-ink-950 outline-none placeholder:text-ink-700/40 focus:border-signal";
 
+function valueHasContent(value: StorefrontContentValue | undefined): boolean {
+  if (typeof value === "string") return Boolean(value.trim());
+  if (!Array.isArray(value)) return false;
+  return value.some((item) => Object.values(item).some((entry) => entry.trim()));
+}
+
 function valuesFromContent(
   fields: StorefrontContentField[],
   content: StorefrontContent
 ): StorefrontContent {
-  return Object.fromEntries(fields.map((field) => [field.key, content[field.key] ?? ""]));
+  return Object.fromEntries(
+    fields.map((field) => {
+      if (isRepeatableField(field)) {
+        const value = content[field.key];
+        return [field.key, Array.isArray(value) ? value : []];
+      }
+      const value = content[field.key];
+      return [field.key, typeof value === "string" ? value : ""];
+    })
+  );
 }
 
 export function StorefrontEditor({
@@ -53,7 +83,7 @@ export function StorefrontEditor({
 
   useEffect(() => {
     const fromServer = valuesFromContent(fields, initialContent);
-    const hasSavedValue = fields.some((field) => fromServer[field.key]?.trim());
+    const hasSavedValue = fields.some((field) => valueHasContent(fromServer[field.key]));
     if (hasSavedValue) {
       setValues(fromServer);
       return;
@@ -69,7 +99,7 @@ export function StorefrontEditor({
         .maybeSingle();
       if (cancelled || error) return;
       const next = valuesFromContent(fields, parseStorefrontContent(data?.store_content));
-      if (!fields.some((field) => next[field.key]?.trim())) return;
+      if (!fields.some((field) => valueHasContent(next[field.key]))) return;
       setValues(next);
     })();
     return () => {
@@ -82,7 +112,7 @@ export function StorefrontEditor({
     if (!pages.includes(activePage)) setActivePage(pages[0] ?? "");
   }, [pages, activePage]);
 
-  function setField(key: string, value: string) {
+  function setField(key: string, value: StorefrontContentValue) {
     setValues((prev) => ({ ...prev, [key]: value }));
     setSaved(false);
   }
@@ -125,7 +155,7 @@ export function StorefrontEditor({
       <Tabs value={activePage} onValueChange={setActivePage} className="gap-0">
         <TabsList
           variant="line"
-          className="h-auto w-full justify-start gap-6 rounded-none border-b border-wire bg-transparent p-0"
+          className="flex h-auto w-full flex-wrap justify-start gap-x-5 gap-y-1 rounded-none border-b border-wire bg-transparent p-0"
         >
           {pages.map((page) => (
             <TabsTrigger
@@ -147,16 +177,32 @@ export function StorefrontEditor({
                   <p className="text-sm text-ink-700/60">No editable content on this page yet.</p>
                 ) : (
                   <div className="space-y-5">
-                    {pageFields.map((field) => (
-                      <EditorField
-                        key={field.key}
-                        field={field}
-                        value={values[field.key] ?? ""}
-                        sellerId={seller.id}
-                        disabled={saving}
-                        onChange={(next) => setField(field.key, next)}
-                      />
-                    ))}
+                    {pageFields.map((field) => {
+                      if (isRepeatableField(field)) {
+                        const raw = values[field.key];
+                        return (
+                          <RepeatableEditorField
+                            key={field.key}
+                            field={field}
+                            value={Array.isArray(raw) ? raw : []}
+                            sellerId={seller.id}
+                            disabled={saving}
+                            onChange={(next) => setField(field.key, next)}
+                          />
+                        );
+                      }
+                      const raw = values[field.key];
+                      return (
+                        <EditorField
+                          key={field.key}
+                          field={field}
+                          value={typeof raw === "string" ? raw : ""}
+                          sellerId={seller.id}
+                          disabled={saving}
+                          onChange={(next) => setField(field.key, next)}
+                        />
+                      );
+                    })}
                   </div>
                 )}
               </section>
@@ -200,7 +246,7 @@ function EditorField({
   disabled,
   onChange,
 }: {
-  field: StorefrontContentField;
+  field: { key: string; label: string; type: StorefrontContentScalarType; placeholder: string };
   value: string;
   sellerId: string;
   disabled: boolean;
@@ -233,7 +279,159 @@ function EditorField({
       ) : null}
       {field.type === "image" ? (
         <ContentImageField
-          field={field}
+          id={`store-content-${field.key}`}
+          label={field.label}
+          placeholder={field.placeholder}
+          value={value}
+          sellerId={sellerId}
+          disabled={disabled}
+          onChange={onChange}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function RepeatableEditorField({
+  field,
+  value,
+  sellerId,
+  disabled,
+  onChange,
+}: {
+  field: StorefrontContentRepeatableField;
+  value: StorefrontRepeatableItem[];
+  sellerId: string;
+  disabled: boolean;
+  onChange: (value: StorefrontRepeatableItem[]) => void;
+}) {
+  function updateItem(index: number, key: string, next: string) {
+    onChange(value.map((item, i) => (i === index ? { ...item, [key]: next } : item)));
+  }
+
+  function moveItem(index: number, delta: number) {
+    const nextIndex = index + delta;
+    if (nextIndex < 0 || nextIndex >= value.length) return;
+    const next = [...value];
+    const [item] = next.splice(index, 1);
+    next.splice(nextIndex, 0, item);
+    onChange(next);
+  }
+
+  return (
+    <div>
+      <p className="text-sm font-medium text-ink-950">{field.label}</p>
+      <div className="mt-2 space-y-3">
+        {value.map((item, index) => (
+          <article key={`${field.key}-${index}`} className="rounded-lg border border-wire p-4">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <p className="text-xs font-medium tracking-wide text-ink-700/60 uppercase">
+                {field.itemLabel} {index + 1}
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => moveItem(index, -1)}
+                  disabled={disabled || index === 0}
+                  aria-label={`Move ${field.itemLabel} up`}
+                  className="rounded-md p-1.5 text-ink-700 hover:bg-mist disabled:opacity-30"
+                >
+                  <ChevronUpIcon className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveItem(index, 1)}
+                  disabled={disabled || index === value.length - 1}
+                  aria-label={`Move ${field.itemLabel} down`}
+                  className="rounded-md p-1.5 text-ink-700 hover:bg-mist disabled:opacity-30"
+                >
+                  <ChevronDownIcon className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onChange(value.filter((_, i) => i !== index))}
+                  disabled={disabled}
+                  aria-label={`Remove ${field.itemLabel}`}
+                  className="rounded-md p-1.5 text-ink-700 hover:bg-mist hover:text-destructive disabled:opacity-30"
+                >
+                  <Trash2Icon className="size-4" />
+                </button>
+              </div>
+            </div>
+            <div className="space-y-4">
+              {field.itemFields.map((itemField) => (
+                <ItemEditorField
+                  key={itemField.key}
+                  field={itemField}
+                  id={`store-content-${field.key}-${index}-${itemField.key}`}
+                  value={item[itemField.key] ?? ""}
+                  sellerId={sellerId}
+                  disabled={disabled}
+                  onChange={(next) => updateItem(index, itemField.key, next)}
+                />
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => onChange([...value, emptyRepeatableItem(field)])}
+        disabled={disabled}
+        className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-wire px-3 py-2 text-sm font-medium text-ink-950 hover:border-signal disabled:opacity-50"
+      >
+        <PlusIcon className="size-4" />
+        Add {field.itemLabel}
+      </button>
+    </div>
+  );
+}
+
+function ItemEditorField({
+  field,
+  id,
+  value,
+  sellerId,
+  disabled,
+  onChange,
+}: {
+  field: StorefrontContentItemField;
+  id: string;
+  value: string;
+  sellerId: string;
+  disabled: boolean;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="text-sm font-medium text-ink-950">
+        {field.label}
+      </label>
+      {field.type === "text" ? (
+        <input
+          id={id}
+          type="text"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={field.placeholder}
+          className={FIELD_CLASS}
+        />
+      ) : null}
+      {field.type === "textarea" ? (
+        <textarea
+          id={id}
+          rows={3}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={field.placeholder}
+          className={FIELD_CLASS}
+        />
+      ) : null}
+      {field.type === "image" ? (
+        <ContentImageField
+          id={id}
+          label={field.label}
+          placeholder={field.placeholder}
           value={value}
           sellerId={sellerId}
           disabled={disabled}
@@ -245,13 +443,17 @@ function EditorField({
 }
 
 function ContentImageField({
-  field,
+  id,
+  label,
+  placeholder,
   value,
   sellerId,
   disabled,
   onChange,
 }: {
-  field: StorefrontContentField;
+  id: string;
+  label: string;
+  placeholder: string;
   value: string;
   sellerId: string;
   disabled: boolean;
@@ -294,7 +496,7 @@ function ContentImageField({
             type="button"
             onClick={() => onChange("")}
             disabled={disabled || uploading}
-            aria-label={`Remove ${field.label}`}
+            aria-label={`Remove ${label}`}
             className="absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full bg-ink-950/70 text-white disabled:opacity-40"
           >
             <XIcon className="size-3.5" />
@@ -316,13 +518,13 @@ function ContentImageField({
         ) : (
           <>
             <ImagePlusIcon className="size-4" />
-            {value ? "Replace image" : field.placeholder}
+            {value ? "Replace image" : placeholder}
           </>
         )}
       </button>
       <input
         ref={inputRef}
-        id={`store-content-${field.key}`}
+        id={id}
         type="file"
         accept={PRODUCT_IMAGE_ACCEPT}
         className="sr-only"

@@ -1,7 +1,12 @@
 import { MessageCircle } from "lucide-react";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 import { createClient } from "@ansaa/shared/supabase/server";
+import type { StorefrontContent } from "@ansaa/shared/storefront-content-schema";
 import { RideContactForm } from "@/components/store/motorbike-template/contact-form";
+import {
+  interpolateBrand,
+  rideText,
+} from "@/components/store/motorbike-template/ride-content";
 import {
   CONTACT_WHATSAPP_GREETING,
   whatsappHref,
@@ -33,6 +38,7 @@ export async function RideContactPage({
 }) {
   const seller = await loadSellerContact(storeSlug);
   const brandName = seller?.businessName || DEFAULT_STORE_NAME;
+  const content: StorefrontContent = seller?.storeContent ?? {};
   const sellerPhone = seller?.phone?.trim() ?? "";
   const phone = sellerPhone || PLACEHOLDER_PHONE;
   const wa =
@@ -44,16 +50,16 @@ export async function RideContactPage({
       <section className="bg-[#141414] text-white">
         <div className="mx-auto max-w-[1400px] px-6 py-14 md:px-10 md:py-20">
           <p className="text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: ORANGE }}>
-            Get in touch
+            {rideText(content, "contactKicker")}
           </p>
           <h1
             className="mt-3 max-w-xl text-[36px] font-extrabold leading-[1.05] tracking-tight md:text-[48px]"
             style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
           >
-            Contact Us
+            {rideText(content, "contactHeadline")}
           </h1>
           <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-white/65">
-            Send a message, ping us on WhatsApp, or call {brandName} directly.
+            {interpolateBrand(rideText(content, "contactSubtext"), brandName)}
           </p>
         </div>
       </section>
@@ -64,10 +70,10 @@ export async function RideContactPage({
             className="text-[24px] font-extrabold tracking-tight text-[#141414]"
             style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
           >
-            Send a message
+            {rideText(content, "contactFormHeading")}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-[#141414]/50">
-            Tell us what you&apos;re looking for and we&apos;ll come back to you.
+            {rideText(content, "contactFormIntro")}
           </p>
           <div className="mt-8">
             <RideContactForm storeSlug={storeSlug} />
@@ -85,10 +91,10 @@ export async function RideContactPage({
             className="text-[22px] font-extrabold tracking-tight"
             style={{ fontFamily: "var(--font-ride-display), ui-sans-serif, system-ui" }}
           >
-            Call or WhatsApp
+            {rideText(content, "contactWhatsappHeading")}
           </h2>
           <p className="mt-3 text-[16px] font-medium leading-relaxed text-white/80 md:text-[17px]">
-            Prefer to talk? Reach {brandName} on WhatsApp at the number below.
+            {interpolateBrand(rideText(content, "contactWhatsappBody"), brandName)}
           </p>
           <p className="mt-6 text-[20px] font-semibold tracking-wide md:text-[22px]">{phone}</p>
           <span

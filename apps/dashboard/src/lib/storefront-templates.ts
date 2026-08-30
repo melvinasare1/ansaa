@@ -19,8 +19,8 @@ export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
     previewClass: "bg-gradient-to-br from-ink-950 via-ink-800 to-amber-700",
   },
   {
-    id: "template-c",
-    name: "Homedine",
+    id: "kitchenware-template",
+    name: "Kitchenware",
     description: "Warm editorial layout, for home and kitchen goods.",
     previewClass: "bg-gradient-to-br from-emerald-50 via-stone-100 to-amber-100",
   },
@@ -29,12 +29,6 @@ export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
     name: "Stylehive",
     description: "Monochrome streetwear layout, for apparel sellers.",
     previewClass: "bg-gradient-to-br from-black via-zinc-800 to-zinc-500",
-  },
-  {
-    id: "template-e",
-    name: "Atelier",
-    description: "Quiet gallery layout, for makers and specialty goods.",
-    previewClass: "bg-gradient-to-br from-stone-200 via-neutral-100 to-rose-100",
   },
   {
     id: "motorbike-template",
@@ -55,7 +49,7 @@ export const PRODUCT_CATEGORY_SUGGESTIONS = [
 
 export const WEBSITE_ADMIN_FEATURES = [
   "Storefront on your own domain",
-  "Pick from 6 templates",
+  "Pick from 5 templates",
   "Admin dashboard for orders, products, and sales",
   "Manual MoMo payments. You mark orders paid, unpaid, or cancelled",
   "Email support",
