@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Check, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { rideCartHrefFromPath } from "@/components/store/motorbike-template/demo-catalog";
 import { MotorbikePlaceholder } from "@/components/store/motorbike-template/placeholders";
 import { PdpFaqs } from "@/components/store/pdp/PdpFaqs";
+import { PdpComparePrice, PdpFeaturesList, PdpShortDescription } from "@/components/store/pdp/PdpFeaturesList";
 import { PdpGallery, PdpQuantity, productFeatures } from "@/components/store/pdp/PdpGallery";
 import { PdpReviews } from "@/components/store/pdp/PdpReviews";
 import { RIDE_CHROME } from "@/components/store/pdp/chrome";
 import { useCart } from "@/lib/cart-context";
-import { formatCedis } from "@/lib/price";
 import type { Product, StoreFaq } from "@ansaa/shared/types";
 
 const ORANGE = RIDE_CHROME.accent;
@@ -83,23 +83,27 @@ export function RideProductDetail({
           >
             {product.name}
           </h1>
-          <p className="mt-3 text-[22px] font-semibold" style={{ color: ORANGE }}>
-            {formatCedis(product.priceCedis)}
-          </p>
+          <PdpComparePrice
+            priceCedis={product.priceCedis}
+            compareAtPriceCedis={product.compareAtPriceCedis}
+            wrapClassName="mt-3 flex flex-wrap items-baseline gap-3"
+            priceClassName="text-[22px] font-semibold"
+            compareClassName="text-[16px] font-medium text-[#141414]/35 line-through"
+            priceStyle={{ color: ORANGE }}
+          />
+          <PdpShortDescription
+            text={product.shortDescription}
+            className="mt-4 max-w-md text-[15px] leading-relaxed text-[#141414]/70"
+          />
           {product.description ? (
             <p className="mt-5 max-w-md text-[15px] leading-relaxed text-[#141414]/60">{product.description}</p>
           ) : null}
 
-          {features.length > 0 ? (
-            <ul className="mt-5 space-y-2">
-              {features.map((feature) => (
-                <li key={feature} className="flex items-start gap-2 text-[14px] text-[#141414]/75">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2} color={ORANGE} />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          <PdpFeaturesList
+            features={features}
+            accent={ORANGE}
+            itemClassName="flex items-start gap-2 text-[14px] text-[#141414]/75"
+          />
 
           <div className="mt-6">
             <p className="text-sm font-semibold text-[#141414]">Quantity</p>

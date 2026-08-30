@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
+import type { Product } from "@ansaa/shared/types";
 
 function GalleryThumbs({
   gallery,
@@ -63,6 +64,34 @@ function uniqueUrls(urls: string[]): string[] {
   return result;
 }
 
+function imagesForValue(product: Product, value: string): string[] {
+  const key = value.trim().toLowerCase();
+  if (!key) return [];
+  for (const variant of product.variants ?? []) {
+    const byValue = variant.imagesByValue;
+    if (byValue) {
+      for (const [label, list] of Object.entries(byValue)) {
+        if (label.toLowerCase() === key && list.length) return uniqueUrls(list);
+      }
+    }
+    const variantColor = (variant.color ?? "").trim().toLowerCase();
+    const variantSize = (variant.size ?? "").trim().toLowerCase();
+    if ((variantColor === key || variantSize === key) && variant.images.length) {
+      return uniqueUrls(variant.images);
+    }
+  }
+  return [];
+}
+
+/** Variant photos for the current color/size, falling back to the product gallery. */
+export function imagesForSelection(product: Product, color?: string, size?: string): string[] {
+  const colorImages = imagesForValue(product, color ?? "");
+  if (colorImages.length > 0) return colorImages;
+  const sizeImages = imagesForValue(product, size ?? "");
+  if (sizeImages.length > 0) return sizeImages;
+  return uniqueUrls(product.images);
+}
+
 export function PdpGallery({
   images,
   alt,
@@ -84,6 +113,12 @@ export function PdpGallery({
 }) {
   const gallery = uniqueUrls(images);
   const [selected, setSelected] = useState(0);
+  const galleryKey = gallery.join("|");
+
+  useEffect(() => {
+    setSelected(0);
+  }, [galleryKey]);
+
   const main = gallery[Math.min(selected, Math.max(gallery.length - 1, 0))] ?? "";
 
   return (

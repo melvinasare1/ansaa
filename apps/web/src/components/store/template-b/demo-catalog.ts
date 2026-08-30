@@ -5,6 +5,8 @@ export type TemplateBDemoProduct = {
   name: string;
   description: string;
   priceCedis: number;
+  compareAtPriceCedis?: number;
+  shortDescription?: string;
   category: string;
   createdAt: number;
   stockQuantity: number;
@@ -17,7 +19,9 @@ export const TEMPLATE_B_DEMO_PRODUCTS: TemplateBDemoProduct[] = [
     id: "demo-rice-5kg",
     name: "Local rice — 5kg",
     description: "Long-grain rice packed for the week. Sealed bag, ready for the pantry.",
+    shortDescription: "Sealed 5kg bag for the pantry.",
     priceCedis: 85,
+    compareAtPriceCedis: 95,
     category: "Staples",
     createdAt: 6,
     stockQuantity: 24,
@@ -106,7 +110,9 @@ export function templateBDemoToProduct(item: TemplateBDemoProduct): Product {
     sellerId: "demo",
     name: item.name,
     description: item.description,
+    shortDescription: item.shortDescription,
     priceCedis: item.priceCedis,
+    compareAtPriceCedis: item.compareAtPriceCedis,
     images: [],
     stockQuantity: item.stockQuantity,
     sku: item.id.replace(/-/g, "").toUpperCase(),

@@ -7,6 +7,8 @@ export type KitchenwareDemoProduct = {
   name: string;
   description: string;
   priceCedis: number;
+  compareAtPriceCedis?: number;
+  shortDescription?: string;
   category: string;
   createdAt: number;
   image: string;
@@ -20,7 +22,9 @@ export const KITCHENWARE_DEMO_PRODUCTS: KitchenwareDemoProduct[] = [
     id: "demo-stoneware-mug",
     name: "CupEco Stoneware Mug",
     description: "A weighty mug with a matte glaze. Holds a generous pour and stacks neatly.",
+    shortDescription: "Matte stoneware mug for everyday pours.",
     priceCedis: 95,
+    compareAtPriceCedis: 120,
     category: "Drinkware",
     createdAt: 6,
     image: "/template-c/cups.jpg",
@@ -115,7 +119,9 @@ export function kitchenwareDemoToProduct(item: KitchenwareDemoProduct): Product 
     sellerId: "demo",
     name: item.name,
     description: item.description,
+    shortDescription: item.shortDescription,
     priceCedis: item.priceCedis,
+    compareAtPriceCedis: item.compareAtPriceCedis,
     images: [item.image, ...(item.gallery ?? [])].filter(Boolean),
     stockQuantity: 10,
     sku: item.id.replace(/-/g, "").toUpperCase(),
@@ -124,5 +130,24 @@ export function kitchenwareDemoToProduct(item: KitchenwareDemoProduct): Product 
     createdAt: item.createdAt,
     colors: item.colors,
     features: item.features ?? [],
+    variants: item.colors.length
+      ? [
+          {
+            id: `${item.id}-color`,
+            name: "Color",
+            values: item.colors,
+            sku: `${item.id.replace(/-/g, "").toUpperCase()}-CLR`,
+            priceCedis: item.priceCedis,
+            stockQuantity: 10,
+            images: [],
+            imagesByValue: Object.fromEntries(
+              item.colors.map((color, index) => {
+                const urls = [item.image, ...(item.gallery ?? [])].filter(Boolean);
+                return [color, [urls[index % urls.length]]];
+              })
+            ),
+          },
+        ]
+      : undefined,
   };
 }

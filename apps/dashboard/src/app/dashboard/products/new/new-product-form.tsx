@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { PlusIcon, XIcon } from "lucide-react";
 import {
   ProductImagePicker,
+  slotsFromUrls,
   useProductImageSlots,
   type ImageSlot,
 } from "@/components/dashboard/ProductImagePicker";
@@ -28,8 +29,12 @@ import {
   type FilterOptionSets,
 } from "@/lib/product-filter-options";
 import {
+  collectProductImageUrls,
+  draftVariantsFromProduct,
   emptyManualVariant,
+  listingColourNames,
   storefrontSizesAndColors,
+  variantImageAssignmentsFromProduct,
   variantImageGroupKey,
   variantImageGroups,
   type DraftVariant,
@@ -40,7 +45,7 @@ import { productToInsert } from "@ansaa/shared/mappers";
 import { createClient } from "@ansaa/shared/supabase/client";
 import { trackEvent } from "@/lib/vercel-track";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
-import type { ProductCondition, ProductVariant } from "@ansaa/shared/types";
+import type { Product, ProductCondition, ProductVariant } from "@ansaa/shared/types";
 
 const TABS = ["basic", "variations", "images"] as const;
 type TabId = (typeof TABS)[number];
@@ -56,13 +61,16 @@ const FIELD_INPUT_CLASS =
 
 type SaveMode = "draft" | "publish";
 
-export function NewProductForm() {
+export function NewProductForm({ product }: { product?: Product }) {
   const router = useRouter();
   const { seller } = useSeller();
-  const images = useProductImageSlots();
+  const isEdit = Boolean(product);
+  const initialDrafts = product ? draftVariantsFromProduct(product) : [];
+  const initialSlots = product ? slotsFromUrls(collectProductImageUrls(product)) : [];
+  const images = useProductImageSlots(initialSlots);
   const [tab, setTab] = useState<TabId>("basic");
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
+  const [name, setName] = useState(product?.name ?? "");
+  const [category, setCategory] = useState(product?.category ?? "");
   const [categories, setCategories] = useState<SellerCategory[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptionSets>({
     tag: [],
@@ -70,21 +78,30 @@ export function NewProductForm() {
     colour: [],
     year: [],
   });
-  const [tags, setTags] = useState<string[]>([]);
-  const [engineSize, setEngineSize] = useState("");
-  const [condition, setCondition] = useState<ProductCondition | "">("");
-  const [year, setYear] = useState("");
-  const [colourNames, setColourNames] = useState<string[]>([]);
-  const [variants, setVariants] = useState<DraftVariant[]>([]);
-  const [price, setPrice] = useState("");
-  const [compareAtPrice, setCompareAtPrice] = useState("");
-  const [sku, setSku] = useState("");
-  const [stock, setStock] = useState("0");
-  const [shortDescription, setShortDescription] = useState("");
-  const [description, setDescription] = useState("");
-  const [features, setFeatures] = useState<string[]>([""]);
-  const [variantImages, setVariantImages] = useState<Record<string, string[]>>({});
-  const [savedId, setSavedId] = useState<string | null>(null);
+  const [tags, setTags] = useState<string[]>(product?.tags ?? []);
+  const [engineSize, setEngineSize] = useState(product?.engineSize ?? "");
+  const [condition, setCondition] = useState<ProductCondition | "">(product?.condition ?? "");
+  const [year, setYear] = useState(product?.year ? String(product.year) : "");
+  const [colourNames, setColourNames] = useState<string[]>(() =>
+    product ? listingColourNames(product, initialDrafts) : []
+  );
+  const [variants, setVariants] = useState<DraftVariant[]>(initialDrafts);
+  const [price, setPrice] = useState(product ? String(product.priceCedis) : "");
+  const [compareAtPrice, setCompareAtPrice] = useState(
+    product?.compareAtPriceCedis != null ? String(product.compareAtPriceCedis) : ""
+  );
+  const [sku, setSku] = useState(product?.sku ?? "");
+  const [stock, setStock] = useState(product ? String(product.stockQuantity) : "0");
+  const [shortDescription, setShortDescription] = useState(product?.shortDescription ?? "");
+  const [description, setDescription] = useState(product?.description ?? "");
+  const [features, setFeatures] = useState<string[]>(
+    product?.features?.length ? product.features : [""]
+  );
+  const [variantImages, setVariantImages] = useState<Record<string, string[]>>(() =>
+    product ? variantImageAssignmentsFromProduct(product, initialSlots) : {}
+  );
+  const [savedId, setSavedId] = useState<string | null>(product?.id ?? null);
+  const keepActive = product?.active ?? false;
   const [saving, setSaving] = useState<SaveMode | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [draftNotice, setDraftNotice] = useState<string | null>(null);
@@ -292,7 +309,7 @@ export function NewProductForm() {
     try {
       const supabase = createClient();
       const uploaded = await images.uploadAll(supabase, seller.id);
-      const fields = payloadFields(uploaded, mode === "publish");
+      const fields = payloadFields(uploaded, mode === "publish" ? true : keepActive);
 
       if (savedId) {
         const { error: updateError } = await supabase
@@ -517,7 +534,9 @@ export function NewProductForm() {
 
   return (
     <div className="px-4 pt-6 pb-8 lg:px-6">
-      <h1 className="text-2xl font-bold tracking-tight text-ink-950">Add new product</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-ink-950">
+        {isEdit ? "Edit product" : "Add new product"}
+      </h1>
       <nav aria-label="Breadcrumb" className="mt-1 text-sm text-muted-foreground">
         <ol className="flex flex-wrap items-center gap-1.5">
           <li>
@@ -526,7 +545,7 @@ export function NewProductForm() {
             </Link>
           </li>
           <li aria-hidden="true">/</li>
-          <li className="text-ink-950">Add new product</li>
+          <li className="text-ink-950">{isEdit ? "Edit product" : "Add new product"}</li>
         </ol>
       </nav>
 
@@ -552,7 +571,9 @@ export function NewProductForm() {
 
         <div className="mt-5 rounded-xl border border-black/8 bg-white">
           <div className="px-6 pt-6 pb-2">
-            <h2 className="text-base font-semibold text-ink-950">Add new product</h2>
+            <h2 className="text-base font-semibold text-ink-950">
+              {isEdit ? "Edit product" : "Add new product"}
+            </h2>
           </div>
 
           <TabsContent value="basic" className="px-6 pt-4 pb-2 outline-none">
@@ -806,7 +827,9 @@ export function NewProductForm() {
                   ? images.slots.some((slot) => slot.status === "uploading")
                     ? "Uploading…"
                     : "Publishing…"
-                  : "Continue"}
+                  : tab === TABS[TABS.length - 1] && isEdit
+                    ? "Publish"
+                    : "Continue"}
               </button>
             </div>
           </div>

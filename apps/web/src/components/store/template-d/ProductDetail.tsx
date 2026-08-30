@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PdpFaqs } from "@/components/store/pdp/PdpFaqs";
-import { PdpGallery, PdpQuantity, productFeatures } from "@/components/store/pdp/PdpGallery";
+import { PdpComparePrice, PdpFeaturesList, PdpShortDescription } from "@/components/store/pdp/PdpFeaturesList";
+import { imagesForSelection, PdpGallery, PdpQuantity, productFeatures } from "@/components/store/pdp/PdpGallery";
 import { PdpReviews } from "@/components/store/pdp/PdpReviews";
+import { PdpVariantSelectors } from "@/components/store/pdp/PdpVariantSelectors";
 import { STYLEHIVE_CHROME } from "@/components/store/pdp/chrome";
 import { useCart } from "@/lib/cart-context";
 import { cartLineId } from "@/lib/checkout";
-import { formatCedis } from "@/lib/price";
-import { fillFromId, isLightSwatch, swatchHex } from "@/lib/swatch";
+import { fillFromId, swatchHex } from "@/lib/swatch";
 import type { Product, StoreFaq } from "@ansaa/shared/types";
 
 const ACCENT = STYLEHIVE_CHROME.accent;
@@ -39,7 +40,7 @@ export function ProductDetail({
     const color = selectedColor || undefined;
     const variantLabel = [size, color].filter(Boolean).join(" / ");
     const qty = Math.min(99, Math.max(1, Math.floor(quantity) || 1));
-    const photo = product.images[0];
+    const photo = imagesForSelection(product, color, size)[0];
 
     addItem({
       productId: cartLineId(product.id, size, color),
@@ -57,7 +58,7 @@ export function ProductDetail({
     <div className="mx-auto max-w-[1400px] px-5 py-8 md:px-8 md:py-12">
       <div className="grid items-start gap-8 md:grid-cols-2 md:gap-12">
         <PdpGallery
-          images={product.images}
+          images={imagesForSelection(product, selectedColor, selectedSize)}
           alt={product.name}
           accent={ACCENT}
           aspectClass="aspect-[4/5]"
@@ -71,81 +72,52 @@ export function ProductDetail({
           >
             {product.name}
           </h1>
+          <PdpShortDescription
+            text={product.shortDescription}
+            className="mt-3 max-w-md text-[14px] leading-relaxed text-black/65"
+          />
           {product.description ? (
             <p className="mt-4 max-w-md text-[14px] leading-relaxed text-black/55">
               {product.description}
             </p>
           ) : null}
 
-          {features.length > 0 ? (
-            <ul className="mt-5 space-y-2">
-              {features.map((feature) => (
-                <li key={feature} className="flex items-start gap-2 text-[14px] text-black/70">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2} color={ACCENT} />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          <PdpFeaturesList
+            features={features}
+            accent={ACCENT}
+            itemClassName="flex items-start gap-2 text-[14px] text-black/70"
+          />
 
-          <p className="mt-5 text-[22px] font-extrabold tracking-tight">{formatCedis(product.priceCedis)}</p>
+          <PdpComparePrice
+            priceCedis={product.priceCedis}
+            compareAtPriceCedis={product.compareAtPriceCedis}
+            wrapClassName="mt-5 flex flex-wrap items-baseline gap-3"
+            priceClassName="text-[22px] font-extrabold tracking-tight"
+            compareClassName="text-[16px] font-medium text-black/35 line-through"
+          />
 
-          {sizes.length > 0 ? (
-            <div className="mt-8">
-              <p className="text-sm font-semibold">Size</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {sizes.map((size) => {
-                  const selected = size === selectedSize;
-                  return (
-                    <button
-                      key={size}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => setSelectedSize(size)}
-                      className={
-                        selected
-                          ? "h-10 min-w-[44px] rounded-full bg-black px-4 text-sm font-semibold text-white"
-                          : "h-10 min-w-[44px] rounded-full bg-[#F5F5F3] px-4 text-sm font-medium text-black"
-                      }
-                    >
-                      {size}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
-
-          {colors.length > 0 ? (
-            <div className="mt-6">
-              <p className="text-sm font-semibold">Color</p>
-              <div className="mt-3 flex items-center gap-2.5">
-                {colors.map((color) => {
-                  const selected = color === selectedColor;
-                  const hex = swatchHex(color);
-                  return (
-                    <button
-                      key={color}
-                      type="button"
-                      aria-label={color}
-                      aria-pressed={selected}
-                      onClick={() => setSelectedColor(color)}
-                      className="flex h-8 w-8 items-center justify-center rounded-full"
-                      style={selected ? { boxShadow: "0 0 0 1.5px #111" } : undefined}
-                    >
-                      <span
-                        className="h-6 w-6 rounded-full"
-                        style={{
-                          backgroundColor: hex,
-                          boxShadow: isLightSwatch(hex) ? "inset 0 0 0 1px rgba(0,0,0,0.08)" : undefined,
-                        }}
-                      />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
+          <PdpVariantSelectors
+            sizes={sizes}
+            colors={colors}
+            selectedSize={selectedSize}
+            selectedColor={selectedColor}
+            onSelectSize={setSelectedSize}
+            onSelectColor={setSelectedColor}
+            sizeLabel="Size"
+            colorLabel="Color"
+            labelClassName="text-sm font-semibold"
+            sizeSectionClassName="mt-8"
+            colorSectionClassName="mt-6"
+            sizeButtonClassName={(selected) =>
+              selected
+                ? "h-10 min-w-[44px] rounded-full bg-black px-4 text-sm font-semibold text-white"
+                : "h-10 min-w-[44px] rounded-full bg-[#F5F5F3] px-4 text-sm font-medium text-black"
+            }
+            colorMode="swatch"
+            colorWrapClassName="mt-3 flex items-center gap-2.5"
+            swatchSelectedRing="0 0 0 1.5px #111"
+            swatchLightBorder
+          />
 
           <div className="mt-6">
             <p className="text-sm font-semibold">Quantity</p>

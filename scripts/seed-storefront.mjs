@@ -76,62 +76,72 @@ const seller = {
   status: "active",
 };
 
+const SHIRT_IMAGES = [
+  "https://ztoogyrvfghfoizahygf.supabase.co/storage/v1/object/public/product-images/template%20a%20images/ChatGPT%20Image%20Aug%2030,%202026,%2009_24_54%20PM.png",
+  "https://ztoogyrvfghfoizahygf.supabase.co/storage/v1/object/public/product-images/template%20a%20images/ChatGPT%20Image%20Aug%2030,%202026,%2009_27_34%20PM.png",
+  "https://ztoogyrvfghfoizahygf.supabase.co/storage/v1/object/public/product-images/template%20a%20images/ChatGPT%20Image%20Aug%2030,%202026,%2009_32_46%20PM.png",
+  "https://ztoogyrvfghfoizahygf.supabase.co/storage/v1/object/public/product-images/template%20a%20images/ChatGPT%20Image%20Aug%2030,%202026,%2009_35_12%20PM.png",
+];
+
 const products = [
   {
     id: "21111111-1111-4111-8111-111111111111",
     seller_id: SELLER_ID,
-    name: "Polyester Printed Shirt",
-    description: "A relaxed short-sleeve shirt with a turn-down collar, cut for everyday wear.",
+    name: "Split Panel Shirt",
+    description:
+      "A short-sleeve button-up with a split print: orange stripes on one side and a floral panel on the other.",
+    short_description: "Split-print camp shirt for warm days.",
     price_cedis: 130,
-    images: [],
+    compare_at_price_cedis: 165,
+    images: [SHIRT_IMAGES[0]],
     stock_quantity: 24,
     sku: "STY-SHIRT-001",
     category: "Tops & Tees",
     active: true,
     sizes: ["XS", "S", "M", "L", "XL"],
-    colors: ["Cream", "Orange", "Blue", "Black"],
+    colors: ["Orange", "Cream", "Black"],
   },
   {
     id: "21111111-1111-4111-8111-111111111112",
     seller_id: SELLER_ID,
-    name: "Half Sleeve Shirt",
-    description: "Lightweight half-sleeve shirting with an easy, regular fit.",
+    name: "Tropical Floral Shirt",
+    description: "Open-collar short sleeve with a tropical lily print on a pale blue ground. Light enough for warm days.",
     price_cedis: 245,
-    images: [],
+    images: [SHIRT_IMAGES[1]],
     stock_quantity: 18,
     sku: "STY-SHIRT-002",
     category: "Tops & Tees",
     active: true,
     sizes: ["S", "M", "L", "XL"],
-    colors: ["Orange", "Navy", "Teal"],
+    colors: ["Blue", "Orange", "White"],
   },
   {
     id: "21111111-1111-4111-8111-111111111113",
     seller_id: SELLER_ID,
-    name: "Cotton Oxford Shirt",
-    description: "Classic oxford cloth with a clean collar and a structured drape.",
+    name: "Painterly Stripe Shirt",
+    description: "A camp shirt in painterly vertical stripes — cyan, gold, magenta, and black on a light ground.",
     price_cedis: 180,
-    images: [],
+    images: [SHIRT_IMAGES[2]],
     stock_quantity: 12,
     sku: "STY-SHIRT-003",
     category: "Tops & Tees",
     active: true,
     sizes: ["S", "M", "L"],
-    colors: ["Blue", "White", "Black"],
+    colors: ["Blue", "Yellow", "Orange"],
   },
   {
     id: "21111111-1111-4111-8111-111111111114",
     seller_id: SELLER_ID,
-    name: "Archived Overshirt",
-    description: "Inactive on purpose — must not appear on the public catalog.",
-    price_cedis: 290,
-    images: [],
-    stock_quantity: 0,
-    sku: "STY-SHIRT-000",
-    category: "Jackets & Coats",
-    active: false,
-    sizes: ["M", "L"],
-    colors: ["Black"],
+    name: "Graphic Print Shirt",
+    description: "A teal short-sleeve covered in collage graphics and slogans. Loud on purpose.",
+    price_cedis: 220,
+    images: [SHIRT_IMAGES[3]],
+    stock_quantity: 16,
+    sku: "STY-SHIRT-004",
+    category: "Tops & Tees",
+    active: true,
+    sizes: ["S", "M", "L", "XL"],
+    colors: ["Sky", "Green", "Orange"],
   },
 ];
 
@@ -141,6 +151,13 @@ if (sellerError) throw sellerError;
 const { error: productError } = await supabase.from("products").upsert(products, { onConflict: "id" });
 if (productError) throw productError;
 
+const keepIds = products.map((product) => product.id);
+const { error: cleanupError } = await supabase
+  .from("products")
+  .delete()
+  .eq("seller_id", SELLER_ID)
+  .not("id", "in", `(${keepIds.join(",")})`);
+if (cleanupError) throw cleanupError;
+
 console.log(`Seeded seller "${STORE_SLUG}" (${SELLER_ID}) with ${products.length} products.`);
 console.log(`Visit: http://localhost:3000/store/template-a/${STORE_SLUG}`);
-console.log("Inactive product (should be hidden): 21111111-1111-4111-8111-111111111114");

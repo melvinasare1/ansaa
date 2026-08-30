@@ -1,83 +1,72 @@
 import type { Product } from "@ansaa/shared/types";
+import { TEMPLATE_A_SHIRT_IMAGES } from "@/components/store/template-a/product-images";
 
 export type TemplateADemoProduct = {
   id: string;
   name: string;
   description: string;
   priceCedis: number;
+  compareAtPriceCedis?: number;
+  shortDescription?: string;
   category: string;
   createdAt: number;
   colors: string[];
   sizes: string[];
+  images: string[];
   features?: string[];
 };
 
 export const TEMPLATE_A_DEMO_PRODUCTS: TemplateADemoProduct[] = [
   {
-    id: "demo-oxford-shirt",
-    name: "Everyday Oxford Shirt",
-    description: "A crisp cotton oxford for the office and weekends. Relaxed through the body with a classic collar.",
-    priceCedis: 280,
+    id: "demo-split-panel-shirt",
+    name: "Split Panel Shirt",
+    description:
+      "A short-sleeve button-up with a split print: orange stripes on one side and a floral panel on the other.",
+    shortDescription: "Split-print camp shirt for warm days.",
+    priceCedis: 130,
+    compareAtPriceCedis: 165,
     category: "Tops & Tees",
-    createdAt: 6,
-    colors: ["#FFFFFF", "#1C7ED6", "#111111"],
-    sizes: ["S", "M", "L", "XL"],
-    features: ["Breathable cotton", "Easy-iron collar", "Made for everyday wear"],
-  },
-  {
-    id: "demo-denim-jacket",
-    name: "Washed Denim Jacket",
-    description: "Medium-wash denim with a straight cut and metal buttons. Layer over tees or knitwear.",
-    priceCedis: 420,
-    category: "Jackets & Coats",
-    createdAt: 5,
-    colors: ["#1C7ED6", "#111111"],
-    sizes: ["S", "M", "L"],
-    features: ["Medium-wash denim", "Metal buttons", "Layer over tees or knits"],
-  },
-  {
-    id: "demo-knit-sweater",
-    name: "Merino Crew Knit",
-    description: "Soft merino crewneck that holds its shape. Fine gauge for cooler evenings without bulk.",
-    priceCedis: 360,
-    category: "Knitwear",
     createdAt: 4,
-    colors: ["#C08A4D", "#ADB5BD", "#2F9E44"],
-    sizes: ["S", "M", "L", "XL"],
-    features: ["Fine-gauge merino", "Holds its shape", "Cool-evening weight"],
+    colors: ["Orange", "Cream", "Black"],
+    sizes: ["XS", "S", "M", "L", "XL"],
+    images: [TEMPLATE_A_SHIRT_IMAGES[0]],
+    features: ["Split-panel print", "Turn-down collar", "Relaxed short sleeve"],
   },
   {
-    id: "demo-wide-pants",
-    name: "Wide-Leg Trousers",
-    description: "Tailored wide-leg trousers with a high rise and a clean drape. Pair with the oxford or knit.",
-    priceCedis: 310,
-    category: "Pants",
+    id: "demo-tropical-floral-shirt",
+    name: "Tropical Floral Shirt",
+    description: "Open-collar short sleeve with a tropical lily print on a pale blue ground. Light enough for warm days.",
+    priceCedis: 245,
+    category: "Tops & Tees",
     createdAt: 3,
-    colors: ["#111111", "#ADB5BD"],
-    sizes: ["S", "M", "L"],
-    features: ["High rise", "Clean drape", "Tailored wide leg"],
+    colors: ["Blue", "Orange", "White"],
+    sizes: ["S", "M", "L", "XL"],
+    images: [TEMPLATE_A_SHIRT_IMAGES[1]],
+    features: ["Tropical print", "Camp collar", "Easy over a tee"],
   },
   {
-    id: "demo-summer-dress",
-    name: "Linen Day Dress",
-    description: "Breathable linen midi with a square neckline. Easy for warm days and evening plans.",
-    priceCedis: 390,
-    category: "Dresses",
+    id: "demo-painterly-stripe-shirt",
+    name: "Painterly Stripe Shirt",
+    description: "A camp shirt in painterly vertical stripes — cyan, gold, magenta, and black on a light ground.",
+    priceCedis: 180,
+    category: "Tops & Tees",
     createdAt: 2,
-    colors: ["#F783AC", "#F4C430", "#FFFFFF"],
-    sizes: ["XS", "S", "M", "L"],
-    features: ["Breathable linen", "Square neckline", "Midi length"],
+    colors: ["Blue", "Yellow", "Orange"],
+    sizes: ["S", "M", "L"],
+    images: [TEMPLATE_A_SHIRT_IMAGES[2]],
+    features: ["Brushstroke stripes", "Chest pocket", "Rounded hem"],
   },
   {
-    id: "demo-midi-skirt",
-    name: "Pleated Midi Skirt",
-    description: "Soft pleats that move without clinging. Wear with the crew knit or a tucked tee.",
-    priceCedis: 250,
-    category: "Skirts",
+    id: "demo-graphic-print-shirt",
+    name: "Graphic Print Shirt",
+    description: "A teal short-sleeve covered in collage graphics and slogans. Loud on purpose.",
+    priceCedis: 220,
+    category: "Tops & Tees",
     createdAt: 1,
-    colors: ["#7B2CBF", "#111111"],
-    sizes: ["S", "M", "L"],
-    features: ["Soft pleats", "Easy to pair", "Midi length"],
+    colors: ["Sky", "Green", "Orange"],
+    sizes: ["S", "M", "L", "XL"],
+    images: [TEMPLATE_A_SHIRT_IMAGES[3]],
+    features: ["All-over graphic print", "Cuffed short sleeve", "Streetwear cut"],
   },
 ];
 
@@ -109,8 +98,10 @@ export function templateADemoToProduct(item: TemplateADemoProduct): Product {
     sellerId: "demo",
     name: item.name,
     description: item.description,
+    shortDescription: item.shortDescription,
     priceCedis: item.priceCedis,
-    images: [],
+    compareAtPriceCedis: item.compareAtPriceCedis,
+    images: item.images,
     stockQuantity: 14,
     sku: item.id.replace(/-/g, "").toUpperCase(),
     category: item.category,
@@ -119,5 +110,24 @@ export function templateADemoToProduct(item: TemplateADemoProduct): Product {
     colors: item.colors,
     sizes: item.sizes,
     features: item.features ?? [],
+    variants:
+      item.id === "demo-split-panel-shirt"
+        ? [
+            {
+              id: "demo-split-panel-shirt-color",
+              name: "Color",
+              values: item.colors,
+              sku: "DEMOSPLITPANELSHIRT-CLR",
+              priceCedis: item.priceCedis,
+              stockQuantity: 14,
+              images: [],
+              imagesByValue: {
+                Orange: [TEMPLATE_A_SHIRT_IMAGES[0]],
+                Cream: [TEMPLATE_A_SHIRT_IMAGES[1]],
+                Black: [TEMPLATE_A_SHIRT_IMAGES[2]],
+              },
+            },
+          ]
+        : undefined,
   };
 }

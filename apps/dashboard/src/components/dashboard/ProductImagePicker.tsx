@@ -26,8 +26,18 @@ function revokeIfBlob(url: string) {
   if (url.startsWith("blob:")) URL.revokeObjectURL(url);
 }
 
-export function useProductImageSlots() {
-  const [slots, setSlots] = useState<ImageSlot[]>([]);
+export function slotsFromUrls(urls: string[]): ImageSlot[] {
+  return urls.slice(0, MAX_PRODUCT_IMAGES).map((url) => ({
+    id: url,
+    previewUrl: url,
+    publicUrl: url,
+    status: "uploaded" as const,
+    progress: 100,
+  }));
+}
+
+export function useProductImageSlots(initialSlots: ImageSlot[] = []) {
+  const [slots, setSlots] = useState<ImageSlot[]>(initialSlots);
   const [error, setError] = useState<string | null>(null);
   const slotsRef = useRef<ImageSlot[]>([]);
   slotsRef.current = slots;

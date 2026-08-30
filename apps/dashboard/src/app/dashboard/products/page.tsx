@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowDownIcon,
   ChevronLeftIcon,
@@ -9,7 +10,7 @@ import {
   ChevronsUpDownIcon,
   MoreHorizontalIcon,
 } from "lucide-react";
-import ProductFormDialog from "@/components/dashboard/ProductFormDialog";
+import ProductQuickEditDialog from "@/components/dashboard/ProductQuickEditDialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
@@ -106,6 +107,7 @@ function pageList(current: number, total: number): Array<number | "ellipsis"> {
 }
 
 export default function ProductsPage() {
+  const router = useRouter();
   const { seller } = useSeller();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -426,12 +428,17 @@ export default function ProductsPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="min-w-40">
                               <DropdownMenuItem
+                                onSelect={() => router.push(`/dashboard/products/${product.id}`)}
+                              >
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
                                 onSelect={() => {
                                   setEditingProduct(product);
                                   setFormOpen(true);
                                 }}
                               >
-                                Edit
+                                Quick edit
                               </DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => toggleActive(product)}>
                                 Toggle active
@@ -496,8 +503,8 @@ export default function ProductsPage() {
         </div>
       ) : null}
 
-      <ProductFormDialog
-        key={editingProduct?.id ?? "create"}
+      <ProductQuickEditDialog
+        key={editingProduct?.id ?? "quick-edit"}
         open={formOpen}
         product={editingProduct}
         onOpenChange={(open) => {

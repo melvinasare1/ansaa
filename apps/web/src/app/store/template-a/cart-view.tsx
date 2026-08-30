@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import {
@@ -12,6 +13,10 @@ import type { CheckoutSuccess } from "@/lib/checkout";
 import { formatCedis } from "@/lib/price";
 
 const ACCENT = "#FF7A1A";
+
+function isImageSrc(value: string) {
+  return value.startsWith("http") || value.startsWith("/");
+}
 
 export function TemplateACartView({
   storeSlug,
@@ -51,14 +56,16 @@ export function TemplateACartView({
           <ul className="mt-8 divide-y divide-black/10 border-b border-black/10">
             {items.map((item) => (
               <li key={item.productId} className="flex gap-4 py-5">
-                <div
-                  className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-[#EDEDED]"
-                  aria-hidden
-                >
-                  <span
-                    className="h-8 w-8 rounded-md"
-                    style={{ backgroundColor: item.image || "#C4C4C4" }}
-                  />
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-black">
+                  {isImageSrc(item.image) ? (
+                    <Image src={item.image} alt={item.name} fill sizes="80px" className="object-contain" />
+                  ) : (
+                    <span
+                      className="block h-full w-full"
+                      style={{ backgroundColor: item.image || "#C4C4C4" }}
+                      aria-hidden
+                    />
+                  )}
                 </div>
 
                 <div className="min-w-0 flex-1">

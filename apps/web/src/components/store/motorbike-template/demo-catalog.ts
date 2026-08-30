@@ -7,6 +7,8 @@ export type RideDemoProduct = {
   name: string;
   description: string;
   priceCedis: number;
+  compareAtPriceCedis?: number;
+  shortDescription?: string;
   category: string;
   createdAt: number;
   image: string;
@@ -40,7 +42,9 @@ export const RIDE_DEMO_VEHICLES: RideDemoProduct[] = [
     name: "Apex R9",
     description:
       "Street-ready motorbike with a punchy engine, upright seating, and the range to cover town and the open road.",
+    shortDescription: "Street-ready commuter with town and open-road range.",
     priceCedis: 18900,
+    compareAtPriceCedis: 21400,
     category: "Motorbikes",
     createdAt: 4,
     image: IMAGES.motorbike,
@@ -258,7 +262,9 @@ export function rideDemoToProduct(item: RideDemoProduct): Product {
     sellerId: "demo",
     name: item.name,
     description: item.description,
+    shortDescription: item.shortDescription,
     priceCedis: item.priceCedis,
+    compareAtPriceCedis: item.compareAtPriceCedis,
     images: [item.image, ...(item.gallery ?? [])].filter(Boolean),
     features: item.features,
     stockQuantity: 8,

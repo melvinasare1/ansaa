@@ -5,6 +5,8 @@ export type TemplateDDemoProduct = {
   name: string;
   description: string;
   priceCedis: number;
+  compareAtPriceCedis?: number;
+  shortDescription?: string;
   category: string;
   createdAt: number;
   image: string;
@@ -19,7 +21,9 @@ export const TEMPLATE_D_DEMO_PRODUCTS: TemplateDDemoProduct[] = [
     id: "demo-corduroy-jacket",
     name: "Cream Corduroy Jacket",
     description: "Wide-wale corduroy with a relaxed shoulder. Soft enough for all day, structured enough to wear out.",
+    shortDescription: "Relaxed wide-wale corduroy, all-day wear.",
     priceCedis: 480,
+    compareAtPriceCedis: 560,
     category: "Jackets",
     createdAt: 6,
     image: "/template-d/card-corduroy.jpg",
@@ -111,7 +115,9 @@ export function templateDDemoToProduct(item: TemplateDDemoProduct): Product {
     sellerId: "demo",
     name: item.name,
     description: item.description,
+    shortDescription: item.shortDescription,
     priceCedis: item.priceCedis,
+    compareAtPriceCedis: item.compareAtPriceCedis,
     images: [item.image, ...(item.gallery ?? [])],
     features: item.features,
     stockQuantity: 9,
@@ -121,5 +127,24 @@ export function templateDDemoToProduct(item: TemplateDDemoProduct): Product {
     createdAt: item.createdAt,
     colors: item.colors,
     sizes: item.sizes,
+    variants: item.colors.length
+      ? [
+          {
+            id: `${item.id}-color`,
+            name: "Color",
+            values: item.colors,
+            sku: `${item.id.replace(/-/g, "").toUpperCase()}-CLR`,
+            priceCedis: item.priceCedis,
+            stockQuantity: 9,
+            images: [],
+            imagesByValue: Object.fromEntries(
+              item.colors.map((color, index) => {
+                const urls = [item.image, ...(item.gallery ?? [])].filter(Boolean);
+                return [color, [urls[index % urls.length]]];
+              })
+            ),
+          },
+        ]
+      : undefined,
   };
 }
