@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
   const { data: sellerRow, error: sellerError } = await supabase
     .from("sellers")
-    .select("id, business_name, phone, store_slug, status")
+    .select("id, business_name, phone, momo_phone, store_slug, status")
     .eq("store_slug", checkout.storeSlug)
     .maybeSingle();
 
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
 
   const momo = momoDetails({
     businessName: String(sellerRow.business_name ?? ""),
-    phone: String(sellerRow.phone ?? ""),
+    phone: String(sellerRow.momo_phone || sellerRow.phone || ""),
     paymentReference: reference,
     subtotalCedis: priced.subtotalCedis,
   });

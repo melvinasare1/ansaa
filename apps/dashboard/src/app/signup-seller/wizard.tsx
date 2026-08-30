@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check } from "lucide-react";
+import { Check, Eye, EyeOff } from "lucide-react";
 import {
   checkStoreSlugAvailable,
   completeSellerProfile,
@@ -31,13 +32,15 @@ const INPUT_CLASS =
 const STORAGE_KEY = "ansaa-seller-onboarding";
 
 type WizardMode = "signup" | "complete";
-type SlugStatus = "idle" | "checking" | "available" | "taken" | "invalid";
+type SlugStatus = "idle" | "checking" | "available" | "taken" | "invalid" | "error";
 
 type Draft = {
   email: string;
   businessName: string;
   storeSlug: string;
   phone: string;
+  momoPhone: string;
+  momoSameAsMobile: boolean;
   template: StorefrontTemplate;
   productCategory: string;
   pricingTier: PricingTier;
@@ -48,6 +51,8 @@ const EMPTY_DRAFT: Draft = {
   businessName: "",
   storeSlug: "",
   phone: "",
+  momoPhone: "",
+  momoSameAsMobile: true,
   template: "template-a",
   productCategory: "",
   pricingTier: "website_admin",
@@ -67,6 +72,8 @@ function readDraft(): Draft {
       businessName: String(parsed.businessName ?? ""),
       storeSlug: slugifyStoreName(String(parsed.storeSlug ?? "")),
       phone: String(parsed.phone ?? ""),
+      momoPhone: String(parsed.momoPhone ?? parsed.phone ?? ""),
+      momoSameAsMobile: parsed.momoSameAsMobile !== false,
       template: parseStorefrontTemplate(parsed.template),
       productCategory: String(parsed.productCategory ?? ""),
       pricingTier: parsed.pricingTier === "fulfilment" ? "fulfilment" : "website_admin",
@@ -97,6 +104,7 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
   const [slugStatus, setSlugStatus] = useState<SlugStatus>("idle");
+  const [slugError, setSlugError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
@@ -120,28 +128,44 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
     const slug = draft.storeSlug;
     if (!slug) {
       setSlugStatus("invalid");
+      setSlugError(null);
       return;
     }
     setSlugStatus("checking");
+    setSlugError(null);
     let cancelled = false;
     const timer = window.setTimeout(() => {
-      checkStoreSlugAvailable(slug).then((result) => {
-        if (cancelled) return;
-        if (result.error) {
-          setSlugStatus("idle");
-          return;
-        }
-        setSlugStatus(result.available ? "available" : "taken");
-      });
+      checkStoreSlugAvailable(slug)
+        .then((result) => {
+          if (cancelled) return;
+          if (result.error) {
+            setSlugStatus("error");
+            setSlugError(result.error);
+            return;
+          }
+          setSlugError(null);
+          setSlugStatus(result.available ? "available" : "taken");
+          if (result.slug && result.slug !== slug) {
+            updateDraft({ storeSlug: result.slug });
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setSlugStatus("error");
+            setSlugError("Could not check that store URL. Try again.");
+          }
+        });
     }, 400);
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [draft.storeSlug, mode, step]);
+  }, [draft.storeSlug, mode, step, updateDraft]);
 
   const planLabel =
     draft.pricingTier === "fulfilment" ? "Fulfilment · 400 GHS/mo intro" : "Website & Admin · 250 GHS/mo";
+
+  const paymentPhone = draft.momoSameAsMobile ? draft.phone : draft.momoPhone;
 
   const canContinue = useMemo(() => {
     const signupStep = mode === "signup" ? step : step + 1;
@@ -154,11 +178,12 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
         Boolean(draft.productCategory.trim()) &&
         Boolean(draft.storeSlug) &&
         slugStatus === "available" &&
-        draft.phone.replace(/\D/g, "").length >= 9
+        draft.phone.replace(/\D/g, "").length >= 9 &&
+        paymentPhone.replace(/\D/g, "").length >= 9
       );
     }
     return true;
-  }, [confirmPassword, draft, mode, password, slugStatus, step]);
+  }, [confirmPassword, draft, mode, password, paymentPhone, slugStatus, step]);
 
   function goNext() {
     setError(null);
@@ -178,6 +203,7 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
         businessName: draft.businessName,
         storeSlug: draft.storeSlug,
         phone: draft.phone,
+        momoPhone: paymentPhone,
         template: draft.template,
         pricingTier: draft.pricingTier,
         productCategory: draft.productCategory,
@@ -305,6 +331,7 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
           <BusinessStep
             draft={draft}
             slugStatus={slugStatus}
+            slugError={slugError}
             onBusinessName={(businessName) => {
               updateDraft({
                 businessName,
@@ -315,7 +342,19 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
               setSlugTouched(true);
               updateDraft({ storeSlug: slugifyStoreName(storeSlug) });
             }}
-            onPhone={(phone) => updateDraft({ phone })}
+            onPhone={(phone) => {
+              updateDraft({
+                phone,
+                ...(draft.momoSameAsMobile ? { momoPhone: phone } : {}),
+              });
+            }}
+            onMomoPhone={(momoPhone) => updateDraft({ momoPhone })}
+            onMomoSameAsMobile={(momoSameAsMobile) => {
+              updateDraft({
+                momoSameAsMobile,
+                ...(momoSameAsMobile ? { momoPhone: draft.phone } : {}),
+              });
+            }}
             onCategory={(productCategory) => updateDraft({ productCategory })}
           />
         ) : null}
@@ -328,7 +367,12 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
         ) : null}
 
         {signupIndex === 4 ? (
-          <ConfirmStep draft={draft} email={mode === "signup" ? draft.email : undefined} planLabel={planLabel} />
+          <ConfirmStep
+            draft={draft}
+            paymentPhone={paymentPhone}
+            email={mode === "signup" ? draft.email : undefined}
+            planLabel={planLabel}
+          />
         ) : null}
       </div>
 
@@ -412,32 +456,62 @@ function AccountStep({
           className={INPUT_CLASS}
         />
       </label>
-      <label className="block">
-        <span className="text-sm font-medium">Password</span>
-        <input
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={6}
-          value={password}
-          onChange={(e) => onPassword(e.target.value)}
-          className={INPUT_CLASS}
-        />
-        <span className="mt-1.5 block text-xs text-muted-foreground">At least 6 characters.</span>
-      </label>
-      <label className="block">
-        <span className="text-sm font-medium">Confirm password</span>
-        <input
-          type="password"
-          autoComplete="new-password"
-          required
-          minLength={6}
-          value={confirmPassword}
-          onChange={(e) => onConfirm(e.target.value)}
-          className={INPUT_CLASS}
-        />
-      </label>
+      <PasswordField
+        label="Password"
+        autoComplete="new-password"
+        value={password}
+        onChange={onPassword}
+        hint="At least 6 characters."
+      />
+      <PasswordField
+        label="Confirm password"
+        autoComplete="new-password"
+        value={confirmPassword}
+        onChange={onConfirm}
+      />
     </div>
+  );
+}
+
+function PasswordField({
+  label,
+  value,
+  onChange,
+  autoComplete,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  autoComplete: "new-password" | "current-password";
+  hint?: string;
+}) {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <label className="block">
+      <span className="text-sm font-medium">{label}</span>
+      <div className="relative mt-1.5">
+        <input
+          type={visible ? "text" : "password"}
+          autoComplete={autoComplete}
+          required
+          minLength={6}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`${INPUT_CLASS} mt-0 pr-11`}
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((show) => !show)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition hover:text-ink-950"
+          aria-label={visible ? "Hide password" : "Show password"}
+        >
+          {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </button>
+      </div>
+      {hint ? <span className="mt-1.5 block text-xs text-muted-foreground">{hint}</span> : null}
+    </label>
   );
 }
 
@@ -462,7 +536,19 @@ function TemplateStep({
               active ? "border-brand ring-2 ring-brand/20" : "border-black/8 hover:border-black/20"
             )}
           >
-            <div className={cn("aspect-[4/3] w-full rounded-xl", template.previewClass)} aria-hidden="true" />
+            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-canvas">
+              {template.previewImage ? (
+                <Image
+                  src={template.previewImage}
+                  alt={`${template.name} storefront preview`}
+                  fill
+                  sizes="(min-width: 640px) 50vw, 100vw"
+                  className="object-cover object-top"
+                />
+              ) : (
+                <div className={cn("h-full w-full", template.previewClass)} aria-hidden="true" />
+              )}
+            </div>
             <h3 className="mt-4 font-display text-lg font-semibold">{template.name}</h3>
             <p className="mt-1.5 text-sm leading-relaxed text-ink-700">{template.description}</p>
             <span className={cn("mt-4 text-sm font-medium", active ? "text-brand" : "text-muted-foreground")}>
@@ -478,16 +564,22 @@ function TemplateStep({
 function BusinessStep({
   draft,
   slugStatus,
+  slugError,
   onBusinessName,
   onSlug,
   onPhone,
+  onMomoPhone,
+  onMomoSameAsMobile,
   onCategory,
 }: {
   draft: Draft;
   slugStatus: SlugStatus;
+  slugError: string | null;
   onBusinessName: (value: string) => void;
   onSlug: (value: string) => void;
   onPhone: (value: string) => void;
+  onMomoPhone: (value: string) => void;
+  onMomoSameAsMobile: (value: boolean) => void;
   onCategory: (value: string) => void;
 }) {
   const slugHint =
@@ -499,7 +591,9 @@ function BusinessStep({
           ? "That store URL is taken. Try another."
           : slugStatus === "invalid"
             ? "Use letters or numbers."
-            : "Used when we copy this template into your store.";
+            : slugStatus === "error"
+              ? slugError ?? "Could not check that store URL. Try again."
+              : "Used when we copy this template into your store.";
 
   return (
     <div className="space-y-5 rounded-2xl border border-black/8 bg-white p-6 shadow-card">
@@ -556,15 +650,19 @@ function BusinessStep({
         <span
           className={cn(
             "mt-1.5 block text-xs",
-            slugStatus === "taken" || slugStatus === "invalid" ? "text-delta-down" : "text-muted-foreground"
+            slugStatus === "taken" || slugStatus === "invalid" || slugStatus === "error"
+              ? "text-delta-down"
+              : slugStatus === "available"
+                ? "text-brand"
+                : "text-muted-foreground"
           )}
         >
-          {slugHint} {draft.storeSlug || "your-store"}
+          {slugHint} Preview path: /store/{draft.storeSlug || "your-store"}
         </span>
       </label>
 
       <label className="block">
-        <span className="text-sm font-medium">MoMo number for receiving payments</span>
+        <span className="text-sm font-medium">Mobile number</span>
         <input
           type="tel"
           autoComplete="tel"
@@ -575,10 +673,46 @@ function BusinessStep({
           className={INPUT_CLASS}
         />
         <span className="mt-1.5 block text-xs text-muted-foreground">
-          This is the number buyers will send Mobile Money to at checkout, not just a contact number.
-          A wrong number here means payment goes to the wrong place.
+          Your contact number for account and support messages.
         </span>
       </label>
+
+      <div className="space-y-3">
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={draft.momoSameAsMobile}
+            onChange={(e) => onMomoSameAsMobile(e.target.checked)}
+            className="mt-1 size-4 rounded border-black/20 text-brand focus:ring-brand"
+          />
+          <span className="text-sm text-ink-800">
+            Mobile Money payment number is the same as my mobile number
+          </span>
+        </label>
+
+        {!draft.momoSameAsMobile ? (
+          <label className="block">
+            <span className="text-sm font-medium">Mobile Money payment number</span>
+            <input
+              type="tel"
+              autoComplete="tel"
+              required
+              value={draft.momoPhone}
+              onChange={(e) => onMomoPhone(e.target.value)}
+              placeholder="e.g. 024 987 6543"
+              className={INPUT_CLASS}
+            />
+            <span className="mt-1.5 block text-xs text-muted-foreground">
+              This is the number buyers will send Mobile Money to at checkout.
+            </span>
+          </label>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Buyers will pay to <span className="font-medium text-ink-800">{draft.phone || "your mobile number"}</span>{" "}
+            at checkout.
+          </p>
+        )}
+      </div>
 
       <div>
         <span className="text-sm font-medium">Domain</span>
@@ -679,10 +813,12 @@ function PlanStep({
 
 function ConfirmStep({
   draft,
+  paymentPhone,
   email,
   planLabel,
 }: {
   draft: Draft;
+  paymentPhone: string;
   email?: string;
   planLabel: string;
 }) {
@@ -706,13 +842,22 @@ function ConfirmStep({
           <Row label="Store URL" value={`/store/${draft.template}`} />
           <Row label="Domain (placeholder)" value={placeholderDomain(draft.storeSlug)} />
           <Row label="Plan" value={planLabel} />
+          <Row label="Mobile number" value={draft.phone || "Not set"} />
+          <Row
+            label="MoMo payment number"
+            value={
+              draft.momoSameAsMobile
+                ? `${paymentPhone || "Not set"} (same as mobile)`
+                : paymentPhone || "Not set"
+            }
+          />
         </dl>
       </div>
 
       <div className="rounded-2xl border border-brand/30 bg-brand-soft p-6">
         <p className="text-xs font-semibold uppercase tracking-wide text-brand">MoMo number buyers will pay</p>
         <p className="mt-2 font-display text-2xl font-semibold tabular-nums text-ink-950">
-          {draft.phone || "Not set"}
+          {paymentPhone || "Not set"}
         </p>
         <p className="mt-2 text-sm text-ink-700">
           Check this twice. Checkout tells buyers to send Mobile Money here. If it is wrong, they pay

@@ -8,6 +8,7 @@ export function newSellerInsertRow(input: {
   storeSlug: string;
   email: string;
   phone: string;
+  momoPhone: string;
   template: Seller["template"];
   pricingTier: PricingTier;
 }) {
@@ -20,6 +21,7 @@ export function newSellerInsertRow(input: {
     template: input.template,
     email: input.email,
     phone: input.phone,
+    momoPhone: input.momoPhone,
     pricingTier: input.pricingTier,
     baseFeeCedis: PRICING_TIER_BASE_FEE_CEDIS[input.pricingTier],
     status: "onboarding",

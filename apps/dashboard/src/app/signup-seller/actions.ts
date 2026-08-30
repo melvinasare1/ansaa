@@ -21,6 +21,7 @@ type SellerSignupFields = {
   businessName: string;
   storeSlug: string;
   phone: string;
+  momoPhone: string;
   template: Seller["template"];
   pricingTier: PricingTier;
   productCategory: string;
@@ -33,11 +34,12 @@ function formatPostgresError(err: PostgrestError) {
 function normalizeSignupFields(input: SellerSignupFields) {
   const businessName = input.businessName.trim();
   const phone = input.phone.replace(/\s+/g, " ").trim();
+  const momoPhone = input.momoPhone.replace(/\s+/g, " ").trim();
   const template = parseStorefrontTemplate(input.template);
   const pricingTier = parsePricingTier(input.pricingTier);
   const productCategory = input.productCategory.trim();
   const baseSlug = slugifyStoreName(input.storeSlug || businessName);
-  return { businessName, phone, template, pricingTier, productCategory, baseSlug };
+  return { businessName, phone, momoPhone, template, pricingTier, productCategory, baseSlug };
 }
 
 function digitCount(phone: string) {
@@ -47,13 +49,17 @@ function digitCount(phone: string) {
 function validateSignupFields(fields: {
   businessName: string;
   phone: string;
+  momoPhone: string;
   baseSlug: string;
   productCategory: string;
 }) {
   if (!fields.businessName) return "Business name is required.";
   if (!fields.productCategory) return "Product category is required.";
   if (digitCount(fields.phone) < 9) {
-    return "Enter the MoMo number buyers will pay. Use at least 9 digits.";
+    return "Enter your mobile number. Use at least 9 digits.";
+  }
+  if (digitCount(fields.momoPhone) < 9) {
+    return "Enter the Mobile Money number buyers will pay. Use at least 9 digits.";
   }
   if (!fields.baseSlug) return "Store slug must use letters or numbers.";
   return null;
@@ -65,7 +71,13 @@ export async function checkStoreSlugAvailable(
   const slug = slugifyStoreName(rawSlug);
   if (!slug) return { slug, available: false, error: "Store slug must use letters or numbers." };
 
-  const supabase = await createClient();
+  let supabase: SupabaseClient;
+  try {
+    supabase = createAdminClient();
+  } catch {
+    return { slug, available: false, error: "Could not check that store URL. Try again." };
+  }
+
   const { data, error } = await supabase
     .from("sellers")
     .select("id")
@@ -85,6 +97,7 @@ export async function signUpSeller(input: {
   businessName: string;
   storeSlug: string;
   phone: string;
+  momoPhone: string;
   template: Seller["template"];
   pricingTier: PricingTier;
   productCategory: string;
@@ -105,6 +118,7 @@ async function signUpSellerInner(input: {
   businessName: string;
   storeSlug: string;
   phone: string;
+  momoPhone: string;
   template: Seller["template"];
   pricingTier: PricingTier;
   productCategory: string;
@@ -163,6 +177,7 @@ async function signUpSellerInner(input: {
     email,
     businessName: fields.businessName,
     phone: fields.phone,
+    momoPhone: fields.momoPhone,
     template: fields.template,
     pricingTier: fields.pricingTier,
     productCategory: fields.productCategory,
@@ -233,6 +248,7 @@ export async function completeSellerProfile(
       email,
       businessName: fields.businessName,
       phone: fields.phone,
+      momoPhone: fields.momoPhone,
       template: fields.template,
       pricingTier: fields.pricingTier,
       productCategory: fields.productCategory,
@@ -260,6 +276,7 @@ async function insertSellerRow(
     email: string;
     businessName: string;
     phone: string;
+    momoPhone: string;
     template: Seller["template"];
     pricingTier: PricingTier;
     productCategory: string;
@@ -272,6 +289,7 @@ async function insertSellerRow(
     storeSlug: input.baseSlug,
     email: input.email,
     phone: input.phone,
+    momoPhone: input.momoPhone,
     template: input.template,
     pricingTier: input.pricingTier,
   });

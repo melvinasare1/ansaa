@@ -60,7 +60,10 @@ export interface Seller {
   storeSlug: string; // fallback path-based routing in dev: /store/[slug]
   template: StorefrontTemplate;
   email: string;
+  /** Contact mobile number. */
   phone: string;
+  /** Mobile Money number buyers pay at checkout. Falls back to phone when unset. */
+  momoPhone: string;
   pricingTier: PricingTier;
   baseFeeCedis: number; // 250 Website & Admin, 400 Fulfilment intro
   status: SellerStatus;

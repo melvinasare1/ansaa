@@ -5,6 +5,8 @@ export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
   name: string;
   description: string;
   previewClass: string;
+  /** Same screenshots as the marketing homepage, when available. */
+  previewImage?: string;
 }> = [
   {
     id: "template-a",
@@ -23,6 +25,7 @@ export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
     name: "Kitchenware",
     description: "Warm editorial layout, for home and kitchen goods.",
     previewClass: "bg-gradient-to-br from-emerald-50 via-stone-100 to-amber-100",
+    previewImage: "/marketing/kitchenware-preview.jpg",
   },
   {
     id: "template-d",
@@ -35,6 +38,7 @@ export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
     name: "Ride",
     description: "Dark vehicle-retail layout, for motorbikes, bicycles, mopeds, and scooters.",
     previewClass: "bg-gradient-to-br from-neutral-950 via-neutral-800 to-orange-700",
+    previewImage: "/marketing/ride-preview.jpg",
   },
 ];
 
