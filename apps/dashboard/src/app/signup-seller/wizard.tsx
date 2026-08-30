@@ -729,7 +729,7 @@ function BusinessStep({
                 : "text-muted-foreground"
           )}
         >
-          {slugHint} Preview path: /store/{draft.storeSlug || "your-store"}
+          {slugHint} Preview path: /store/{draft.template || "template"}/{draft.storeSlug || "your-store"}
         </span>
       </label>
 
@@ -966,7 +966,7 @@ function ConfirmStep({
           <Row label="Template" value={templateLabel(draft.template)} />
           <Row label="Business name" value={draft.businessName || "Not set"} />
           <Row label="Product category" value={draft.productCategory || "Not set"} />
-          <Row label="Store URL" value={`/store/${draft.template}`} />
+          <Row label="Store URL" value={`/store/${draft.template}/${draft.storeSlug || "your-store"}`} />
           <Row label="Domain (placeholder)" value={placeholderDomain(draft.storeSlug)} />
           <Row label="Plan" value={planLabel} />
           <Row

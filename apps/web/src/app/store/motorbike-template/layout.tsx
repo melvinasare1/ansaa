@@ -15,6 +15,8 @@ import {
 import { RideCartLink } from "@/components/store/motorbike-template/cart-link";
 import { RideMobileNav } from "@/components/store/motorbike-template/mobile-nav";
 import { getLiveRideStorefrontSeller } from "@/components/store/motorbike-template/catalog";
+import { storefrontBase } from "@/lib/store-path";
+import { sellerForStoreLayout } from "@/lib/storefront-resolve";
 import {
   RIDE_SOCIAL_LINK_FALLBACKS,
   rideList,
@@ -106,9 +108,10 @@ export default async function MotorbikeTemplateLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const seller = await getLiveRideStorefrontSeller();
+  const { storeSlug, seller: slugSeller } = await sellerForStoreLayout("motorbike-template");
+  const seller = slugSeller ?? (storeSlug ? null : await getLiveRideStorefrontSeller());
   const content = seller?.storeContent ?? {};
-  const base = "/store/motorbike-template";
+  const base = storefrontBase("motorbike-template", storeSlug);
   const brandName = seller?.businessName || DEFAULT_STORE_NAME;
   const logoUrl = rideText(content, "logoUrl");
   const headerNav = navLinks.map((item) => ({

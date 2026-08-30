@@ -3,6 +3,9 @@
 import { Cormorant_Garamond, Figtree } from "next/font/google";
 import { CartFeedbackProvider } from "@/components/store/kitchenware-template/CartFeedback";
 import { Header } from "@/components/store/kitchenware-template/Header";
+import { DEFAULT_STORE_NAME } from "@/lib/store-name";
+import { storefrontBase } from "@/lib/store-path";
+import { sellerForStoreLayout } from "@/lib/storefront-resolve";
 
 const display = Cormorant_Garamond({
   subsets: ["latin"],
@@ -17,14 +20,18 @@ const sans = Figtree({
   weight: ["400", "500", "600"],
 });
 
-export default function KitchenwareTemplateLayout({ children }: { children: React.ReactNode }) {
+export default async function KitchenwareTemplateLayout({ children }: { children: React.ReactNode }) {
+  const { storeSlug, seller } = await sellerForStoreLayout("kitchenware-template");
+  const base = storefrontBase("kitchenware-template", storeSlug);
+  const brandName = seller?.businessName || DEFAULT_STORE_NAME;
+
   return (
     <div
       className={`${display.variable} ${sans.variable} min-h-screen bg-white text-[#2B4239]`}
       style={{ fontFamily: "var(--font-homedine-sans), ui-sans-serif, system-ui" }}
     >
       <CartFeedbackProvider>
-        <Header />
+        <Header base={base} brandName={brandName} />
         <main>{children}</main>
       </CartFeedbackProvider>
     </div>

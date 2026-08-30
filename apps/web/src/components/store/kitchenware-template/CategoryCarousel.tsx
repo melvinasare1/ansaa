@@ -17,7 +17,13 @@ export type KitchenCategory = {
 
 const VISIBLE = 4;
 
-export default function CategoryCarousel({ categories }: { categories: KitchenCategory[] }) {
+export default function CategoryCarousel({
+  categories,
+  storeBase = KITCHENWARE_TEMPLATE_BASE,
+}: {
+  categories: KitchenCategory[];
+  storeBase?: string;
+}) {
   const [start, setStart] = useState(0);
   const maxStart = Math.max(0, categories.length - VISIBLE);
 
@@ -66,7 +72,7 @@ export default function CategoryCarousel({ categories }: { categories: KitchenCa
                 Explore <em className="italic">{c.name}</em>
               </p>
               <Link
-                href={`${KITCHENWARE_TEMPLATE_BASE}/search?category=${encodeURIComponent(c.category)}`}
+                href={`${storeBase}/search?category=${encodeURIComponent(c.category)}`}
                 className="mt-3 inline-flex rounded-full bg-[#F5F1E4] px-5 py-1.5 text-[12px] font-medium text-[#2B4239]"
               >
                 Shop

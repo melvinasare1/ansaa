@@ -12,8 +12,11 @@ import {
   User,
   Youtube,
 } from "lucide-react";
+import { StoreSearchForm } from "@/components/store/StoreSearchForm";
 import { CartLink } from "@/components/store/template-d/CartLink";
 import { DEFAULT_STORE_NAME } from "@/lib/store-name";
+import { storefrontBase } from "@/lib/store-path";
+import { sellerForStoreLayout } from "@/lib/storefront-resolve";
 
 const footerLinkGroups = [
   { heading: "About", links: ["Company", "Leadership", "Press", "Careers"] },
@@ -55,8 +58,10 @@ const body = Work_Sans({
   weight: ["400", "500", "600"],
 });
 
-export default function TemplateDLayout({ children }: { children: React.ReactNode }) {
-  const base = "/store/template-d";
+export default async function TemplateDLayout({ children }: { children: React.ReactNode }) {
+  const { storeSlug, seller } = await sellerForStoreLayout("template-d");
+  const base = storefrontBase("template-d", storeSlug);
+  const brandName = seller?.businessName || DEFAULT_STORE_NAME;
 
   return (
     <div
@@ -75,7 +80,7 @@ export default function TemplateDLayout({ children }: { children: React.ReactNod
             className="text-center text-[22px] font-extrabold uppercase tracking-[0.12em] md:text-[26px]"
             style={{ fontFamily: "var(--font-stylehive-display), ui-sans-serif, system-ui" }}
           >
-            {DEFAULT_STORE_NAME}
+            {brandName}
           </Link>
 
           <div className="flex items-center justify-end gap-5">
@@ -93,18 +98,17 @@ export default function TemplateDLayout({ children }: { children: React.ReactNod
 
         {/* Second row */}
         <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-5 pb-4 md:gap-4 md:px-8">
-          <label className="relative w-[140px] shrink-0 sm:w-[180px] md:w-[220px]">
-            <span className="sr-only">Search clothing</span>
+          <div className="relative w-[140px] shrink-0 sm:w-[180px] md:w-[220px]">
             <Search
-              className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-black/40"
+              className="pointer-events-none absolute left-3.5 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-black/40"
               strokeWidth={1.75}
             />
-            <input
-              type="search"
+            <StoreSearchForm
+              action={`${base}/search`}
               placeholder="Search Cloth"
-              className="h-10 w-full rounded-full border border-black/10 bg-white py-2 pl-10 pr-4 text-sm text-black outline-none placeholder:text-black/40"
+              inputClassName="h-10 w-full rounded-full border border-black/10 bg-white py-2 pl-10 pr-4 text-sm text-black outline-none placeholder:text-black/40"
             />
-          </label>
+          </div>
 
           <label className="relative shrink-0">
             <span className="sr-only">Category</span>
@@ -153,7 +157,7 @@ export default function TemplateDLayout({ children }: { children: React.ReactNod
                 className="text-[20px] font-extrabold uppercase tracking-[0.12em] md:text-[22px]"
                 style={{ fontFamily: "var(--font-stylehive-display), ui-sans-serif, system-ui" }}
               >
-                {DEFAULT_STORE_NAME}
+                {brandName}
               </p>
               <p className="mt-4 max-w-sm text-[13px] leading-relaxed text-white/45">
                 Seamless transactions, personalized insights, and innovative solutions for a
@@ -200,7 +204,7 @@ export default function TemplateDLayout({ children }: { children: React.ReactNod
           </div>
 
           <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-[12px] text-white/40 md:flex-row md:items-center md:justify-between">
-            <p>Copyright © 2026 {DEFAULT_STORE_NAME}. All Rights Reserved.</p>
+            <p>Copyright © 2026 {brandName}. All Rights Reserved.</p>
             <a href="#" className="transition-colors hover:text-white/70">
               Privacy Policy
             </a>

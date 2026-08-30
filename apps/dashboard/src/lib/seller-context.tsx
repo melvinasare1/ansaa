@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useMemo } from "react";
 import { createClient } from "@ansaa/shared/supabase/client";
 import type { Seller, SellerUser } from "@ansaa/shared/types";
 import { TRIAL_BANNER_DISMISS_KEY, TRIAL_EXPIRY_MODAL_DISMISS_KEY } from "@/lib/trial";
+import { STOREFRONT_NOT_LIVE_MODAL_DISMISS_KEY } from "@/lib/verify";
 
 export type SellerAuthStatus = "loading" | "unauthenticated" | "authenticated";
 
@@ -34,6 +35,7 @@ export function SellerProvider({
     try {
       sessionStorage.removeItem(TRIAL_BANNER_DISMISS_KEY);
       sessionStorage.removeItem(TRIAL_EXPIRY_MODAL_DISMISS_KEY);
+      sessionStorage.removeItem(STOREFRONT_NOT_LIVE_MODAL_DISMISS_KEY);
     } catch {
       /* private mode */
     }

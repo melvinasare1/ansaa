@@ -1,3 +1,4 @@
+import StorefrontNotLiveModal from "@/components/dashboard/StorefrontNotLiveModal";
 import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
 import { emptyOverviewStats, getOverviewStats } from "@/lib/analytics";
@@ -9,6 +10,9 @@ import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 export default async function DashboardOverviewPage() {
   const session = await getDashboardSession();
   const sellerId = session?.seller?.id ?? null;
+  const showNotLiveModal = Boolean(
+    session?.seller && session.seller.status !== "active"
+  );
 
   let stats = emptyOverviewStats();
   let recentOrders: DashboardOrder[] = [];
@@ -31,6 +35,7 @@ export default async function DashboardOverviewPage() {
 
   return (
     <div className="@container/main flex flex-1 flex-col gap-2">
+      <StorefrontNotLiveModal open={showNotLiveModal} />
       <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
         {loadError ? (
           <p className="mx-4 rounded-xl border border-wire bg-white px-5 py-4 text-sm text-muted-foreground lg:mx-6">

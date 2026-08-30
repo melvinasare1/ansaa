@@ -1,10 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { STOREFRONT_TEMPLATE_OPTIONS } from "@/lib/storefront-templates";
 import { useSeller } from "@/lib/seller-context";
 import { storefrontUrl } from "@/lib/storefront-url";
 import { SettingsFaqs } from "@/components/dashboard/SettingsFaqs";
-import { VerificationUpload } from "./verification-upload";
 
 const templateLabels = Object.fromEntries(
   STOREFRONT_TEMPLATE_OPTIONS.map((option) => [option.id, option.name])
@@ -68,28 +68,19 @@ export default function SettingsPage() {
       </section>
 
       <section className="mt-6 rounded-xl border border-wire bg-white p-6">
-        <h2 className="font-display text-base font-semibold text-ink-950">Identity documents</h2>
+        <h2 className="font-display text-base font-semibold text-ink-950">Verify</h2>
         <p className="mt-2 text-sm text-ink-700/60">
-          Test upload to private storage. Files are stored under your seller id and can only be
-          viewed through a short-lived signed URL, not a public link.
+          Identity documents, return policy, and publishing live on Verify.
         </p>
-        <VerificationUpload />
+        <Link
+          href="/dashboard/verify"
+          className="mt-4 inline-block text-sm font-medium text-brand hover:underline"
+        >
+          Open Verify
+        </Link>
       </section>
 
       <SettingsFaqs />
-
-      <section className="mt-6 rounded-xl border border-wire bg-white p-6">
-        <h2 className="font-display text-base font-semibold text-ink-950">Returns policy</h2>
-        <p className="mt-2 text-sm text-ink-700/60">
-          Set your own return policy. Items that arrive damaged or not as described are always
-          eligible for return regardless of your policy below.
-        </p>
-        <textarea
-          rows={3}
-          placeholder="e.g. No returns on sale items. Full returns within 3 days for everything else."
-          className="mt-4 w-full rounded-lg border border-wire px-4 py-3 text-sm outline-none focus:border-signal"
-        />
-      </section>
     </div>
   );
 }

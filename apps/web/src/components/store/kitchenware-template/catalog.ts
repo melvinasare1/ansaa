@@ -2,8 +2,11 @@ import type { Product, StoreFaq } from "@ansaa/shared/types";
 import {
   getLiveProduct,
   getLiveSellerFaqs,
+  getProductForStoreSlug,
+  getSellerFaqsForStoreSlug,
   isLiveStorefrontCatalog,
   listLiveProducts,
+  listProductsForStoreSlug,
 } from "@/lib/live-catalog";
 import { formatCedis } from "@/lib/price";
 import {
@@ -40,24 +43,36 @@ function facetsFromCards(products: KitchenwareCatalogCard[]): KitchenwareFilterF
   };
 }
 
-export async function listKitchenwareProducts(): Promise<Product[]> {
+export async function listKitchenwareProducts(storeSlug?: string): Promise<Product[]> {
+  if (storeSlug) return listProductsForStoreSlug(storeSlug);
   if (isLiveStorefrontCatalog()) return listLiveProducts();
   return KITCHENWARE_DEMO_PRODUCTS.map(kitchenwareDemoToProduct);
 }
 
-export async function getKitchenwareProduct(productId: string): Promise<Product | null> {
+export async function getKitchenwareProduct(
+  productId: string,
+  storeSlug?: string
+): Promise<Product | null> {
+  if (storeSlug) return getProductForStoreSlug(storeSlug, productId);
   if (isLiveStorefrontCatalog()) return getLiveProduct(productId);
   const demo = getKitchenwareDemoProduct(productId);
   return demo ? kitchenwareDemoToProduct(demo) : null;
 }
 
-export async function getKitchenwareProductPage(productId: string): Promise<{
+export async function getKitchenwareProductPage(
+  productId: string,
+  storeSlug?: string
+): Promise<{
   product: Product;
   faqs: StoreFaq[];
 } | null> {
-  const product = await getKitchenwareProduct(productId);
+  const product = await getKitchenwareProduct(productId, storeSlug);
   if (!product) return null;
-  const faqs = isLiveStorefrontCatalog() ? await getLiveSellerFaqs() : KITCHENWARE_DEMO_FAQS;
+  const faqs = storeSlug
+    ? await getSellerFaqsForStoreSlug(storeSlug)
+    : isLiveStorefrontCatalog()
+      ? await getLiveSellerFaqs()
+      : KITCHENWARE_DEMO_FAQS;
   return { product, faqs };
 }
 
@@ -74,19 +89,21 @@ export function productToKitchenCard(product: Product, index: number): KitchenPr
   };
 }
 
-export async function listKitchenwareCarousel(): Promise<KitchenProduct[]> {
-  return (await listKitchenwareProducts()).map(productToKitchenCard);
+export async function listKitchenwareCarousel(storeSlug?: string): Promise<KitchenProduct[]> {
+  return (await listKitchenwareProducts(storeSlug)).map(productToKitchenCard);
 }
 
 /**
  * Kitchenware search catalog.
  *
- * Template preview (`/store/kitchenware-template`): dummy catalog.
- * After cloning onto a client project, set `NEXT_PUBLIC_STORE_SLUG` so
- * listings load active products for that seller from Supabase.
+ * Live seller routes pass `storeSlug` from the URL.
+ * Template preview (`/store/kitchenware-template`) uses the dummy catalog,
+ * unless `NEXT_PUBLIC_STORE_SLUG` is set for optional local preview.
  */
-export async function listKitchenwareSearchProducts(): Promise<KitchenwareCatalogCard[]> {
-  return (await listKitchenwareProducts()).map(productToCard);
+export async function listKitchenwareSearchProducts(
+  storeSlug?: string
+): Promise<KitchenwareCatalogCard[]> {
+  return (await listKitchenwareProducts(storeSlug)).map(productToCard);
 }
 
 export async function getKitchenwareSearchFacets(

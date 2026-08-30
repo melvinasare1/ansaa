@@ -77,6 +77,10 @@ export interface Seller {
   profilePhotoUrl?: string;
   businessRegistrationUrl?: string;
   hasBusinessRegistration: boolean;
+  /** Seller-written return policy shown on Verify. Empty until they save one. */
+  returnPolicy: string;
+  /** Epoch ms when the seller clicked Publish. Status stays onboarding until manual review. */
+  verificationSubmittedAt?: number;
   /** Editable storefront copy, image URLs, and repeatable lists, keyed by template field keys. */
   storeContent: Record<string, string | Array<Record<string, string>>>;
   /** Store-wide FAQs reused on every product page. */

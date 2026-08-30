@@ -8,9 +8,14 @@ import { KITCHENWARE_TEMPLATE_BASE } from "@/components/store/kitchenware-templa
 import { useCart } from "@/lib/cart-context";
 import { DEFAULT_STORE_NAME } from "@/lib/store-name";
 
-export function Header() {
+export function Header({
+  base = KITCHENWARE_TEMPLATE_BASE,
+  brandName = DEFAULT_STORE_NAME,
+}: {
+  base?: string;
+  brandName?: string;
+}) {
   const router = useRouter();
-  const base = KITCHENWARE_TEMPLATE_BASE;
   const { totalItems, hydrated } = useCart();
   const count = hydrated ? totalItems : 0;
   const [query, setQuery] = useState("");
@@ -34,7 +39,7 @@ export function Header() {
           className="text-center text-[28px] font-medium tracking-[0.04em] text-[#111111] md:text-[32px]"
           style={{ fontFamily: "var(--font-homedine-serif), ui-serif, Georgia" }}
         >
-          {DEFAULT_STORE_NAME}
+          {brandName}
         </Link>
 
         <div className="flex items-center justify-end gap-3">

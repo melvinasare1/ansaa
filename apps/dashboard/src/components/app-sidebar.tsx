@@ -6,6 +6,7 @@ import { useSeller } from "@/lib/seller-context";
 import { storefrontUrl } from "@/lib/storefront-url";
 import { templateHasBlog } from "@/lib/storefront-templates";
 import {
+  BadgeCheckIcon,
   BarChart3Icon,
   ExternalLinkIcon,
   LayoutDashboardIcon,
@@ -31,6 +32,7 @@ const navMain = [
   { title: "Customers", url: "/dashboard/customers", icon: UsersIcon },
   { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3Icon },
   { title: "Support", url: "/dashboard/support", icon: LifeBuoyIcon },
+  { title: "Verify", url: "/dashboard/verify", icon: BadgeCheckIcon },
   { title: "Settings", url: "/dashboard/settings", icon: SettingsIcon },
 ];
 

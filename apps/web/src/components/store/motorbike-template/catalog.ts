@@ -13,8 +13,14 @@ import {
   getLiveRideFilterFacets,
   getLiveRideProduct,
   getLiveRideStorefrontSeller,
+  getRideBlogPostsForStoreSlug,
+  getRideFaqsForStoreSlug,
+  getRideFilterFacetsForStoreSlug,
+  getRideProductForStoreSlug,
+  getRideSellerBySlug,
   isLiveRideCatalog,
   listLiveRideProducts,
+  listRideProductsForStoreSlug,
   rideLiveStoreSlug,
 } from "@/components/store/motorbike-template/live-catalog";
 import { getLiveSellerFaqs } from "@/lib/live-catalog";
@@ -26,7 +32,14 @@ import {
   type RideFilterFacets,
 } from "@/components/store/motorbike-template/search-filters";
 
-export { isLiveRideCatalog, rideLiveStoreSlug, getLiveRideStorefrontSeller, getLiveRideBlogPosts };
+export {
+  isLiveRideCatalog,
+  rideLiveStoreSlug,
+  getLiveRideStorefrontSeller,
+  getLiveRideBlogPosts,
+  getRideSellerBySlug,
+  getRideBlogPostsForStoreSlug,
+};
 export type { RideCatalogCard, RideFilterFacets };
 export { productMatchesColour } from "@/components/store/motorbike-template/search-filters";
 
@@ -92,40 +105,58 @@ function facetsFromCards(products: RideCatalogCard[]): RideFilterFacets {
 /**
  * Ride product data for this storefront.
  *
- * Template preview (Ansaa `/store/motorbike-template`): dummy catalog only.
- * After cloning onto a client project, set `NEXT_PUBLIC_STORE_SLUG` to the
- * seller's `store_slug` so listings and PDPs load from Supabase.
+ * Live seller routes pass `storeSlug` from the URL (`/store/motorbike-template/{slug}`).
+ * Template preview (`/store/motorbike-template`) uses the dummy catalog, unless
+ * `NEXT_PUBLIC_STORE_SLUG` is set for optional local single-tenant preview.
  */
-export async function listRideProducts(): Promise<Product[]> {
+export async function listRideProducts(storeSlug?: string): Promise<Product[]> {
+  if (storeSlug) return listRideProductsForStoreSlug(storeSlug);
   if (isLiveRideCatalog()) return listLiveRideProducts();
   return RIDE_DEMO_PRODUCTS.map(rideDemoToProduct);
 }
 
-export async function getRideProduct(productId: string): Promise<Product | null> {
+export async function getRideProduct(productId: string, storeSlug?: string): Promise<Product | null> {
+  if (storeSlug) return getRideProductForStoreSlug(storeSlug, productId);
   if (isLiveRideCatalog()) return getLiveRideProduct(productId);
   const demo = getRideDemoProduct(productId);
   return demo ? rideDemoToProduct(demo) : null;
 }
 
-export async function getRideProductPage(productId: string): Promise<{
+export async function getRideProductPage(
+  productId: string,
+  storeSlug?: string
+): Promise<{
   product: Product;
   faqs: StoreFaq[];
 } | null> {
-  const product = await getRideProduct(productId);
+  const product = await getRideProduct(productId, storeSlug);
   if (!product) return null;
-  const faqs = isLiveRideCatalog() ? await getLiveSellerFaqs() : RIDE_DEMO_FAQS;
+  const faqs = storeSlug
+    ? await getRideFaqsForStoreSlug(storeSlug)
+    : isLiveRideCatalog()
+      ? await getLiveSellerFaqs()
+      : RIDE_DEMO_FAQS;
   return { product, faqs };
 }
 
-export async function listRideSearchProducts(): Promise<RideCatalogCard[]> {
+export async function listRideSearchProducts(storeSlug?: string): Promise<RideCatalogCard[]> {
+  if (storeSlug) {
+    return (await listRideProductsForStoreSlug(storeSlug)).map(productToCard);
+  }
   if (isLiveRideCatalog()) {
     return (await listLiveRideProducts()).map(productToCard);
   }
   return RIDE_DEMO_PRODUCTS.map(demoToCard);
 }
 
-export async function getRideSearchFacets(products: RideCatalogCard[]): Promise<RideFilterFacets> {
+export async function getRideSearchFacets(
+  products: RideCatalogCard[],
+  storeSlug?: string
+): Promise<RideFilterFacets> {
   const fromCatalog = facetsFromCards(products);
+  if (storeSlug) {
+    return mergeFacets(await getRideFilterFacetsForStoreSlug(storeSlug), fromCatalog);
+  }
   if (isLiveRideCatalog()) {
     return mergeFacets(await getLiveRideFilterFacets(), fromCatalog);
   }
@@ -140,7 +171,12 @@ export async function getRideSearchFacets(products: RideCatalogCard[]): Promise<
   );
 }
 
-export async function listRideAccessories(): Promise<RideCatalogCard[]> {
+export async function listRideAccessories(storeSlug?: string): Promise<RideCatalogCard[]> {
+  if (storeSlug) {
+    return (await listRideProductsForStoreSlug(storeSlug))
+      .filter((product) => isAccessoryCategory(product.category))
+      .map(productToCard);
+  }
   if (isLiveRideCatalog()) {
     return (await listLiveRideProducts())
       .filter((product) => isAccessoryCategory(product.category))

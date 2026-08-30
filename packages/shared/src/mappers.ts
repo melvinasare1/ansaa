@@ -223,6 +223,8 @@ export function sellerFromRow(row: unknown): Seller {
     profilePhotoUrl: String(fields.profile_photo_url ?? "") || undefined,
     businessRegistrationUrl: String(fields.business_registration_url ?? "") || undefined,
     hasBusinessRegistration: Boolean(fields.has_business_registration),
+    returnPolicy: String(fields.return_policy ?? ""),
+    verificationSubmittedAt: optionalEpochMs(fields.verification_submitted_at),
     storeContent: parseStorefrontContent(fields.store_content),
     faqs: faqsFromUnknown(fields.faqs),
   };

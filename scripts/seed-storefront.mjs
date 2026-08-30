@@ -65,7 +65,7 @@ const supabase = createClient(url, serviceKey, {
 const seller = {
   id: SELLER_ID,
   uid: SELLER_ID,
-  business_name: "Styleco",
+  business_name: "Store",
   domain: "styleco.local",
   store_slug: STORE_SLUG,
   template: "template-a",
@@ -142,5 +142,5 @@ const { error: productError } = await supabase.from("products").upsert(products,
 if (productError) throw productError;
 
 console.log(`Seeded seller "${STORE_SLUG}" (${SELLER_ID}) with ${products.length} products.`);
-console.log(`Visit: http://localhost:3000/store/template-a`);
+console.log(`Visit: http://localhost:3000/store/template-a/${STORE_SLUG}`);
 console.log("Inactive product (should be hidden): 21111111-1111-4111-8111-111111111114");

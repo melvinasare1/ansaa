@@ -9,6 +9,11 @@ import {
   type StorefrontSeller,
 } from "@/lib/storefront";
 
+/**
+ * Optional single-tenant preview: when set, demo routes (`/store/{template}`
+ * with no seller slug) can load that seller from Supabase. Live seller pages
+ * always resolve from the URL `[slug]` — never from this env var.
+ */
 export function liveStoreSlug(): string {
   return process.env.NEXT_PUBLIC_STORE_SLUG?.trim() ?? "";
 }
@@ -17,39 +22,50 @@ export function isLiveStorefrontCatalog(): boolean {
   return Boolean(liveStoreSlug());
 }
 
-async function liveSeller() {
-  const slug = liveStoreSlug();
-  if (!slug || !isSupabaseConfigured()) return null;
+async function storefrontContext(storeSlug: string) {
+  if (!storeSlug || !isSupabaseConfigured()) return null;
   const supabase = await createClient();
-  const seller = await getSellerByStoreSlug(supabase, slug);
+  const seller = await getSellerByStoreSlug(supabase, storeSlug);
   if (!seller) return null;
   return { supabase, seller };
 }
 
-export async function listLiveProducts(): Promise<Product[]> {
-  const ctx = await liveSeller();
+async function envPreviewSeller() {
+  const slug = liveStoreSlug();
+  if (!slug) return null;
+  return storefrontContext(slug);
+}
+
+export async function getStorefrontSellerBySlug(storeSlug: string): Promise<StorefrontSeller | null> {
+  const ctx = await storefrontContext(storeSlug);
+  return ctx?.seller ?? null;
+}
+
+export async function listProductsForStoreSlug(storeSlug: string): Promise<Product[]> {
+  const ctx = await storefrontContext(storeSlug);
   if (!ctx) return [];
   return getActiveProductsForSeller(ctx.supabase, ctx.seller.id);
 }
 
-export async function getLiveProduct(productId: string): Promise<Product | null> {
-  const ctx = await liveSeller();
+export async function getProductForStoreSlug(
+  storeSlug: string,
+  productId: string
+): Promise<Product | null> {
+  const ctx = await storefrontContext(storeSlug);
   if (!ctx) return null;
   return getStorefrontProduct(ctx.supabase, productId, ctx.seller.id);
 }
 
-export async function getLiveSellerFaqs(): Promise<StoreFaq[]> {
-  const ctx = await liveSeller();
+export async function getSellerFaqsForStoreSlug(storeSlug: string): Promise<StoreFaq[]> {
+  const ctx = await storefrontContext(storeSlug);
   return ctx?.seller.faqs ?? [];
 }
 
-export async function getLiveStorefrontSeller(): Promise<StorefrontSeller | null> {
-  const ctx = await liveSeller();
-  return ctx?.seller ?? null;
-}
-
-export async function getLivePublishedBlogPosts(limit = 3): Promise<StoreBlogPost[]> {
-  const ctx = await liveSeller();
+export async function getPublishedBlogPostsForStoreSlug(
+  storeSlug: string,
+  limit = 3
+): Promise<StoreBlogPost[]> {
+  const ctx = await storefrontContext(storeSlug);
   if (!ctx) return [];
   return getPublishedBlogPosts(ctx.supabase, ctx.seller.id, limit);
 }
@@ -79,8 +95,8 @@ function uniqueSortedYears(values: number[]): number[] {
   return [...new Set(values)].sort((a, b) => b - a);
 }
 
-export async function getLiveRideFilterFacets(): Promise<RideFilterFacets> {
-  const ctx = await liveSeller();
+export async function getRideFilterFacetsForStoreSlug(storeSlug: string): Promise<RideFilterFacets> {
+  const ctx = await storefrontContext(storeSlug);
   if (!ctx) return { tags: [], engineSizes: [], colours: [], years: [] };
 
   const { data, error } = await ctx.supabase
@@ -112,4 +128,44 @@ export async function getLiveRideFilterFacets(): Promise<RideFilterFacets> {
     colours: uniqueSortedNames(colours),
     years: uniqueSortedYears(years),
   };
+}
+
+/** @deprecated Prefer `listProductsForStoreSlug` on live seller routes. */
+export async function listLiveProducts(): Promise<Product[]> {
+  const ctx = await envPreviewSeller();
+  if (!ctx) return [];
+  return getActiveProductsForSeller(ctx.supabase, ctx.seller.id);
+}
+
+/** @deprecated Prefer `getProductForStoreSlug` on live seller routes. */
+export async function getLiveProduct(productId: string): Promise<Product | null> {
+  const ctx = await envPreviewSeller();
+  if (!ctx) return null;
+  return getStorefrontProduct(ctx.supabase, productId, ctx.seller.id);
+}
+
+/** @deprecated Prefer `getSellerFaqsForStoreSlug` on live seller routes. */
+export async function getLiveSellerFaqs(): Promise<StoreFaq[]> {
+  const ctx = await envPreviewSeller();
+  return ctx?.seller.faqs ?? [];
+}
+
+/** @deprecated Prefer `getStorefrontSellerBySlug` on live seller routes. */
+export async function getLiveStorefrontSeller(): Promise<StorefrontSeller | null> {
+  const ctx = await envPreviewSeller();
+  return ctx?.seller ?? null;
+}
+
+/** @deprecated Prefer `getPublishedBlogPostsForStoreSlug` on live seller routes. */
+export async function getLivePublishedBlogPosts(limit = 3): Promise<StoreBlogPost[]> {
+  const ctx = await envPreviewSeller();
+  if (!ctx) return [];
+  return getPublishedBlogPosts(ctx.supabase, ctx.seller.id, limit);
+}
+
+/** @deprecated Prefer `getRideFilterFacetsForStoreSlug` on live seller routes. */
+export async function getLiveRideFilterFacets(): Promise<RideFilterFacets> {
+  const slug = liveStoreSlug();
+  if (!slug) return { tags: [], engineSizes: [], colours: [], years: [] };
+  return getRideFilterFacetsForStoreSlug(slug);
 }

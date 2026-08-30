@@ -152,6 +152,47 @@ export const STOREFRONT_CONTENT_SCHEMA: Partial<
       page: "home",
     },
   ],
+  "template-b": [
+    textField(
+      "heroHeadline",
+      "Main headline",
+      "e.g. In stock, ships today if ordered before 4pm",
+      "home",
+      "The banner line at the top of your shop homepage."
+    ),
+  ],
+  "kitchenware-template": [
+    textareaField(
+      "heroHeadline",
+      "Main headline",
+      "e.g. Eco-Friendly Kitchenware for a greener home",
+      "home",
+      "The large title at the top of your shop homepage."
+    ),
+    textareaField(
+      "heroSubtext",
+      "Line under the headline",
+      "e.g. Thoughtfully made tools for everyday cooking…",
+      "home",
+      "The supporting sentence shown directly beneath your main headline."
+    ),
+  ],
+  "template-d": [
+    textareaField(
+      "heroHeadline",
+      "Main headline",
+      "e.g. Unleash Your Style\nShop the Latest Trends",
+      "home",
+      "The large title at the top of your shop homepage."
+    ),
+    textareaField(
+      "heroSubtext",
+      "Line under the headline",
+      "e.g. Discover elevated streetwear essentials…",
+      "home",
+      "The supporting sentence shown directly beneath your main headline."
+    ),
+  ],
   "motorbike-template": [
     imageField(
       "logoUrl",
@@ -439,6 +480,9 @@ export const STOREFRONT_CONTENT_SCHEMA: Partial<
  */
 export const STOREFRONT_CONTENT_PAGES: Partial<Record<StorefrontTemplate, readonly string[]>> = {
   "template-a": ["home", "product", "cart"],
+  "template-b": ["home", "product", "cart"],
+  "kitchenware-template": ["home", "product", "cart"],
+  "template-d": ["home", "product", "cart"],
   "motorbike-template": [
     "header",
     "hero",

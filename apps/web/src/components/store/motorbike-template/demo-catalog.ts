@@ -274,16 +274,19 @@ export function rideDemoToProduct(item: RideDemoProduct): Product {
   };
 }
 
-export function rideProductPath(productId: string): string {
-  return `${RIDE_TEMPLATE_BASE}/product/${productId}`;
+export function rideStoreBase(sellerSlug?: string): string {
+  return sellerSlug ? `${RIDE_TEMPLATE_BASE}/${sellerSlug}` : RIDE_TEMPLATE_BASE;
+}
+
+export function rideProductPath(productId: string, sellerSlug?: string): string {
+  return `${rideStoreBase(sellerSlug)}/product/${productId}`;
 }
 
 export function rideCartPath(sellerSlug?: string): string {
-  if (sellerSlug) return `${RIDE_TEMPLATE_BASE}/${sellerSlug}/cart`;
-  return `${RIDE_TEMPLATE_BASE}/cart`;
+  return `${rideStoreBase(sellerSlug)}/cart`;
 }
 
-const RESERVED_PATH_SEGMENTS = new Set(["search", "blog", "product", "cart"]);
+const RESERVED_PATH_SEGMENTS = new Set(["search", "blog", "product", "cart", "contact"]);
 
 export function rideCartHrefFromPath(pathname: string): string {
   const match = pathname.match(/^\/store\/motorbike-template\/([^/]+)/);

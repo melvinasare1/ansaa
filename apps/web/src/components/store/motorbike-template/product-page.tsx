@@ -14,7 +14,11 @@ export async function RideProductPage({
   storeSlug: string;
   pathBase: string;
 }) {
-  const [page, catalog] = await Promise.all([getRideProductPage(productId), listRideProducts()]);
+  const sellerSlug = storeSlug && storeSlug !== "motorbike-template" ? storeSlug : undefined;
+  const [page, catalog] = await Promise.all([
+    getRideProductPage(productId, sellerSlug),
+    listRideProducts(sellerSlug),
+  ]);
   if (!page) {
     notFound();
   }

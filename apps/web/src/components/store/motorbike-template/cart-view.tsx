@@ -9,19 +9,19 @@ import {
   RidePaymentInstructions,
 } from "@/components/store/motorbike-template/checkout-form";
 import { MotorbikePlaceholder } from "@/components/store/motorbike-template/placeholders";
-import { RIDE_TEMPLATE_BASE } from "@/components/store/motorbike-template/demo-catalog";
+import { rideStoreBase } from "@/components/store/motorbike-template/demo-catalog";
 import { useCart } from "@/lib/cart-context";
 import type { CheckoutSuccess } from "@/lib/checkout";
 import { formatCedis } from "@/lib/price";
 
 const ORANGE = "#E8622C";
-const shopHref = RIDE_TEMPLATE_BASE;
 
 function isImageSrc(value: string) {
   return value.startsWith("http") || value.startsWith("/");
 }
 
 export function RideCartView({ storeSlug }: { storeSlug: string }) {
+  const shopHref = rideStoreBase(storeSlug && storeSlug !== "motorbike-template" ? storeSlug : undefined);
   const { items, updateQuantity, removeItem, clearCart, totalCedis, hydrated } = useCart();
   const [receipt, setReceipt] = useState<CheckoutSuccess | null>(null);
 
