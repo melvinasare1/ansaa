@@ -37,7 +37,7 @@ export default function TrialBanner({ trial }: { trial: TrialBannerState | null 
           : "border-brand/20 bg-brand-soft text-ink-950"
       )}
     >
-      <p className="text-sm font-medium">{trialBannerMessage(trial)}</p>
+      <p className="min-w-0 text-sm font-medium">{trialBannerMessage(trial)}</p>
       <div className="flex shrink-0 items-center gap-2">
         <Link
           href="/dashboard/billing"

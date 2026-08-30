@@ -6,6 +6,7 @@ export type StorefrontContentFieldType = StorefrontContentScalarType | "repeatab
 export type StorefrontContentItemField = {
   key: string;
   label: string;
+  description?: string;
   type: StorefrontContentScalarType;
   placeholder: string;
 };
@@ -13,6 +14,7 @@ export type StorefrontContentItemField = {
 export type StorefrontContentScalarField = {
   key: string;
   label: string;
+  description?: string;
   type: StorefrontContentScalarType;
   placeholder: string;
   page: string;
@@ -21,6 +23,7 @@ export type StorefrontContentScalarField = {
 export type StorefrontContentRepeatableField = {
   key: string;
   label: string;
+  description?: string;
   type: "repeatable";
   page: string;
   itemLabel: string;
@@ -46,39 +49,57 @@ function textField(
   key: string,
   label: string,
   placeholder: string,
-  page: string
+  page: string,
+  description?: string
 ): StorefrontContentScalarField {
-  return { key, label, type: "text", placeholder, page };
+  return { key, label, description, type: "text", placeholder, page };
 }
 
 function textareaField(
   key: string,
   label: string,
   placeholder: string,
-  page: string
+  page: string,
+  description?: string
 ): StorefrontContentScalarField {
-  return { key, label, type: "textarea", placeholder, page };
+  return { key, label, description, type: "textarea", placeholder, page };
 }
 
 function imageField(
   key: string,
   label: string,
   placeholder: string,
-  page: string
+  page: string,
+  description?: string
 ): StorefrontContentScalarField {
-  return { key, label, type: "image", placeholder, page };
+  return { key, label, description, type: "image", placeholder, page };
 }
 
-function itemText(key: string, label: string, placeholder: string): StorefrontContentItemField {
-  return { key, label, type: "text", placeholder };
+function itemText(
+  key: string,
+  label: string,
+  placeholder: string,
+  description?: string
+): StorefrontContentItemField {
+  return { key, label, description, type: "text", placeholder };
 }
 
-function itemTextarea(key: string, label: string, placeholder: string): StorefrontContentItemField {
-  return { key, label, type: "textarea", placeholder };
+function itemTextarea(
+  key: string,
+  label: string,
+  placeholder: string,
+  description?: string
+): StorefrontContentItemField {
+  return { key, label, description, type: "textarea", placeholder };
 }
 
-function itemImage(key: string, label: string, placeholder: string): StorefrontContentItemField {
-  return { key, label, type: "image", placeholder };
+function itemImage(
+  key: string,
+  label: string,
+  placeholder: string,
+  description?: string
+): StorefrontContentItemField {
+  return { key, label, description, type: "image", placeholder };
 }
 
 /**
@@ -92,211 +113,322 @@ export const STOREFRONT_CONTENT_SCHEMA: Partial<
   "template-a": [
     {
       key: "heroHeadline",
-      label: "Hero headline",
+      label: "Main headline",
+      description: "The large title at the top of your shop homepage.",
       type: "text",
       placeholder: "e.g. Men's Clothing",
       page: "home",
     },
     {
       key: "heroSubtext",
-      label: "Hero subtext",
+      label: "Line under the headline",
+      description: "The supporting sentence shown directly beneath your main headline.",
       type: "textarea",
       placeholder: "e.g. New season pieces, made to last.",
       page: "home",
     },
     {
       key: "heroImageUrl",
-      label: "Hero image",
+      label: "Top banner photo",
+      description: "The wide photo visitors see behind or above your headline.",
       type: "image",
-      placeholder: "Wide photo for the top of your shop",
+      placeholder: "Upload a wide photo for the top of your shop",
       page: "home",
     },
     {
       key: "aboutText",
-      label: "About",
+      label: "About your shop",
+      description: "A short story about your brand, shown on the homepage.",
       type: "textarea",
       placeholder: "e.g. A short story about your brand.",
       page: "home",
     },
     {
       key: "logoUrl",
-      label: "Logo",
+      label: "Shop logo",
+      description: "Your logo in the shop header.",
       type: "image",
-      placeholder: "Shown in the shop header",
+      placeholder: "Upload your logo",
       page: "home",
     },
   ],
   "motorbike-template": [
-    imageField("logoUrl", "Logo", "Shown in the header and footer", "header"),
+    imageField(
+      "logoUrl",
+      "Shop logo",
+      "Upload your logo",
+      "header",
+      "Shown in the top bar and footer of every page."
+    ),
 
     textareaField(
       "heroHeadline",
-      "Headline",
+      "Main headline",
       "e.g. Ride Better.\nRide Together.",
-      "hero"
+      "hero",
+      "The big title at the very top of your homepage."
     ),
     textareaField(
       "heroSubtext",
-      "Subtext",
+      "Line under the headline",
       "e.g. Motorbikes, bicycles, mopeds, and scooters…",
-      "hero"
+      "hero",
+      "The paragraph directly beneath your main headline."
     ),
-    imageField("heroImage", "Image", "Wide photo for the top of your shop", "hero"),
+    imageField(
+      "heroImage",
+      "Top banner photo",
+      "Upload a wide photo",
+      "hero",
+      "The large photo in the hero section at the top of your shop."
+    ),
 
     {
       key: "trustBadges",
-      label: "Trust badges",
+      label: "Trust badges strip",
+      description: "Short labels in the row below your hero (e.g. warranty, delivery).",
       type: "repeatable",
       page: "trust-strip",
-      itemLabel: "badge",
-      itemFields: [itemText("label", "Label", "e.g. Warranty")],
+      itemLabel: "Badge",
+      itemFields: [itemText("label", "Badge text", "e.g. Warranty", "What the badge says")],
     },
 
-    textField("shopHeading", "Heading", "e.g. Shop", "shop"),
+    textField("shopHeading", "Shop section title", "e.g. Shop", "shop", "The heading above your category cards."),
     {
       key: "shopCategories",
       label: "Category cards",
+      description: "The image tiles shoppers click to browse product types.",
       type: "repeatable",
       page: "shop",
-      itemLabel: "category",
+      itemLabel: "Category",
       itemFields: [
-        itemText("label", "Label", "e.g. Motorbikes"),
-        itemImage("image", "Image", "Category photo"),
-        itemText("linkCategory", "Search category", "e.g. motorbikes"),
+        itemText("label", "Category name", "e.g. Motorbikes", "The name shown on the card"),
+        itemImage("image", "Card photo", "Upload category photo", "Photo on the category tile"),
+        itemText(
+          "linkCategory",
+          "Product filter",
+          "e.g. motorbikes",
+          "Matches products in this category (optional)"
+        ),
       ],
     },
 
-    textField("promoHeadline", "Headline", "e.g. Apex R9", "promo"),
-    textField("promoKicker", "Kicker", "e.g. Street Motorbike", "promo"),
+    textField(
+      "promoHeadline",
+      "Featured product name",
+      "e.g. Apex R9",
+      "promo",
+      "The bold product name in the promo banner."
+    ),
+    textField(
+      "promoKicker",
+      "Featured product type",
+      "e.g. Street Motorbike",
+      "promo",
+      "The small label above the product name."
+    ),
     textareaField(
       "promoBody",
-      "Body",
+      "Featured product description",
       "e.g. Street-ready motorbike with a punchy engine…",
-      "promo"
+      "promo",
+      "The short description beside the featured product photo."
     ),
-    imageField("promoImage", "Image", "Featured machine photo", "promo"),
+    imageField(
+      "promoImage",
+      "Featured product photo",
+      "Upload product photo",
+      "promo",
+      "The photo in the promo banner."
+    ),
 
     {
       key: "featureStrip",
-      label: "Feature columns",
+      label: "Three selling points",
+      description: "The three columns with icons below the promo banner.",
       type: "repeatable",
       page: "features",
-      itemLabel: "feature",
+      itemLabel: "Column",
       itemFields: [
-        itemText("label", "Title", "e.g. Trusted Brands"),
-        itemTextarea("body", "Body", "Short supporting sentence"),
+        itemText("label", "Column title", "e.g. Trusted Brands", "The bold heading"),
+        itemTextarea("body", "Column text", "Short supporting sentence", "One or two sentences below the title"),
       ],
     },
 
-    textField("accessoriesHeading", "Heading", "e.g. Gear & Accessories", "accessories"),
+    textField(
+      "accessoriesHeading",
+      "Accessories section title",
+      "e.g. Gear & Accessories",
+      "accessories",
+      "The heading above the accessories product row."
+    ),
     {
       key: "accessories",
       label: "Accessory products",
+      description: "Products shown in the accessories carousel.",
       type: "repeatable",
       page: "accessories",
-      itemLabel: "accessory",
+      itemLabel: "Product",
       itemFields: [
-        itemText("name", "Name", "e.g. Motorbike Helmet"),
-        itemImage("image", "Image", "Product photo"),
-        itemText("price", "Price", "e.g. 450"),
-        itemText("productId", "Product ID", "Optional listing id for the product page"),
+        itemText("name", "Product name", "e.g. Motorbike Helmet", "Shown on the product card"),
+        itemImage("image", "Product photo", "Upload product photo", "Photo on the card"),
+        itemText("price", "Price (GHS)", "e.g. 450", "Displayed on the card"),
+        itemText(
+          "productId",
+          "Link to listing",
+          "Optional product id",
+          "Connects this card to a real product page (optional)"
+        ),
       ],
     },
 
     {
       key: "valueProps",
-      label: "Value columns",
+      label: "Why shop with you",
+      description: "Three columns explaining delivery, support, or other benefits.",
       type: "repeatable",
       page: "value-props",
-      itemLabel: "column",
+      itemLabel: "Benefit",
       itemFields: [
-        itemText("label", "Title", "e.g. Delivery Across Accra"),
-        itemTextarea("body", "Body", "Short supporting sentence"),
+        itemText("label", "Benefit title", "e.g. Delivery Across Accra", "The bold heading"),
+        itemTextarea("body", "Benefit text", "Short supporting sentence", "One or two sentences below the title"),
       ],
     },
 
-    textField("darkBannerHeadline", "Headline", "e.g. E-Bike", "dark-banner"),
+    textField(
+      "darkBannerHeadline",
+      "Dark banner headline",
+      "e.g. E-Bike",
+      "dark-banner",
+      "The large title on the dark feature banner."
+    ),
     textareaField(
       "darkBannerBody",
-      "Body",
+      "Dark banner text",
       "e.g. Quiet power for city hops and weekend loops…",
-      "dark-banner"
+      "dark-banner",
+      "The description on the dark feature banner."
     ),
-    imageField("darkBannerImage", "Image", "Banner photo", "dark-banner"),
+    imageField(
+      "darkBannerImage",
+      "Dark banner photo",
+      "Upload banner photo",
+      "dark-banner",
+      "The photo on the dark feature banner."
+    ),
     textField(
       "darkBannerCalloutTitle",
-      "Callout title",
+      "Callout box title",
       "e.g. Super Powerful Battery",
-      "dark-banner"
+      "dark-banner",
+      "The bold line inside the small callout box."
     ),
     textareaField(
       "darkBannerCalloutBody",
-      "Callout body",
+      "Callout box text",
       "e.g. The best range ever seen for a bike like this.",
-      "dark-banner"
+      "dark-banner",
+      "Supporting text inside the callout box."
     ),
 
-    textField("blogHeading", "Heading", "e.g. Recent Blog Posts", "blog"),
+    textField(
+      "blogHeading",
+      "Blog section title",
+      "e.g. Recent Blog Posts",
+      "blog",
+      "The heading above your blog cards."
+    ),
     {
       key: "blogPosts",
       label: "Blog cards",
+      description: "Preview cards for blog posts on your homepage.",
       type: "repeatable",
       page: "blog",
-      itemLabel: "post",
+      itemLabel: "Post",
       itemFields: [
-        itemText("title", "Title", "Post title"),
-        itemTextarea("excerpt", "Excerpt", "One or two sentences"),
-        itemImage("image", "Image", "Card photo"),
-        itemText("date", "Date", "e.g. 30 Aug 2026"),
-        itemText("href", "Link", "Optional URL"),
+        itemText("title", "Post title", "Post title", "The headline on the card"),
+        itemTextarea("excerpt", "Short summary", "One or two sentences", "Shown beneath the title"),
+        itemImage("image", "Card photo", "Upload card photo", "Photo on the blog card"),
+        itemText("date", "Date shown", "e.g. 30 Aug 2026", "Displayed on the card"),
+        itemText("href", "Link (optional)", "https://…", "Where the card links to"),
       ],
     },
 
     textareaField(
       "footerTagline",
-      "Tagline",
+      "Footer tagline",
       "e.g. Motorbikes, bicycles, mopeds, and scooters…",
-      "footer"
+      "footer",
+      "The short line under your logo in the footer."
     ),
     textField(
       "footerNewsletterHeading",
       "Newsletter heading",
       "e.g. Signup for latest information",
-      "footer"
+      "footer",
+      "The title above the email signup box in the footer."
     ),
     {
       key: "footerSocialLinks",
-      label: "Social links",
+      label: "Social media links",
+      description: "Icons and links in the footer.",
       type: "repeatable",
       page: "footer",
-      itemLabel: "link",
+      itemLabel: "Link",
       itemFields: [
-        itemText("network", "Network", "e.g. Instagram"),
-        itemText("url", "URL", "https://…"),
+        itemText("network", "Platform name", "e.g. Instagram", "Which social network"),
+        itemText("url", "Profile URL", "https://…", "Full link to your profile"),
       ],
     },
 
-    textField("contactKicker", "Kicker", "e.g. Get in touch", "contact"),
-    textField("contactHeadline", "Headline", "e.g. Contact Us", "contact"),
+    textField(
+      "contactKicker",
+      "Contact page label",
+      "e.g. Get in touch",
+      "contact",
+      "The small text above the contact page headline."
+    ),
+    textField(
+      "contactHeadline",
+      "Contact page headline",
+      "e.g. Contact Us",
+      "contact",
+      "The main title on your contact page."
+    ),
     textareaField(
       "contactSubtext",
-      "Subtext",
+      "Contact page intro",
       "Use {brandName} for your shop name. e.g. Call {brandName} directly.",
-      "contact"
+      "contact",
+      "The paragraph under the headline. Use {brandName} where your shop name should appear."
     ),
-    textField("contactFormHeading", "Form heading", "e.g. Send a message", "contact"),
+    textField(
+      "contactFormHeading",
+      "Message form title",
+      "e.g. Send a message",
+      "contact",
+      "The heading above the contact form."
+    ),
     textareaField(
       "contactFormIntro",
-      "Form intro",
+      "Message form intro",
       "e.g. Tell us what you're looking for…",
-      "contact"
+      "contact",
+      "Short instructions above the contact form fields."
     ),
-    textField("contactWhatsappHeading", "WhatsApp heading", "e.g. Call or WhatsApp", "contact"),
+    textField(
+      "contactWhatsappHeading",
+      "WhatsApp section title",
+      "e.g. Call or WhatsApp",
+      "contact",
+      "The heading above your WhatsApp / phone details."
+    ),
     textareaField(
       "contactWhatsappBody",
-      "WhatsApp body",
+      "WhatsApp section text",
       "Use {brandName} for your shop name.",
-      "contact"
+      "contact",
+      "Text beside your phone number. Use {brandName} where your shop name should appear."
     ),
   ],
 };

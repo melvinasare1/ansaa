@@ -39,7 +39,6 @@ export default function DashboardShell({
         }
       >
         <SiteHeader />
-        <TrialBanner trial={trial} />
         <TrialExpiryModal
           open={showExpiryModal}
           billingReference={seller?.billingReference ?? "Not available"}
@@ -48,6 +47,7 @@ export default function DashboardShell({
         <div className="flex min-h-0 flex-1">
           <AppSidebar className="top-(--header-height)! bottom-0! h-auto!" />
           <SidebarInset className="bg-mist">
+            <TrialBanner trial={trial} />
             <DashboardHeading />
             <div className="flex flex-1 flex-col">
               {sellerError ? (

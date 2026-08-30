@@ -11,12 +11,12 @@ import {
   Trash2Icon,
   XIcon,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   PRODUCT_IMAGE_ACCEPT,
   uploadProductImage,
   validateProductImage,
 } from "@/lib/product-images";
+import { cn } from "@/lib/utils";
 import { storefrontUrl } from "@/lib/storefront-url";
 import { createClient } from "@ansaa/shared/supabase/client";
 import {
@@ -38,7 +38,7 @@ import {
 import type { Seller } from "@ansaa/shared/types";
 
 const FIELD_CLASS =
-  "mt-1.5 w-full rounded-lg border border-wire bg-white px-4 py-2.5 text-sm text-ink-950 outline-none placeholder:text-ink-700/40 focus:border-signal";
+  "w-full rounded-lg border border-wire bg-white px-4 py-2.5 text-sm text-ink-950 outline-none placeholder:text-ink-700/40 focus:border-signal";
 
 function valueHasContent(value: StorefrontContentValue | undefined): boolean {
   if (typeof value === "string") return Boolean(value.trim());
@@ -83,11 +83,10 @@ export function StorefrontEditor({
 
   useEffect(() => {
     const fromServer = valuesFromContent(fields, initialContent);
+    setValues(fromServer);
+
     const hasSavedValue = fields.some((field) => valueHasContent(fromServer[field.key]));
-    if (hasSavedValue) {
-      setValues(fromServer);
-      return;
-    }
+    if (hasSavedValue) return;
 
     let cancelled = false;
     void (async () => {
@@ -150,92 +149,153 @@ export function StorefrontEditor({
     );
   }
 
-  return (
-    <form onSubmit={onSubmit} className="mt-6">
-      <Tabs value={activePage} onValueChange={setActivePage} className="gap-0">
-        <TabsList
-          variant="line"
-          className="flex h-auto w-full flex-wrap justify-start gap-x-5 gap-y-1 rounded-none border-b border-wire bg-transparent p-0"
-        >
-          {pages.map((page) => (
-            <TabsTrigger
-              key={page}
-              value={page}
-              className="h-auto flex-none rounded-none px-0 py-3 text-sm font-medium text-muted-foreground after:h-0.5 after:bg-ink-950 data-active:text-ink-950"
-            >
-              {storefrontPageLabel(page)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+  const pageFields = getStorefrontContentFields(seller.template, activePage);
 
-        {pages.map((page) => {
-          const pageFields = getStorefrontContentFields(seller.template, page);
-          return (
-            <TabsContent key={page} value={page} className="mt-6 outline-none">
-              <section className="rounded-xl border border-wire bg-white p-6">
-                {pageFields.length === 0 ? (
-                  <p className="text-sm text-ink-700/60">No editable content on this page yet.</p>
-                ) : (
-                  <div className="space-y-5">
-                    {pageFields.map((field) => {
-                      if (isRepeatableField(field)) {
-                        const raw = values[field.key];
-                        return (
-                          <RepeatableEditorField
-                            key={field.key}
-                            field={field}
-                            value={Array.isArray(raw) ? raw : []}
-                            sellerId={seller.id}
-                            disabled={saving}
-                            onChange={(next) => setField(field.key, next)}
-                          />
-                        );
-                      }
-                      const raw = values[field.key];
-                      return (
-                        <EditorField
-                          key={field.key}
+  return (
+    <form onSubmit={onSubmit} className="mt-8 pb-16">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
+        <EditorSectionNav pages={pages} activePage={activePage} onChange={setActivePage} />
+
+        <div className="min-w-0 flex-1">
+          <section className="rounded-xl border border-wire bg-white px-6 py-7 shadow-card md:px-8 md:py-8">
+            <header className="border-b border-wire pb-5">
+              <h2 className="font-display text-lg font-semibold tracking-tight text-ink-950">
+                {storefrontPageLabel(activePage)}
+              </h2>
+            </header>
+
+            {pageFields.length === 0 ? (
+              <p className="mt-6 text-sm text-ink-700/60">No editable content on this page yet.</p>
+            ) : (
+              <div className="divide-y divide-wire">
+                {pageFields.map((field) => {
+                  if (isRepeatableField(field)) {
+                    const raw = values[field.key];
+                    return (
+                      <div key={field.key} className="py-8 first:pt-7 last:pb-0">
+                        <RepeatableEditorField
                           field={field}
-                          value={typeof raw === "string" ? raw : ""}
+                          value={Array.isArray(raw) ? raw : []}
                           sellerId={seller.id}
                           disabled={saving}
                           onChange={(next) => setField(field.key, next)}
                         />
-                      );
-                    })}
-                  </div>
-                )}
-              </section>
-            </TabsContent>
-          );
-        })}
-      </Tabs>
+                      </div>
+                    );
+                  }
+                  const raw = values[field.key];
+                  return (
+                    <div key={field.key} className="py-8 first:pt-7 last:pb-0">
+                      <EditorField
+                        field={field}
+                        value={typeof raw === "string" ? raw : ""}
+                        sellerId={seller.id}
+                        disabled={saving}
+                        onChange={(next) => setField(field.key, next)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
 
-      {error ? <p className="mt-4 text-sm text-destructive">{error}</p> : null}
+          {error ? <p className="mt-5 text-sm text-destructive">{error}</p> : null}
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-lg bg-ink-950 px-4 py-2 text-sm font-medium text-white hover:bg-ink-800 disabled:opacity-50"
-        >
-          {saving ? "Saving…" : "Save storefront content"}
-        </button>
-        {saved && storeUrl ? (
-          <a
-            href={storeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg border border-wire px-4 py-2 text-sm font-medium text-ink-950 hover:border-signal"
-          >
-            View your live store
-          </a>
-        ) : null}
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-lg bg-ink-950 px-4 py-2 text-sm font-medium text-white hover:bg-ink-800 disabled:opacity-50"
+            >
+              {saving ? "Saving…" : "Save storefront content"}
+            </button>
+            {saved && storeUrl ? (
+              <a
+                href={storeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg border border-wire px-4 py-2 text-sm font-medium text-ink-950 hover:border-signal"
+              >
+                View your live store
+              </a>
+            ) : null}
+          </div>
+          {saved && !storeUrl ? (
+            <p className="mt-3 text-sm text-ink-700/60">Saved. Set a store slug to view your live shop.</p>
+          ) : null}
+        </div>
       </div>
-      {saved && !storeUrl ? (
-        <p className="mt-3 text-sm text-ink-700/60">Saved. Set a store slug to view your live shop.</p>
-      ) : null}
     </form>
+  );
+}
+
+function EditorSectionNav({
+  pages,
+  activePage,
+  onChange,
+}: {
+  pages: string[];
+  activePage: string;
+  onChange: (page: string) => void;
+}) {
+  return (
+    <>
+      <div className="lg:hidden">
+        <label
+          htmlFor="editor-section"
+          className="text-xs font-semibold tracking-wide text-ink-700/45 uppercase"
+        >
+          Section
+        </label>
+        <div className="relative mt-2">
+          <select
+            id="editor-section"
+            value={activePage}
+            onChange={(event) => onChange(event.target.value)}
+            className="w-full appearance-none rounded-xl border border-wire bg-white px-4 py-3 pr-10 text-sm font-semibold text-ink-950 outline-none focus:border-signal"
+          >
+            {pages.map((page) => (
+              <option key={page} value={page}>
+                {storefrontPageLabel(page)}
+              </option>
+            ))}
+          </select>
+          <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-ink-700/45" />
+        </div>
+      </div>
+
+      <nav
+        aria-label="Storefront sections"
+        className="hidden w-52 shrink-0 lg:sticky lg:top-24 lg:block xl:w-56"
+      >
+        <p className="mb-2 px-3 text-xs font-semibold tracking-wide text-ink-700/45 uppercase">
+          Sections
+        </p>
+        <ul className="space-y-1">
+          {pages.map((page) => {
+            const active = page === activePage;
+            return (
+              <li key={page}>
+                <button
+                  type="button"
+                  onClick={() => onChange(page)}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "relative flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm transition-colors",
+                    active
+                      ? "bg-brand-soft font-semibold text-brand before:absolute before:top-1/2 before:left-0 before:h-5 before:w-[3px] before:-translate-y-1/2 before:rounded-full before:bg-brand"
+                      : "font-medium text-ink-700/65 hover:bg-white hover:text-ink-950"
+                  )}
+                >
+                  {storefrontPageLabel(page)}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </>
   );
 }
 
@@ -246,7 +306,13 @@ function EditorField({
   disabled,
   onChange,
 }: {
-  field: { key: string; label: string; type: StorefrontContentScalarType; placeholder: string };
+  field: {
+    key: string;
+    label: string;
+    description?: string;
+    type: StorefrontContentScalarType;
+    placeholder: string;
+  };
   value: string;
   sellerId: string;
   disabled: boolean;
@@ -254,39 +320,86 @@ function EditorField({
 }) {
   return (
     <div>
-      <label htmlFor={`store-content-${field.key}`} className="text-sm font-medium text-ink-950">
-        {field.label}
+      <FieldLabel
+        htmlFor={`store-content-${field.key}`}
+        label={field.label}
+        description={field.description}
+        value={field.type === "image" ? undefined : value}
+      />
+      <div className="mt-5">
+        {field.type === "text" ? (
+          <input
+            id={`store-content-${field.key}`}
+            type="text"
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={field.placeholder}
+            className={FIELD_CLASS}
+          />
+        ) : null}
+        {field.type === "textarea" ? (
+          <textarea
+            id={`store-content-${field.key}`}
+            rows={3}
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={field.placeholder}
+            className={FIELD_CLASS}
+          />
+        ) : null}
+        {field.type === "image" ? (
+          <ContentImageField
+            id={`store-content-${field.key}`}
+            label={field.label}
+            placeholder={field.placeholder}
+            value={value}
+            sellerId={sellerId}
+            disabled={disabled}
+            onChange={onChange}
+          />
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function FieldLabel({
+  htmlFor,
+  label,
+  description,
+  value,
+}: {
+  htmlFor?: string;
+  label: string;
+  description?: string;
+  value?: string;
+}) {
+  const trimmed = value?.trim() ?? "";
+  const preview =
+    trimmed.length > 0
+      ? trimmed.length > 120
+        ? `${trimmed.slice(0, 120)}…`
+        : trimmed
+      : null;
+
+  return (
+    <div>
+      <label htmlFor={htmlFor} className="block text-sm font-semibold text-ink-950">
+        {label}
       </label>
-      {field.type === "text" ? (
-        <input
-          id={`store-content-${field.key}`}
-          type="text"
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={field.placeholder}
-          className={FIELD_CLASS}
-        />
+      {description ? (
+        <p className="mt-2 text-sm leading-relaxed text-ink-700/50">{description}</p>
       ) : null}
-      {field.type === "textarea" ? (
-        <textarea
-          id={`store-content-${field.key}`}
-          rows={3}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={field.placeholder}
-          className={FIELD_CLASS}
-        />
-      ) : null}
-      {field.type === "image" ? (
-        <ContentImageField
-          id={`store-content-${field.key}`}
-          label={field.label}
-          placeholder={field.placeholder}
-          value={value}
-          sellerId={sellerId}
-          disabled={disabled}
-          onChange={onChange}
-        />
+      {value !== undefined ? (
+        preview ? (
+          <p className="mt-3.5 rounded-md border border-wire/70 bg-mist/60 px-3 py-2 text-xs leading-relaxed text-ink-700">
+            Currently on your shop: <span className="font-medium text-ink-950">{preview}</span>
+          </p>
+        ) : (
+          <p className="mt-3.5 text-xs italic text-ink-700/45">
+            Nothing saved yet — shoppers see the template default.
+          </p>
+        )
       ) : null}
     </div>
   );
@@ -319,13 +432,16 @@ function RepeatableEditorField({
   }
 
   return (
-    <div>
-      <p className="text-sm font-medium text-ink-950">{field.label}</p>
-      <div className="mt-2 space-y-3">
+    <div className="rounded-xl border border-wire bg-mist/60 p-5 md:p-6">
+      <FieldLabel label={field.label} description={field.description} />
+      <div className="mt-5 space-y-4">
         {value.map((item, index) => (
-          <article key={`${field.key}-${index}`} className="rounded-lg border border-wire p-4">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <p className="text-xs font-medium tracking-wide text-ink-700/60 uppercase">
+          <article
+            key={`${field.key}-${index}`}
+            className="rounded-xl border border-wire bg-white p-5"
+          >
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <p className="text-xs font-semibold tracking-wide text-ink-700/55 uppercase">
                 {field.itemLabel} {index + 1}
               </p>
               <div className="flex items-center gap-1">
@@ -358,7 +474,7 @@ function RepeatableEditorField({
                 </button>
               </div>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {field.itemFields.map((itemField) => (
                 <ItemEditorField
                   key={itemField.key}
@@ -378,7 +494,7 @@ function RepeatableEditorField({
         type="button"
         onClick={() => onChange([...value, emptyRepeatableItem(field)])}
         disabled={disabled}
-        className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-wire px-3 py-2 text-sm font-medium text-ink-950 hover:border-signal disabled:opacity-50"
+        className="mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-wire bg-white px-4 py-2.5 text-sm font-semibold text-ink-950 hover:border-signal disabled:opacity-50"
       >
         <PlusIcon className="size-4" />
         Add {field.itemLabel}
@@ -404,40 +520,45 @@ function ItemEditorField({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="text-sm font-medium text-ink-950">
-        {field.label}
-      </label>
-      {field.type === "text" ? (
-        <input
-          id={id}
-          type="text"
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={field.placeholder}
-          className={FIELD_CLASS}
-        />
-      ) : null}
-      {field.type === "textarea" ? (
-        <textarea
-          id={id}
-          rows={3}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={field.placeholder}
-          className={FIELD_CLASS}
-        />
-      ) : null}
-      {field.type === "image" ? (
-        <ContentImageField
-          id={id}
-          label={field.label}
-          placeholder={field.placeholder}
-          value={value}
-          sellerId={sellerId}
-          disabled={disabled}
-          onChange={onChange}
-        />
-      ) : null}
+      <FieldLabel
+        htmlFor={id}
+        label={field.label}
+        description={field.description}
+        value={field.type === "image" ? undefined : value}
+      />
+      <div className="mt-4">
+        {field.type === "text" ? (
+          <input
+            id={id}
+            type="text"
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={field.placeholder}
+            className={FIELD_CLASS}
+          />
+        ) : null}
+        {field.type === "textarea" ? (
+          <textarea
+            id={id}
+            rows={3}
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={field.placeholder}
+            className={FIELD_CLASS}
+          />
+        ) : null}
+        {field.type === "image" ? (
+          <ContentImageField
+            id={id}
+            label={field.label}
+            placeholder={field.placeholder}
+            value={value}
+            sellerId={sellerId}
+            disabled={disabled}
+            onChange={onChange}
+          />
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -487,41 +608,54 @@ function ContentImageField({
   }
 
   return (
-    <div className="mt-1.5">
-      {value ? (
-        <div className="relative mb-3 h-32 w-full overflow-hidden rounded-lg border border-wire bg-mist">
-          {/* Public storage URLs; next/image remotePatterns are not required here. */}
-          <img src={value} alt="" className="h-full w-full object-cover" />
+    <div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+        {value ? (
+          <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg border border-wire bg-mist sm:h-24 sm:w-28">
+            {/* Public storage URLs; next/image remotePatterns are not required here. */}
+            <img src={value} alt="" className="h-full w-full object-cover" />
+            <button
+              type="button"
+              onClick={() => onChange("")}
+              disabled={disabled || uploading}
+              aria-label={`Remove ${label}`}
+              className="absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full bg-ink-950/70 text-white disabled:opacity-40"
+            >
+              <XIcon className="size-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex h-28 w-full shrink-0 items-center justify-center rounded-lg border border-dashed border-wire bg-mist/50 sm:h-24 sm:w-28">
+            <p className="px-2 text-center text-xs text-ink-700/45">No image saved</p>
+          </div>
+        )}
+
+        <div className="min-w-0 flex-1">
           <button
             type="button"
-            onClick={() => onChange("")}
+            onClick={() => inputRef.current?.click()}
             disabled={disabled || uploading}
-            aria-label={`Remove ${label}`}
-            className="absolute top-1.5 right-1.5 flex size-6 items-center justify-center rounded-full bg-ink-950/70 text-white disabled:opacity-40"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-wire px-4 py-3 text-sm font-medium text-ink-700 hover:border-signal hover:text-ink-950 disabled:opacity-50"
           >
-            <XIcon className="size-3.5" />
+            {uploading ? (
+              <>
+                <Loader2Icon className="size-4 animate-spin" />
+                Uploading {progress}%
+              </>
+            ) : (
+              <>
+                <ImagePlusIcon className="size-4" />
+                {value ? "Replace image" : placeholder}
+              </>
+            )}
           </button>
+          {value ? (
+            <p className="mt-1.5 truncate text-xs text-ink-700/60" title={value}>
+              Current image is active on your shop.
+            </p>
+          ) : null}
         </div>
-      ) : null}
-
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={disabled || uploading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-wire px-4 py-3 text-sm font-medium text-ink-700 hover:border-signal hover:text-ink-950 disabled:opacity-50"
-      >
-        {uploading ? (
-          <>
-            <Loader2Icon className="size-4 animate-spin" />
-            Uploading {progress}%
-          </>
-        ) : (
-          <>
-            <ImagePlusIcon className="size-4" />
-            {value ? "Replace image" : placeholder}
-          </>
-        )}
-      </button>
+      </div>
       <input
         ref={inputRef}
         id={id}

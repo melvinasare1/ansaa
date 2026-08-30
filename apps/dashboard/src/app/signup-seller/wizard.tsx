@@ -18,6 +18,13 @@ import {
   WEBSITE_ADMIN_FEATURES,
 } from "@/lib/storefront-templates";
 import { slugifyStoreName } from "@/lib/store-slug";
+import {
+  isValidPhoneNumber,
+  normalizePhoneForStorage,
+  PHONE_DIGIT_ERROR,
+  stripPhoneWhitespace,
+} from "@/lib/phone";
+import { TRIAL_LENGTH_DAYS } from "@/lib/trial";
 import { cn } from "@/lib/utils";
 import {
   PRICING_TIER_BASE_FEE_CEDIS,
@@ -44,6 +51,7 @@ type Draft = {
   template: StorefrontTemplate;
   productCategory: string;
   pricingTier: PricingTier;
+  startFreeTrial: boolean;
 };
 
 const EMPTY_DRAFT: Draft = {
@@ -56,6 +64,7 @@ const EMPTY_DRAFT: Draft = {
   template: "template-a",
   productCategory: "",
   pricingTier: "website_admin",
+  startFreeTrial: true,
 };
 
 const SIGNUP_STEPS = ["Account", "Template", "Business", "Plan", "Confirm"] as const;
@@ -77,6 +86,7 @@ function readDraft(): Draft {
       template: parseStorefrontTemplate(parsed.template),
       productCategory: String(parsed.productCategory ?? ""),
       pricingTier: parsed.pricingTier === "fulfilment" ? "fulfilment" : "website_admin",
+      startFreeTrial: parsed.startFreeTrial !== false,
     };
   } catch {
     return EMPTY_DRAFT;
@@ -105,6 +115,8 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
   const [slugTouched, setSlugTouched] = useState(false);
   const [slugStatus, setSlugStatus] = useState<SlugStatus>("idle");
   const [slugError, setSlugError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [momoPhoneError, setMomoPhoneError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
@@ -166,6 +178,8 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
     draft.pricingTier === "fulfilment" ? "Fulfilment · 400 GHS/mo intro" : "Website & Admin · 250 GHS/mo";
 
   const paymentPhone = draft.momoSameAsMobile ? draft.phone : draft.momoPhone;
+  const phoneValid = isValidPhoneNumber(draft.phone);
+  const paymentPhoneValid = isValidPhoneNumber(paymentPhone);
 
   const canContinue = useMemo(() => {
     const signupStep = mode === "signup" ? step : step + 1;
@@ -178,18 +192,39 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
         Boolean(draft.productCategory.trim()) &&
         Boolean(draft.storeSlug) &&
         slugStatus === "available" &&
-        draft.phone.replace(/\D/g, "").length >= 9 &&
-        paymentPhone.replace(/\D/g, "").length >= 9
+        phoneValid &&
+        paymentPhoneValid &&
+        !phoneError &&
+        !momoPhoneError
       );
     }
     return true;
-  }, [confirmPassword, draft, mode, password, paymentPhone, slugStatus, step]);
+  }, [
+    confirmPassword,
+    draft,
+    mode,
+    momoPhoneError,
+    password,
+    paymentPhoneValid,
+    phoneError,
+    phoneValid,
+    slugStatus,
+    step,
+  ]);
 
   function goNext() {
     setError(null);
     if (mode === "signup" && step === 0 && password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
+    }
+    const signupStep = mode === "signup" ? step : step + 1;
+    if (signupStep === 2) {
+      const nextPhoneError = phoneValid ? null : PHONE_DIGIT_ERROR;
+      const nextMomoError = paymentPhoneValid ? null : PHONE_DIGIT_ERROR;
+      setPhoneError(nextPhoneError);
+      setMomoPhoneError(draft.momoSameAsMobile ? null : nextMomoError);
+      if (nextPhoneError || nextMomoError) return;
     }
     if (!canContinue) return;
     setStep((n) => Math.min(n + 1, steps.length - 1));
@@ -202,8 +237,8 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
       const payload = {
         businessName: draft.businessName,
         storeSlug: draft.storeSlug,
-        phone: draft.phone,
-        momoPhone: paymentPhone,
+        phone: normalizePhoneForStorage(draft.phone),
+        momoPhone: normalizePhoneForStorage(paymentPhone),
         template: draft.template,
         pricingTier: draft.pricingTier,
         productCategory: draft.productCategory,
@@ -332,6 +367,8 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
             draft={draft}
             slugStatus={slugStatus}
             slugError={slugError}
+            phoneError={phoneError}
+            momoPhoneError={momoPhoneError}
             onBusinessName={(businessName) => {
               updateDraft({
                 businessName,
@@ -343,17 +380,42 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
               updateDraft({ storeSlug: slugifyStoreName(storeSlug) });
             }}
             onPhone={(phone) => {
+              setPhoneError(null);
               updateDraft({
                 phone,
                 ...(draft.momoSameAsMobile ? { momoPhone: phone } : {}),
               });
             }}
-            onMomoPhone={(momoPhone) => updateDraft({ momoPhone })}
+            onPhoneBlur={() => {
+              const stripped = stripPhoneWhitespace(draft.phone);
+              if (stripped !== draft.phone) {
+                updateDraft({
+                  phone: stripped,
+                  ...(draft.momoSameAsMobile ? { momoPhone: stripped } : {}),
+                });
+              }
+              setPhoneError(isValidPhoneNumber(stripped) ? null : PHONE_DIGIT_ERROR);
+              if (draft.momoSameAsMobile) {
+                setMomoPhoneError(null);
+              }
+            }}
+            onMomoPhone={(momoPhone) => {
+              setMomoPhoneError(null);
+              updateDraft({ momoPhone });
+            }}
+            onMomoPhoneBlur={() => {
+              const stripped = stripPhoneWhitespace(draft.momoPhone);
+              if (stripped !== draft.momoPhone) {
+                updateDraft({ momoPhone: stripped });
+              }
+              setMomoPhoneError(isValidPhoneNumber(stripped) ? null : PHONE_DIGIT_ERROR);
+            }}
             onMomoSameAsMobile={(momoSameAsMobile) => {
               updateDraft({
                 momoSameAsMobile,
                 ...(momoSameAsMobile ? { momoPhone: draft.phone } : {}),
               });
+              setMomoPhoneError(null);
             }}
             onCategory={(productCategory) => updateDraft({ productCategory })}
           />
@@ -363,6 +425,7 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
           <PlanStep
             selected={draft.pricingTier}
             onSelect={(pricingTier) => updateDraft({ pricingTier })}
+            startFreeTrial={draft.startFreeTrial}
           />
         ) : null}
 
@@ -372,6 +435,7 @@ export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
             paymentPhone={paymentPhone}
             email={mode === "signup" ? draft.email : undefined}
             planLabel={planLabel}
+            startFreeTrial={draft.startFreeTrial}
           />
         ) : null}
       </div>
@@ -565,20 +629,28 @@ function BusinessStep({
   draft,
   slugStatus,
   slugError,
+  phoneError,
+  momoPhoneError,
   onBusinessName,
   onSlug,
   onPhone,
+  onPhoneBlur,
   onMomoPhone,
+  onMomoPhoneBlur,
   onMomoSameAsMobile,
   onCategory,
 }: {
   draft: Draft;
   slugStatus: SlugStatus;
   slugError: string | null;
+  phoneError: string | null;
+  momoPhoneError: string | null;
   onBusinessName: (value: string) => void;
   onSlug: (value: string) => void;
   onPhone: (value: string) => void;
+  onPhoneBlur: () => void;
   onMomoPhone: (value: string) => void;
+  onMomoPhoneBlur: () => void;
   onMomoSameAsMobile: (value: boolean) => void;
   onCategory: (value: string) => void;
 }) {
@@ -669,12 +741,18 @@ function BusinessStep({
           required
           value={draft.phone}
           onChange={(e) => onPhone(e.target.value)}
-          placeholder="e.g. 024 123 4567"
-          className={INPUT_CLASS}
+          onBlur={onPhoneBlur}
+          placeholder="e.g. 0241234567"
+          aria-invalid={phoneError ? true : undefined}
+          className={cn(INPUT_CLASS, phoneError && "border-delta-down focus:border-delta-down")}
         />
-        <span className="mt-1.5 block text-xs text-muted-foreground">
-          Your contact number for account and support messages.
-        </span>
+        {phoneError ? (
+          <span className="mt-1.5 block text-xs text-delta-down">{phoneError}</span>
+        ) : (
+          <span className="mt-1.5 block text-xs text-muted-foreground">
+            Your contact number for account and support messages. Enter exactly 10 digits.
+          </span>
+        )}
       </label>
 
       <div className="space-y-3">
@@ -699,12 +777,18 @@ function BusinessStep({
               required
               value={draft.momoPhone}
               onChange={(e) => onMomoPhone(e.target.value)}
-              placeholder="e.g. 024 987 6543"
-              className={INPUT_CLASS}
+              onBlur={onMomoPhoneBlur}
+              placeholder="e.g. 0249876543"
+              aria-invalid={momoPhoneError ? true : undefined}
+              className={cn(INPUT_CLASS, momoPhoneError && "border-delta-down focus:border-delta-down")}
             />
-            <span className="mt-1.5 block text-xs text-muted-foreground">
-              This is the number buyers will send Mobile Money to at checkout.
-            </span>
+            {momoPhoneError ? (
+              <span className="mt-1.5 block text-xs text-delta-down">{momoPhoneError}</span>
+            ) : (
+              <span className="mt-1.5 block text-xs text-muted-foreground">
+                This is the number buyers will send Mobile Money to at checkout. Enter exactly 10 digits.
+              </span>
+            )}
           </label>
         ) : (
           <p className="text-xs text-muted-foreground">
@@ -730,11 +814,14 @@ function BusinessStep({
 function PlanStep({
   selected,
   onSelect,
+  startFreeTrial,
 }: {
   selected: PricingTier;
   onSelect: (tier: PricingTier) => void;
+  startFreeTrial: boolean;
 }) {
   return (
+    <div className="space-y-6">
     <div className="grid gap-6 md:grid-cols-2">
       <article
         className={cn(
@@ -808,6 +895,28 @@ function PlanStep({
         </button>
       </article>
     </div>
+
+    <div className="rounded-2xl border border-black/8 bg-white p-5 shadow-card">
+      <label className="flex cursor-not-allowed items-start gap-3 opacity-90">
+        <input
+          type="checkbox"
+          checked={startFreeTrial}
+          disabled
+          readOnly
+          className="mt-1 size-4 rounded border-black/20 text-brand"
+        />
+        <span>
+          <span className="text-sm font-medium text-ink-950">
+            Start with a {TRIAL_LENGTH_DAYS}-day free trial — no payment needed until it ends
+          </span>
+          <span className="mt-1 block text-xs text-muted-foreground">
+            Every new store starts on a free trial for now. After signup you can pay from your billing
+            page when you are ready — there is no separate pay-upfront option yet.
+          </span>
+        </span>
+      </label>
+    </div>
+    </div>
   );
 }
 
@@ -816,19 +925,37 @@ function ConfirmStep({
   paymentPhone,
   email,
   planLabel,
+  startFreeTrial,
 }: {
   draft: Draft;
   paymentPhone: string;
   email?: string;
   planLabel: string;
+  startFreeTrial: boolean;
 }) {
+  const displayPhone = normalizePhoneForStorage(draft.phone) || draft.phone;
+  const displayPaymentPhone = normalizePhoneForStorage(paymentPhone) || paymentPhone;
+
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-brand/30 bg-brand-soft p-6">
-        <p className="text-sm font-medium text-ink-950">
-          Your 14-day free trial starts today — no payment needed until it ends.
-        </p>
-      </div>
+      {startFreeTrial ? (
+        <div className="rounded-2xl border border-brand/30 bg-brand-soft p-6">
+          <p className="text-sm font-medium text-ink-950">
+            Your {TRIAL_LENGTH_DAYS}-day free trial starts today — no payment needed until it ends.
+          </p>
+          <p className="mt-2 text-sm text-ink-700">
+            We will remind you from your dashboard when it is time to pay. You can send payment from
+            the billing page at any point during or after the trial.
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-black/8 bg-white p-6">
+          <p className="text-sm font-medium text-ink-950">No free trial selected.</p>
+          <p className="mt-2 text-sm text-ink-700">
+            Your account will need payment before it is fully active.
+          </p>
+        </div>
+      )}
 
       <div className="rounded-2xl border border-black/8 bg-white p-6 shadow-card">
         <h2 className="font-display text-lg font-semibold">Review before you go live</h2>
@@ -842,13 +969,21 @@ function ConfirmStep({
           <Row label="Store URL" value={`/store/${draft.template}`} />
           <Row label="Domain (placeholder)" value={placeholderDomain(draft.storeSlug)} />
           <Row label="Plan" value={planLabel} />
-          <Row label="Mobile number" value={draft.phone || "Not set"} />
+          <Row
+            label="Free trial"
+            value={
+              startFreeTrial
+                ? `${TRIAL_LENGTH_DAYS}-day trial — payment due after it ends`
+                : "No trial — payment required to activate"
+            }
+          />
+          <Row label="Mobile number" value={displayPhone || "Not set"} />
           <Row
             label="MoMo payment number"
             value={
               draft.momoSameAsMobile
-                ? `${paymentPhone || "Not set"} (same as mobile)`
-                : paymentPhone || "Not set"
+                ? `${displayPaymentPhone || "Not set"} (same as mobile)`
+                : displayPaymentPhone || "Not set"
             }
           />
         </dl>
@@ -857,7 +992,7 @@ function ConfirmStep({
       <div className="rounded-2xl border border-brand/30 bg-brand-soft p-6">
         <p className="text-xs font-semibold uppercase tracking-wide text-brand">MoMo number buyers will pay</p>
         <p className="mt-2 font-display text-2xl font-semibold tabular-nums text-ink-950">
-          {paymentPhone || "Not set"}
+          {displayPaymentPhone || "Not set"}
         </p>
         <p className="mt-2 text-sm text-ink-700">
           Check this twice. Checkout tells buyers to send Mobile Money here. If it is wrong, they pay

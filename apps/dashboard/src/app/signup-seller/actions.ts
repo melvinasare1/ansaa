@@ -11,6 +11,7 @@ import {
   type PricingTier,
   type Seller,
 } from "@ansaa/shared/types";
+import { normalizePhoneForStorage, validatePhoneNumber } from "@/lib/phone";
 import { newSellerInsertRow } from "./seller-row";
 
 export type SignUpSellerResult =
@@ -33,17 +34,13 @@ function formatPostgresError(err: PostgrestError) {
 
 function normalizeSignupFields(input: SellerSignupFields) {
   const businessName = input.businessName.trim();
-  const phone = input.phone.replace(/\s+/g, " ").trim();
-  const momoPhone = input.momoPhone.replace(/\s+/g, " ").trim();
+  const phone = normalizePhoneForStorage(input.phone);
+  const momoPhone = normalizePhoneForStorage(input.momoPhone);
   const template = parseStorefrontTemplate(input.template);
   const pricingTier = parsePricingTier(input.pricingTier);
   const productCategory = input.productCategory.trim();
   const baseSlug = slugifyStoreName(input.storeSlug || businessName);
   return { businessName, phone, momoPhone, template, pricingTier, productCategory, baseSlug };
-}
-
-function digitCount(phone: string) {
-  return phone.replace(/\D/g, "").length;
 }
 
 function validateSignupFields(fields: {
@@ -55,12 +52,10 @@ function validateSignupFields(fields: {
 }) {
   if (!fields.businessName) return "Business name is required.";
   if (!fields.productCategory) return "Product category is required.";
-  if (digitCount(fields.phone) < 9) {
-    return "Enter your mobile number. Use at least 9 digits.";
-  }
-  if (digitCount(fields.momoPhone) < 9) {
-    return "Enter the Mobile Money number buyers will pay. Use at least 9 digits.";
-  }
+  const phoneCheck = validatePhoneNumber(fields.phone);
+  if (!phoneCheck.ok) return phoneCheck.error;
+  const momoCheck = validatePhoneNumber(fields.momoPhone);
+  if (!momoCheck.ok) return momoCheck.error;
   if (!fields.baseSlug) return "Store slug must use letters or numbers.";
   return null;
 }
