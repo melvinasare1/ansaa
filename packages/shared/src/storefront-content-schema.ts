@@ -104,7 +104,7 @@ function itemImage(
 
 /**
  * Editable storefront fields per template. The dashboard editor renders
- * from this list, grouped by each field's `page`. Adding template-b/c/d
+ * from this list, grouped by each field's `page`. Adding sneaker/kitchenware
  * (or a new page like `checkout`) is another entry here, not new form code.
  */
 export const STOREFRONT_CONTENT_SCHEMA: Partial<
@@ -152,13 +152,27 @@ export const STOREFRONT_CONTENT_SCHEMA: Partial<
       page: "home",
     },
   ],
-  "template-b": [
-    textField(
+  "sneaker-template": [
+    textareaField(
       "heroHeadline",
       "Main headline",
-      "e.g. In stock, ships today if ordered before 4pm",
+      "e.g. Sneakers That Defy Your Everyday Look",
       "home",
-      "The banner line at the top of your shop homepage."
+      "The large title over the homepage hero photo."
+    ),
+    textareaField(
+      "heroSubtext",
+      "Line under the headline",
+      "e.g. New drops, everyday pairs, and accessories…",
+      "home",
+      "The supporting sentence shown directly beneath your main headline."
+    ),
+    imageField(
+      "heroImageUrl",
+      "Hero photo",
+      "Upload a wide lifestyle photo for the top of your shop",
+      "home",
+      "The full-width photo behind your headline. Leave empty to use the placeholder."
     ),
   ],
   "kitchenware-template": [
@@ -173,22 +187,6 @@ export const STOREFRONT_CONTENT_SCHEMA: Partial<
       "heroSubtext",
       "Line under the headline",
       "e.g. Thoughtfully made tools for everyday cooking…",
-      "home",
-      "The supporting sentence shown directly beneath your main headline."
-    ),
-  ],
-  "template-d": [
-    textareaField(
-      "heroHeadline",
-      "Main headline",
-      "e.g. Unleash Your Style\nShop the Latest Trends",
-      "home",
-      "The large title at the top of your shop homepage."
-    ),
-    textareaField(
-      "heroSubtext",
-      "Line under the headline",
-      "e.g. Discover elevated streetwear essentials…",
       "home",
       "The supporting sentence shown directly beneath your main headline."
     ),
@@ -559,9 +557,8 @@ export const STOREFRONT_CONTENT_SCHEMA: Partial<
  */
 export const STOREFRONT_CONTENT_PAGES: Partial<Record<StorefrontTemplate, readonly string[]>> = {
   "template-a": ["home", "product", "cart"],
-  "template-b": ["home", "product", "cart"],
+  "sneaker-template": ["home", "product", "cart"],
   "kitchenware-template": ["home", "product", "cart"],
-  "template-d": ["home", "product", "cart"],
   "imports-template": ["home", "product", "cart", "contact"],
   "motorbike-template": [
     "header",

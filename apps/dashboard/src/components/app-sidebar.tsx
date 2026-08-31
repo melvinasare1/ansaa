@@ -9,6 +9,7 @@ import {
   BadgeCheckIcon,
   BarChart3Icon,
   ExternalLinkIcon,
+  GaugeIcon,
   LayoutDashboardIcon,
   LifeBuoyIcon,
   NewspaperIcon,
@@ -17,10 +18,16 @@ import {
   SettingsIcon,
   ShoppingBagIcon,
   UsersIcon,
+  type LucideIcon,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
-const navMain = [
+const navMain: Array<{
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  external?: boolean;
+}> = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboardIcon },
   {
     title: "Orders",
@@ -38,10 +45,26 @@ const navMain = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const { seller } = useSeller();
+  const { seller, isAdmin } = useSeller();
   const storeUrl = storefrontUrl(seller);
   const items = (() => {
+    if (isAdmin && !seller) {
+      return [
+        {
+          title: "Platform",
+          url: "/dashboard/admin/overview",
+          icon: GaugeIcon,
+        },
+      ];
+    }
     const next = [...navMain];
+    if (isAdmin) {
+      next.unshift({
+        title: "Platform",
+        url: "/dashboard/admin/overview",
+        icon: GaugeIcon,
+      });
+    }
     if (templateHasBlog(seller?.template)) {
       const editorIndex = next.findIndex((item) => item.url === "/dashboard/editor");
       next.splice(editorIndex + 1, 0, {

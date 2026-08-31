@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import DashboardShell from "@/components/dashboard/DashboardShell";
+import { isAdminEmail } from "@/lib/admin";
 import { ansaaMomoDetails } from "@/lib/billing";
 import { getDashboardSession } from "@/lib/seller";
 import { trialBannerState, trialPaymentOverdue } from "@/lib/trial";
@@ -23,6 +24,7 @@ export default async function DashboardLayout({
       user={session.user}
       seller={session.seller}
       sellerError={session.sellerError}
+      isAdmin={isAdminEmail(session.user.email)}
       trial={bannerTrial}
       showExpiryModal={trialPaymentOverdue(session.seller)}
       momo={ansaaMomoDetails()}

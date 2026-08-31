@@ -15,6 +15,7 @@ type SellerContextValue = {
   user: SellerUser | null;
   seller: Seller | null;
   sellerError: string | null;
+  isAdmin: boolean;
   signOut: () => Promise<void>;
 };
 
@@ -25,11 +26,13 @@ export function SellerProvider({
   user,
   seller,
   sellerError,
+  isAdmin,
 }: {
   children: React.ReactNode;
   user: SellerUser;
   seller: Seller | null;
   sellerError: string | null;
+  isAdmin: boolean;
 }) {
   const signOut = useCallback(async () => {
     try {
@@ -49,9 +52,10 @@ export function SellerProvider({
       user,
       seller,
       sellerError,
+      isAdmin,
       signOut,
     }),
-    [user, seller, sellerError, signOut]
+    [user, seller, sellerError, isAdmin, signOut]
   );
 
   return <SellerContext.Provider value={value}>{children}</SellerContext.Provider>;

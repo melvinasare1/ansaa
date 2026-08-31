@@ -9,7 +9,7 @@ Next.js apps share one Supabase Postgres project, scoped by `seller_id`.
 apps/
   web/                         Public site (port 3000)
     src/app/(marketing)/       Landing + /signup lead capture
-    src/app/store/             Storefront templates a–d
+    src/app/store/             Storefront templates
     src/app/api/leads/         Signup form → `leads` table
     src/lib/cart-context.tsx   Storefront cart
 
@@ -38,8 +38,8 @@ snake_case (`seller_id`, `price_cedis`). Mapping happens in `@ansaa/shared/mappe
 ## Routing model (important)
 
 Right now storefronts are path-based template previews on the **web** app:
-`/store/template-a`, `/store/template-b`, `/store/kitchenware-template`, `/store/template-d`,
-or `/store/motorbike-template`. Templates are generic — they are not tied to a
+`/store/template-a`, `/store/sneaker-template`, `/store/kitchenware-template`,
+`/store/motorbike-template`, or `/store/imports-template`. Templates are generic — they are not tied to a
 seller. When a client site is needed, copy a template and customize that copy.
 
 In production you want each seller's own domain to serve their storefront directly

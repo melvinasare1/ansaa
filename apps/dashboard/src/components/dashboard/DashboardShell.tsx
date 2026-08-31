@@ -15,6 +15,7 @@ export default function DashboardShell({
   user,
   seller,
   sellerError,
+  isAdmin,
   trial,
   showExpiryModal,
   momo,
@@ -23,12 +24,15 @@ export default function DashboardShell({
   user: SellerUser;
   seller: Seller | null;
   sellerError: string | null;
+  isAdmin: boolean;
   trial: TrialBannerState | null;
   showExpiryModal: boolean;
   momo: AnsaaMomoDetails;
 }) {
+  const showSellerError = Boolean(sellerError) && !(isAdmin && !seller);
+
   return (
-    <SellerProvider user={user} seller={seller} sellerError={sellerError}>
+    <SellerProvider user={user} seller={seller} sellerError={sellerError} isAdmin={isAdmin}>
       <SidebarProvider
         className="flex-col"
         style={
@@ -50,7 +54,7 @@ export default function DashboardShell({
             <TrialBanner trial={trial} />
             <DashboardHeading />
             <div className="flex flex-1 flex-col">
-              {sellerError ? (
+              {showSellerError ? (
                 <p className="mx-4 mt-4 rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive lg:mx-6">
                   {sellerError}
                 </p>

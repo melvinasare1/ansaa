@@ -41,9 +41,8 @@ export type SellerUser = {
 
 export const STOREFRONT_TEMPLATES = [
   "template-a",
-  "template-b",
+  "sneaker-template",
   "kitchenware-template",
-  "template-d",
   "motorbike-template",
   "imports-template",
 ] as const;
@@ -82,7 +81,7 @@ export interface Seller {
   baseFeeCedis: number; // 250 Website & Admin, 400 Fulfilment intro
   status: SellerStatus;
   createdAt: number;
-  /** Epoch ms when the 14-day free trial ends. Unset for accounts that skip onboarding. */
+  /** Epoch ms when the 30-day free trial ends. Unset for accounts that skip onboarding. */
   trialEndsAt?: number;
   /** Permanent 6-digit MoMo payment reference. Assigned on insert, never regenerated. */
   billingReference?: string;

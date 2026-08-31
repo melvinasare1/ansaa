@@ -7,8 +7,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { formatCedis } from "@/lib/price";
 import type { CatalogSearchProduct } from "@/components/store/catalog-search-types";
 import {
+  ALL_CATEGORY,
   applyCatalogFilters,
   filtersFromSearchParams,
+  isAllCategory,
   parseSearchSort,
   setRepeatParam,
   toggleNamedValue,
@@ -16,7 +18,7 @@ import {
 
 export type { CatalogSearchProduct };
 
-export type CatalogSearchTheme = "styleco" | "market" | "stylehive";
+export type CatalogSearchTheme = "styleco" | "kicks";
 
 const THEMES: Record<
   CatalogSearchTheme,
@@ -46,30 +48,18 @@ const THEMES: Record<
     title: "mt-3 text-[15px] font-bold leading-snug",
     empty: "mt-8 rounded-2xl border border-dashed border-black/15 px-6 py-16 text-center",
   },
-  market: {
+  kicks: {
     page: "mx-auto max-w-6xl",
-    heading: "font-[family-name:var(--font-market)] text-2xl font-extrabold uppercase",
-    muted: "text-sm text-[#0B1220]/55",
-    chip: "border-2 border-[#0B1220] px-3 py-1 text-[12px] font-semibold uppercase",
-    chipOn: "border-2 border-[#1447E6] bg-[#1447E6] px-3 py-1 text-[12px] font-semibold uppercase text-white",
-    select: "border-2 border-[#0B1220] bg-white px-3 py-2 text-sm font-semibold outline-none",
-    card: "border-2 border-[#0B1220] p-3 transition hover:bg-[#0B1220]/5",
-    image: "relative aspect-square w-full overflow-hidden bg-[#0B1220]/10",
-    title: "mt-2 text-sm font-semibold leading-tight",
-    empty: "mt-6 border-2 border-dashed border-[#0B1220] px-5 py-16 text-center",
-  },
-  stylehive: {
-    page: "mx-auto max-w-[1400px] px-5 py-10 md:px-8 md:py-14",
-    heading: "text-[28px] font-extrabold tracking-tight text-black md:text-[34px]",
-    headingStyle: { fontFamily: "var(--font-stylehive-display), ui-sans-serif, system-ui" },
-    muted: "text-sm text-black/45",
-    chip: "rounded-full bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-wide shadow-[0_0_0_1px_rgba(0,0,0,0.08)]",
-    chipOn: "rounded-full bg-black px-3.5 py-2 text-[11px] font-semibold uppercase tracking-wide text-white",
-    select: "rounded-full border border-black/10 bg-white px-3 py-2 text-sm outline-none",
-    card: "overflow-hidden rounded-2xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)]",
-    image: "relative block aspect-[4/5] bg-[#F7F7F5]",
-    title: "px-4 pt-4 text-[15px] font-bold text-black",
-    empty: "mt-8 rounded-2xl border border-dashed border-black/15 px-6 py-16 text-center",
+    heading:
+      "text-[28px] font-semibold text-[#2A1C14] [font-family:var(--font-kicks-display),ui-serif,Georgia]",
+    muted: "text-sm text-[#2A1C14]/55",
+    chip: "rounded-full border border-[#3C2415]/20 px-3.5 py-1.5 text-[12px] font-medium",
+    chipOn: "rounded-full bg-[#3C2415] px-3.5 py-1.5 text-[12px] font-medium text-white",
+    select: "rounded-full border border-[#3C2415]/20 bg-white px-3 py-2 text-sm outline-none",
+    card: "overflow-hidden",
+    image: "relative block aspect-square w-full overflow-hidden rounded-2xl bg-[#E8E2D9]",
+    title: "mt-3 text-sm font-semibold leading-tight",
+    empty: "mt-6 rounded-2xl border border-dashed border-[#3C2415]/25 px-5 py-16 text-center",
   },
 };
 
@@ -102,6 +92,12 @@ export function CatalogSearch({
   const styles = THEMES[theme];
   const filters = filtersFromSearchParams(searchParams);
   const categories = useMemo(() => uniqueCategories(products), [products]);
+  const categoryChips = useMemo(
+    () => (theme === "kicks" && categories.length > 0 ? [ALL_CATEGORY, ...categories] : categories),
+    [categories, theme]
+  );
+  const allSelected =
+    filters.categories.length === 0 || filters.categories.every((item) => isAllCategory(item));
 
   const replaceParams = useCallback(
     (mutate: (params: URLSearchParams) => void) => {
@@ -115,6 +111,10 @@ export function CatalogSearch({
 
   const toggleCategory = (value: string) => {
     replaceParams((params) => {
+      if (theme === "kicks") {
+        setRepeatParam(params, "category", isAllCategory(value) ? [ALL_CATEGORY] : [value]);
+        return;
+      }
       setRepeatParam(params, "category", toggleNamedValue(filters.categories, value));
     });
   };
@@ -128,12 +128,13 @@ export function CatalogSearch({
       </h1>
       <p className={`mt-2 ${styles.muted}`}>Browse this shop’s products.</p>
 
-      {categories.length > 0 ? (
+      {categoryChips.length > 0 ? (
         <div className="mt-6 flex flex-wrap gap-2">
-          {categories.map((category) => {
-            const selected = filters.categories.some(
-              (item) => item.toLowerCase() === category.toLowerCase()
-            );
+          {categoryChips.map((category) => {
+            const selected = isAllCategory(category)
+              ? allSelected
+              : !allSelected &&
+                filters.categories.some((item) => item.toLowerCase() === category.toLowerCase());
             return (
               <button
                 key={category}
@@ -190,7 +191,7 @@ export function CatalogSearch({
       ) : (
         <div
           className={
-            theme === "market"
+            theme === "kicks"
               ? "mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3"
               : "mt-8 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3"
           }
@@ -204,21 +205,19 @@ export function CatalogSearch({
                     alt={product.name}
                     fill
                     sizes="(min-width: 1024px) 28vw, (min-width: 640px) 45vw, 90vw"
-                    className="object-cover"
+                    className={theme === "kicks" ? "object-contain p-4" : "object-cover"}
                   />
                 ) : null}
               </Link>
               <Link href={`${productBase}/product/${product.id}`}>
-                <p className={styles.title} style={theme === "stylehive" ? styles.headingStyle : undefined}>
+                <p className={styles.title} style={styles.headingStyle}>
                   {product.name}
                 </p>
                 <p
                   className={
-                    theme === "stylehive"
-                      ? "px-4 pb-4 pt-1 text-[14px] text-black/80"
-                      : theme === "market"
-                        ? "mt-1 font-[family-name:var(--font-market)] font-extrabold"
-                        : "mt-1 text-[14px] text-black/80"
+                    theme === "kicks"
+                      ? "mt-1 font-bold"
+                      : "mt-1 text-[14px] text-black/80"
                   }
                 >
                   {formatCedis(product.priceCedis)}
@@ -239,7 +238,7 @@ export function CatalogSearchSkeleton({ theme }: { theme: CatalogSearchTheme }) 
       <div className="h-10 w-40 animate-pulse rounded bg-black/10" />
       <div
         className={
-          theme === "market"
+          theme === "kicks"
             ? "mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3"
             : "mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
         }

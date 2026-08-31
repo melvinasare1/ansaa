@@ -8,7 +8,7 @@ const steps = [
   {
     n: "01",
     title: "Pick a template",
-    body: "Choose from six storefront templates and put your shop on your own domain. Your catalogue, your look, live in a few steps.",
+    body: "Choose from five storefront templates and put your shop on your own domain. Your catalogue, your look, live in a few steps.",
   },
   {
     n: "02",
@@ -29,7 +29,7 @@ const steps = [
 
 const websiteFeatures = [
   "Storefront on your own domain",
-  "Pick from 6 templates",
+  "Pick from 5 templates",
   "Admin dashboard for orders, products, and sales",
   "Manual MoMo payments. You mark orders paid, unpaid, or cancelled",
   "Email support",
@@ -51,18 +51,16 @@ const templates = [
     image: "/marketing/simple-preview.jpg",
   },
   {
-    name: "Market",
-    description: "Dense bold grid, for electronics and general goods.",
+    name: "Kicks",
+    description: "Warm sneaker storefront, for footwear and streetwear sellers.",
+    href: "/store/sneaker-template",
+    image: "/marketing/kicks-preview.png",
   },
   {
     name: "Kitchenware",
     description: "Warm editorial layout, for home and kitchen goods.",
     href: "/store/kitchenware-template",
     image: "/marketing/kitchenware-preview.jpg",
-  },
-  {
-    name: "Stylehive",
-    description: "Monochrome streetwear layout, for apparel sellers.",
   },
   {
     name: "Ride",
@@ -132,7 +130,7 @@ export default function LandingPage() {
             want us to pack and send every order.
           </p>
           <p className="mt-4 text-sm font-medium text-navy">
-            Try it free for 14 days — no payment required to get started.
+            Try it free for 30 days — no payment required to get started.
           </p>
 
           <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -144,7 +142,7 @@ export default function LandingPage() {
                 <span className="ml-1 text-lg font-medium text-ink-700">/ month</span>
               </p>
               <span className="mt-3 inline-flex self-start rounded-full border border-navy/20 bg-navy/5 px-2.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide text-navy">
-                14-day free trial
+                30-day free trial
               </span>
               <ul className="mt-8 flex-1 space-y-3">
                 {websiteFeatures.map((feature) => (
@@ -175,7 +173,7 @@ export default function LandingPage() {
                 <span className="ml-1 text-lg font-medium text-ink-700">/ month</span>
               </p>
               <span className="mt-3 inline-flex self-start rounded-full border border-navy/20 bg-navy/5 px-2.5 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide text-navy">
-                14-day free trial
+                30-day free trial
               </span>
               <p className="mt-1 font-mono text-xs font-medium uppercase tracking-wide text-navy">Intro price</p>
               <ul className="mt-8 flex-1 space-y-3">
@@ -205,7 +203,7 @@ export default function LandingPage() {
       <section id="templates" className="scroll-mt-24 mx-auto max-w-5xl px-6 py-24">
         <h2 className="font-display text-3xl font-semibold">Pick a template</h2>
         <p className="mt-3 max-w-xl text-ink-700">
-          Six storefront designs, ready to launch on your own domain.
+          Five storefront designs, ready to launch on your own domain.
         </p>
 
         <div className="mt-10 grid gap-6 sm:grid-cols-2">

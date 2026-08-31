@@ -54,37 +54,37 @@ export const STYLECO_CHROME: PdpChrome = {
     "inline-flex items-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm font-medium text-white shadow-lg",
 };
 
-export const MARKET_CHROME: PdpChrome = {
-  accent: "#1447E6",
-  ink: "#0B1220",
-  sectionClass: "mt-12 scroll-mt-28 border-t-2 border-[#0B1220] pt-8",
+export const KICKS_CHROME: PdpChrome = {
+  accent: "#3C2415",
+  ink: "#2A1C14",
+  sectionClass: "mt-12 scroll-mt-28 border-t border-[#3C2415]/15 pt-8",
   titleClass:
-    "font-[family-name:var(--font-market)] text-2xl font-extrabold uppercase leading-tight text-[#0B1220]",
+    "text-[28px] font-semibold leading-tight text-[#2A1C14] [font-family:var(--font-kicks-display),ui-serif,Georgia]",
   questionClass:
-    "font-[family-name:var(--font-market)] text-base font-extrabold uppercase leading-snug text-[#0B1220]",
-  mutedClass: "text-sm text-[#0B1220]/50",
-  strongClass: "font-extrabold text-[#0B1220]",
-  bodyClass: "text-[15px] leading-relaxed text-[#0B1220]/70",
-  dividerClass: "border-[#0B1220]/20",
+    "text-[17px] font-semibold leading-snug text-[#2A1C14] [font-family:var(--font-kicks-display),ui-serif,Georgia]",
+  mutedClass: "text-sm text-[#2A1C14]/50",
+  strongClass: "font-semibold text-[#2A1C14]",
+  bodyClass: "text-[15px] leading-relaxed text-[#2A1C14]/70",
+  dividerClass: "border-[#3C2415]/15",
   addButtonClass:
-    "border-2 border-[#0B1220] bg-white px-3 py-2 text-xs font-extrabold uppercase hover:bg-[#0B1220]/5",
-  formClass: "mt-5 border-2 border-[#0B1220] bg-[#FFE8A3]/40 p-4",
+    "rounded-full border border-[#3C2415]/25 bg-[#F5F0EA] px-4 py-2 text-xs font-semibold hover:bg-white",
+  formClass: "mt-5 rounded-2xl border border-[#3C2415]/12 bg-white/70 p-4",
   fieldClass:
-    "mt-1.5 h-11 w-full border-2 border-[#0B1220] bg-white px-3 text-sm text-[#0B1220] outline-none focus:border-[#1447E6]",
+    "mt-1.5 h-11 w-full rounded-xl border border-[#3C2415]/20 bg-white px-3 text-sm text-[#2A1C14] outline-none focus:border-[#3C2415]",
   textareaClass:
-    "mt-1.5 w-full resize-y border-2 border-[#0B1220] bg-white px-3 py-3 text-sm text-[#0B1220] outline-none focus:border-[#1447E6]",
+    "mt-1.5 w-full resize-y rounded-xl border border-[#3C2415]/20 bg-white px-3 py-3 text-sm text-[#2A1C14] outline-none focus:border-[#3C2415]",
   submitClass:
-    "mt-5 flex h-11 w-full items-center justify-center bg-[#1447E6] text-sm font-extrabold uppercase text-white disabled:opacity-60",
+    "mt-5 flex h-11 w-full items-center justify-center rounded-full bg-[#3C2415] text-sm font-semibold text-white disabled:opacity-60",
   errorClass: "mt-4 text-sm font-medium text-red-700",
   successClass: "mt-4 text-sm font-medium text-emerald-800",
   filterClass:
-    "h-10 min-w-0 border-2 border-[#0B1220] bg-white px-3 text-sm font-semibold text-[#0B1220] outline-none",
-  barTrackClass: "h-[6px] overflow-hidden bg-[#0B1220]/10",
-  barFillClass: "h-full bg-[#0B1220]",
-  iconClass: "h-[18px] w-[18px] shrink-0 text-[#0B1220]",
-  verifiedClass: "text-[#1447E6]",
+    "h-10 min-w-0 rounded-full border border-[#3C2415]/20 bg-white px-3 text-sm font-medium text-[#2A1C14] outline-none",
+  barTrackClass: "h-[6px] overflow-hidden rounded-full bg-[#3C2415]/10",
+  barFillClass: "h-full rounded-full bg-[#3C2415]",
+  iconClass: "h-[18px] w-[18px] shrink-0 text-[#2A1C14]",
+  verifiedClass: "text-[#3C2415]",
   cartToastClass:
-    "inline-flex items-center gap-2 border-2 border-[#0B1220] bg-[#0B1220] px-4 py-2.5 font-[family-name:var(--font-market)] text-xs font-extrabold uppercase text-white shadow-lg",
+    "inline-flex items-center gap-2 rounded-full bg-[#3C2415] px-4 py-2.5 text-sm font-medium text-white shadow-lg",
 };
 
 export const HOMEDINE_CHROME: PdpChrome = {
@@ -118,39 +118,6 @@ export const HOMEDINE_CHROME: PdpChrome = {
   verifiedClass: "text-[#3D6B4F]",
   cartToastClass:
     "inline-flex items-center gap-2 rounded-full bg-[#2B4239] px-4 py-2.5 text-sm font-medium text-[#F5F1E4] shadow-lg",
-};
-
-export const STYLEHIVE_CHROME: PdpChrome = {
-  accent: "#111111",
-  ink: "#111111",
-  sectionClass: "mt-16 scroll-mt-28 border-t border-black/8 pt-12",
-  titleClass:
-    "text-[32px] font-extrabold leading-[1.1] tracking-tight text-black [font-family:var(--font-stylehive-display),ui-sans-serif,system-ui] md:text-[36px]",
-  questionClass:
-    "text-[18px] font-extrabold leading-snug text-black [font-family:var(--font-stylehive-display),ui-sans-serif,system-ui]",
-  mutedClass: "text-sm text-black/45",
-  strongClass: "font-semibold text-black",
-  bodyClass: "text-[15px] leading-relaxed text-black/55",
-  dividerClass: "border-black/10",
-  addButtonClass:
-    "h-10 rounded-full bg-[#F5F5F3] px-4 text-sm font-semibold text-black hover:bg-[#EFEFEF]",
-  formClass: "mt-6 rounded-[24px] bg-[#F5F5F3] p-5",
-  fieldClass:
-    "mt-1.5 h-11 w-full rounded-full border border-black/10 bg-white px-4 text-sm text-black outline-none focus:border-black/30",
-  textareaClass:
-    "mt-1.5 w-full resize-y rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm text-black outline-none focus:border-black/30",
-  submitClass:
-    "mt-5 flex h-11 w-full items-center justify-center rounded-full bg-black text-sm font-semibold text-white disabled:opacity-60",
-  errorClass: "mt-4 text-sm font-medium text-red-600",
-  successClass: "mt-4 text-sm font-medium text-emerald-700",
-  filterClass:
-    "h-10 min-w-0 rounded-full border border-black/10 bg-white px-4 text-sm text-black outline-none",
-  barTrackClass: "h-[5px] overflow-hidden rounded-full bg-black/8",
-  barFillClass: "h-full rounded-full bg-black",
-  iconClass: "h-[18px] w-[18px] shrink-0 text-black/40",
-  verifiedClass: "text-[#2F6B3A]",
-  cartToastClass:
-    "inline-flex items-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm font-semibold text-white shadow-lg [font-family:var(--font-stylehive-display),ui-sans-serif,system-ui]",
 };
 
 export const RIDE_CHROME: PdpChrome = {

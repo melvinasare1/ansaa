@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import { ShirtPlaceholder } from "@/components/store/template-a/ShirtPlaceholder";
 import { ProductFaqs } from "@/components/store/template-a/ProductFaqs";
@@ -10,8 +10,10 @@ import { ProductReviews } from "@/components/store/template-a/ProductReviews";
 import { PdpComparePrice, PdpFeaturesList, PdpShortDescription } from "@/components/store/pdp/PdpFeaturesList";
 import { imagesForSelection } from "@/components/store/pdp/PdpGallery";
 import { PdpVariantSelectors } from "@/components/store/pdp/PdpVariantSelectors";
+import { useAddToCartFeedback } from "@/components/store/cart-feedback";
 import { useCart } from "@/lib/cart-context";
 import { fillFromId, swatchHex } from "@/lib/swatch";
+import { sellerSlugFromPath, storefrontBase } from "@/lib/store-path";
 import type { Product, StoreFaq } from "@ansaa/shared/types";
 
 const ACCENT = "#FF7A1A";
@@ -88,8 +90,10 @@ export function ProductDetail({
   children?: ReactNode;
 }) {
   const { addItem } = useCart();
+  const { added, notifyAdded } = useAddToCartFeedback();
   const router = useRouter();
-  const cartHref = "/store/template-a/cart";
+  const pathname = usePathname() ?? "";
+  const cartHref = `${storefrontBase("template-a", sellerSlugFromPath(pathname, "template-a"))}/cart`;
   const sizes = product.sizes ?? [];
   const colors = product.colors ?? [];
   const features = (product.features ?? []).map((item) => item.trim()).filter(Boolean);
@@ -113,7 +117,7 @@ export function ProductDetail({
 
   const main = gallery[Math.min(selectedImage, Math.max(gallery.length - 1, 0))] ?? gallery[0];
 
-  function handleBuy() {
+  function addToBag() {
     const size = selectedSize || undefined;
     const color = selectedColor || undefined;
     const variantLabel = [size, color].filter(Boolean).join(" / ");
@@ -134,6 +138,15 @@ export function ProductDetail({
       color,
       quantity: qty,
     });
+  }
+
+  function handleAdd() {
+    addToBag();
+    notifyAdded();
+  }
+
+  function handleBuy() {
+    addToBag();
     router.push(cartHref);
   }
 
@@ -281,13 +294,22 @@ export function ProductDetail({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleBuy}
-          className="mt-10 flex h-12 w-full items-center justify-center rounded-full bg-black text-[15px] font-semibold text-white transition hover:bg-black/90"
-        >
-          Buy this product
-        </button>
+        <div className="mt-10 flex gap-2">
+          <button
+            type="button"
+            onClick={handleAdd}
+            className="flex h-12 flex-1 items-center justify-center rounded-full border border-black/15 bg-white text-[15px] font-semibold text-black transition hover:bg-black/5"
+          >
+            {added ? "Added" : "Add to cart"}
+          </button>
+          <button
+            type="button"
+            onClick={handleBuy}
+            className="flex h-12 flex-1 items-center justify-center rounded-full bg-black text-[15px] font-semibold text-white transition hover:bg-black/90"
+          >
+            Buy now
+          </button>
+        </div>
       </div>
       </div>
 

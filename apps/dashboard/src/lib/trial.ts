@@ -1,4 +1,4 @@
-export const TRIAL_LENGTH_DAYS = 14;
+export const TRIAL_LENGTH_DAYS = 30;
 export const TRIAL_BANNER_DISMISS_KEY = "ansaa-trial-banner-dismissed";
 export const TRIAL_EXPIRY_MODAL_DISMISS_KEY = "ansaa-trial-expiry-modal-dismissed";
 

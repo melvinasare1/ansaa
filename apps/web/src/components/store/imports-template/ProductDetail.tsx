@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { PdpFaqs } from "@/components/store/pdp/PdpFaqs";
 import { PdpComparePrice, PdpFeaturesList, PdpShortDescription } from "@/components/store/pdp/PdpFeaturesList";
 import { imagesForSelection, PdpGallery, PdpQuantity, productFeatures } from "@/components/store/pdp/PdpGallery";
@@ -11,6 +12,7 @@ import { useAddToCartFeedback } from "@/components/store/cart-feedback";
 import { useCart } from "@/lib/cart-context";
 import { cartLineId } from "@/lib/checkout";
 import { fillFromId, swatchHex } from "@/lib/swatch";
+import { sellerSlugFromPath, storefrontBase } from "@/lib/store-path";
 import type { Product, StoreFaq } from "@ansaa/shared/types";
 
 const ACCENT = IMPORTS_CHROME.accent;
@@ -26,6 +28,9 @@ export function ProductDetail({
 }) {
   const { addItem } = useCart();
   const { added, notifyAdded } = useAddToCartFeedback();
+  const router = useRouter();
+  const pathname = usePathname() ?? "";
+  const cartHref = `${storefrontBase("imports-template", sellerSlugFromPath(pathname, "imports-template"))}/cart`;
   const sizes = product.sizes ?? [];
   const colors = product.colors ?? [];
   const features = productFeatures(product);
@@ -33,8 +38,7 @@ export function ProductDetail({
   const [selectedColor, setSelectedColor] = useState(colors[0] ?? "");
   const [quantity, setQuantity] = useState(1);
 
-  function handleAdd() {
-    if (added) return;
+  function addToBag() {
     const size = selectedSize || undefined;
     const color = selectedColor || undefined;
     const variantLabel = [size, color].filter(Boolean).join(" / ");
@@ -50,7 +54,17 @@ export function ProductDetail({
       color,
       quantity: qty,
     });
+  }
+
+  function handleAdd() {
+    if (added) return;
+    addToBag();
     notifyAdded();
+  }
+
+  function handleBuy() {
+    addToBag();
+    router.push(cartHref);
   }
 
   return (
@@ -126,13 +140,22 @@ export function ProductDetail({
             />
           </div>
 
-          <button
-            type="button"
-            onClick={handleAdd}
-            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#1266b5] text-sm font-medium text-white transition-colors hover:bg-[#0d4c88] sm:w-auto sm:px-6"
-          >
-            {added ? "Added" : "Add to cart"}
-          </button>
+          <div className="mt-6 flex w-full flex-col gap-2 sm:flex-row sm:w-auto">
+            <button
+              type="button"
+              onClick={handleAdd}
+              className="inline-flex h-11 flex-1 items-center justify-center rounded-lg border border-[#e4e8ef] bg-white px-6 text-sm font-medium text-[#1a1f2b] transition-colors hover:border-[#1266b5]/40"
+            >
+              {added ? "Added" : "Add to cart"}
+            </button>
+            <button
+              type="button"
+              onClick={handleBuy}
+              className="inline-flex h-11 flex-1 items-center justify-center rounded-lg bg-[#1266b5] px-6 text-sm font-medium text-white transition-colors hover:bg-[#0d4c88]"
+            >
+              Buy now
+            </button>
+          </div>
         </div>
       </div>
 

@@ -22,8 +22,9 @@ const titles: Record<string, string> = {
 };
 
 export function SiteHeader() {
-  const { seller } = useSeller();
-  const businessName = seller?.businessName.trim() || "Dashboard";
+  const { seller, isAdmin } = useSeller();
+  const businessName =
+    seller?.businessName.trim() || (isAdmin ? "Ansaa" : "Dashboard");
   const initials = businessName
     .split(/\s+/)
     .map((part) => part[0])
@@ -34,7 +35,10 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-20 flex h-(--header-height) shrink-0 items-center gap-4 border-b border-black/4 bg-white px-4 lg:px-6">
       <SidebarTrigger className="md:hidden" />
-      <Link href="/dashboard" className="flex min-w-0 shrink-0 items-center gap-2.5">
+      <Link
+        href={isAdmin && !seller ? "/dashboard/admin/overview" : "/dashboard"}
+        className="flex min-w-0 shrink-0 items-center gap-2.5"
+      >
         <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand text-[11px] font-semibold tracking-wide text-white">
           {initials || "S"}
         </span>
@@ -91,7 +95,9 @@ export function DashboardHeading() {
   if (pathname.startsWith("/dashboard/orders/") || pathname.startsWith("/dashboard/customers/")) {
     return null;
   }
-  const title = titles[pathname] ?? "Dashboard";
+  const title = pathname.startsWith("/dashboard/admin")
+    ? "Platform overview"
+    : (titles[pathname] ?? "Dashboard");
 
   return (
     <div className="px-4 pt-6 lg:px-6">

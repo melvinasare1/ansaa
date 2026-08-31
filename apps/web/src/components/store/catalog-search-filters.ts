@@ -46,7 +46,14 @@ export function parsePriceBound(value: string | undefined): number | null {
   return amount;
 }
 
+export const ALL_CATEGORY = "All";
+
+export function isAllCategory(value: string): boolean {
+  return value.trim().toLowerCase() === "all";
+}
+
 export function productMatchesCategory(productCategory: string, selected: string): boolean {
+  if (isAllCategory(selected)) return true;
   return productCategory.trim().toLowerCase() === selected.trim().toLowerCase();
 }
 
@@ -86,8 +93,11 @@ export function applyCatalogFilters<T extends CatalogFilterable>(
       if (!haystack.includes(needle)) return false;
     }
     if (filters.categories.length > 0) {
-      const matches = filters.categories.some((item) => productMatchesCategory(product.category, item));
-      if (!matches) return false;
+      const selected = filters.categories.filter((item) => !isAllCategory(item));
+      if (selected.length > 0) {
+        const matches = selected.some((item) => productMatchesCategory(product.category, item));
+        if (!matches) return false;
+      }
     }
     if (filters.colors.length > 0) {
       const matches = filters.colors.some((item) => productMatchesColor(product.colors, item));

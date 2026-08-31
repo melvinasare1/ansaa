@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { PdpFaqs } from "@/components/store/pdp/PdpFaqs";
 import { PdpComparePrice, PdpFeaturesList, PdpShortDescription } from "@/components/store/pdp/PdpFeaturesList";
 import { imagesForSelection, PdpGallery, PdpQuantity, productFeatures } from "@/components/store/pdp/PdpGallery";
@@ -9,10 +9,10 @@ import { PdpReviews } from "@/components/store/pdp/PdpReviews";
 import { PdpVariantSelectors } from "@/components/store/pdp/PdpVariantSelectors";
 import { HOMEDINE_CHROME } from "@/components/store/pdp/chrome";
 import { useAddToCartFeedback } from "@/components/store/cart-feedback";
-import { KITCHENWARE_TEMPLATE_BASE } from "@/components/store/kitchenware-template/demo-catalog";
 import { useCart } from "@/lib/cart-context";
 import { cartLineId } from "@/lib/checkout";
 import { fillFromId, swatchHex } from "@/lib/swatch";
+import { sellerSlugFromPath, storefrontBase } from "@/lib/store-path";
 import type { Product, StoreFaq } from "@ansaa/shared/types";
 
 const ACCENT = HOMEDINE_CHROME.accent;
@@ -29,7 +29,8 @@ export function ProductDetail({
   const { addItem } = useCart();
   const { added, notifyAdded } = useAddToCartFeedback();
   const router = useRouter();
-  const cartHref = `${KITCHENWARE_TEMPLATE_BASE}/cart`;
+  const pathname = usePathname() ?? "";
+  const cartHref = `${storefrontBase("kitchenware-template", sellerSlugFromPath(pathname, "kitchenware-template"))}/cart`;
   const sizes = product.sizes ?? [];
   const colors = product.colors ?? [];
   const features = productFeatures(product);
@@ -37,8 +38,7 @@ export function ProductDetail({
   const [selectedColor, setSelectedColor] = useState(colors[0] ?? "");
   const [quantity, setQuantity] = useState(1);
 
-  function handleAdd() {
-    if (added) return;
+  function addToBag() {
     const size = selectedSize || undefined;
     const color = selectedColor || undefined;
     const variantLabel = [size, color].filter(Boolean).join(" / ");
@@ -54,8 +54,17 @@ export function ProductDetail({
       color,
       quantity: qty,
     });
+  }
+
+  function handleAdd() {
+    if (added) return;
+    addToBag();
     notifyAdded();
-    window.setTimeout(() => router.push(cartHref), 700);
+  }
+
+  function handleBuy() {
+    addToBag();
+    router.push(cartHref);
   }
 
   return (
@@ -131,13 +140,22 @@ export function ProductDetail({
             />
           </div>
 
-          <button
-            type="button"
-            onClick={handleAdd}
-            className="mt-10 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#2B4239] text-sm font-medium text-[#F5F1E4] transition hover:opacity-90"
-          >
-            {added ? "Added" : "Add to cart"}
-          </button>
+          <div className="mt-10 flex gap-2">
+            <button
+              type="button"
+              onClick={handleAdd}
+              className="inline-flex h-12 flex-1 items-center justify-center rounded-full border border-[#2B4239]/25 bg-white text-sm font-medium text-[#2B4239] transition hover:bg-[#F5F1E4]"
+            >
+              {added ? "Added" : "Add to cart"}
+            </button>
+            <button
+              type="button"
+              onClick={handleBuy}
+              className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-[#2B4239] text-sm font-medium text-[#F5F1E4] transition hover:opacity-90"
+            >
+              Buy now
+            </button>
+          </div>
         </div>
       </div>
 

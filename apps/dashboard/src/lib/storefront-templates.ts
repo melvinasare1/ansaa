@@ -16,10 +16,11 @@ export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
     previewImage: "/marketing/simple-preview.jpg",
   },
   {
-    id: "template-b",
-    name: "Market",
-    description: "Dense bold grid, for electronics and general goods.",
-    previewClass: "bg-gradient-to-br from-ink-950 via-ink-800 to-amber-700",
+    id: "sneaker-template",
+    name: "Kicks",
+    description: "Warm sneaker storefront, for footwear and streetwear sellers.",
+    previewClass: "bg-gradient-to-br from-[#F5F0EA] via-[#E8E2D9] to-[#3C2415]",
+    previewImage: "/marketing/kicks-preview.png",
   },
   {
     id: "kitchenware-template",
@@ -27,12 +28,6 @@ export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
     description: "Warm editorial layout, for home and kitchen goods.",
     previewClass: "bg-gradient-to-br from-emerald-50 via-stone-100 to-amber-100",
     previewImage: "/marketing/kitchenware-preview.jpg",
-  },
-  {
-    id: "template-d",
-    name: "Stylehive",
-    description: "Monochrome streetwear layout, for apparel sellers.",
-    previewClass: "bg-gradient-to-br from-black via-zinc-800 to-zinc-500",
   },
   {
     id: "motorbike-template",
@@ -61,7 +56,7 @@ export const PRODUCT_CATEGORY_SUGGESTIONS = [
 
 export const WEBSITE_ADMIN_FEATURES = [
   "Storefront on your own domain",
-  "Pick from 6 templates",
+  "Pick from 5 templates",
   "Admin dashboard for orders, products, and sales",
   "Manual MoMo payments. You mark orders paid, unpaid, or cancelled",
   "Email support",
