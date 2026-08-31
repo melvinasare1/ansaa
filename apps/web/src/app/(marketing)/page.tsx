@@ -45,8 +45,9 @@ const fulfilmentFeatures = [
 
 const templates = [
   {
-    name: "Studio",
-    description: "Minimal boutique layout, for fashion and beauty sellers.",
+    name: "Simple",
+    description: "A simple, minimal ecom store — clean product pages and checkout.",
+    href: "/store/template-a",
   },
   {
     name: "Market",
