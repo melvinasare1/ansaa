@@ -26,6 +26,7 @@ import {
 } from "@/lib/phone";
 import { TRIAL_LENGTH_DAYS } from "@/lib/trial";
 import { cn } from "@/lib/utils";
+import { publicStorefrontUrl } from "@ansaa/shared/store-domain";
 import {
   PRICING_TIER_BASE_FEE_CEDIS,
   parseStorefrontTemplate,
@@ -101,8 +102,8 @@ function persistDraft(draft: Draft) {
   }
 }
 
-function placeholderDomain(slug: string) {
-  return `${slug || "your-store"}.local`;
+function liveStoreUrl(slug: string) {
+  return publicStorefrontUrl(slug || "your-store");
 }
 
 export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
@@ -729,7 +730,7 @@ function BusinessStep({
                 : "text-muted-foreground"
           )}
         >
-          {slugHint} Preview path: /store/{draft.template || "template"}/{draft.storeSlug || "your-store"}
+          {slugHint} Your store: {liveStoreUrl(draft.storeSlug)}
         </span>
       </label>
 
@@ -799,12 +800,12 @@ function BusinessStep({
       </div>
 
       <div>
-        <span className="text-sm font-medium">Domain</span>
+        <span className="text-sm font-medium">Store address</span>
         <p className="mt-1.5 rounded-lg border border-dashed border-black/12 bg-mist px-4 py-2.5 font-mono text-sm text-ink-700">
-          {placeholderDomain(draft.storeSlug)}
+          {liveStoreUrl(draft.storeSlug)}
         </p>
         <span className="mt-1.5 block text-xs text-muted-foreground">
-          Placeholder for now. Connecting a real custom domain is a manual step we handle later.
+          Buyers will open your shop at this address. A custom domain can be added later.
         </span>
       </div>
     </div>
@@ -966,8 +967,7 @@ function ConfirmStep({
           <Row label="Template" value={templateLabel(draft.template)} />
           <Row label="Business name" value={draft.businessName || "Not set"} />
           <Row label="Product category" value={draft.productCategory || "Not set"} />
-          <Row label="Store URL" value={`/store/${draft.template}/${draft.storeSlug || "your-store"}`} />
-          <Row label="Domain (placeholder)" value={placeholderDomain(draft.storeSlug)} />
+          <Row label="Store URL" value={liveStoreUrl(draft.storeSlug)} />
           <Row label="Plan" value={planLabel} />
           <Row
             label="Free trial"

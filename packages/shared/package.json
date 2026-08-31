@@ -5,6 +5,7 @@
   "exports": {
     "./mappers": "./src/mappers.ts",
     "./types": "./src/types/index.ts",
+    "./store-domain": "./src/store-domain.ts",
     "./id-verification": "./src/id-verification.ts",
     "./id-verification-admin": "./src/id-verification-admin.ts",
     "./storefront-content-schema": "./src/storefront-content-schema.ts",

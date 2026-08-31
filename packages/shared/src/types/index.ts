@@ -3,6 +3,8 @@
 // Everything tenant-scoped is keyed by sellerId (= sellers.id). Once Auth is
 // wired, create seller rows with id = auth.uid().
 
+import type { SellerDomainType } from "../store-domain";
+
 export const PRICING_TIERS = ["website_admin", "fulfilment"] as const;
 
 export type PricingTier = (typeof PRICING_TIERS)[number];
@@ -25,6 +27,12 @@ export function parseSellerStatus(value: unknown): SellerStatus {
     ? (value as SellerStatus)
     : "onboarding";
 }
+
+export {
+  parseSellerDomainType,
+  SELLER_DOMAIN_TYPES,
+  type SellerDomainType,
+} from "../store-domain";
 
 export type SellerUser = {
   uid: string;
@@ -56,8 +64,12 @@ export interface Seller {
   id: string;
   uid: string; // Intended auth uid of the seller who owns this tenant
   businessName: string;
-  domain: string; // e.g. "makeup.com" — storefront lives here, dashboard at dashboard.makeup.com
-  storeSlug: string; // fallback path-based routing in dev: /store/[slug]
+  domain: string; // e.g. "{store_slug}.ansaagh.com" for Ansaa subdomains
+  /** How `domain` is provisioned. `custom` is reserved; not implemented yet. */
+  domainType: SellerDomainType;
+  /** True for Ansaa-owned subdomains; custom domains stay unverified until that flow exists. */
+  domainVerified: boolean;
+  storeSlug: string; // also the ansaagh.com subdomain; path routing stays /store/{template}/{slug}
   template: StorefrontTemplate;
   email: string;
   /** Contact mobile number. */

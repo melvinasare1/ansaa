@@ -1,4 +1,5 @@
 import { sellerToInsert } from "@ansaa/shared/mappers";
+import { storefrontHost } from "@ansaa/shared/store-domain";
 import { PRICING_TIER_BASE_FEE_CEDIS, type PricingTier, type Seller } from "@ansaa/shared/types";
 import { trialEndsAtFromNow } from "@/lib/trial";
 
@@ -16,7 +17,9 @@ export function newSellerInsertRow(input: {
     id: input.userId,
     uid: input.userId,
     businessName: input.businessName,
-    domain: `${input.storeSlug}.local`,
+    domain: storefrontHost(input.storeSlug),
+    domainType: "subdomain",
+    domainVerified: true,
     storeSlug: input.storeSlug,
     template: input.template,
     email: input.email,

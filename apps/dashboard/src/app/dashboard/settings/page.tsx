@@ -35,12 +35,7 @@ export default function SettingsPage() {
           <SettingRow
             label="Storefront domain"
             value={seller?.domain || "Not set"}
-            hint="Your own domain, e.g. yourbrand.com"
-          />
-          <SettingRow
-            label="Dashboard URL"
-            value={seller?.domain ? `dashboard.${seller.domain}` : "dashboard.yourbrand.com"}
-            hint="Auto-generated, not editable"
+            hint="Your shop on ansaagh.com. A custom domain can be added later."
           />
           <SettingRow label="Template" value={templateLabel} />
           <SettingRow

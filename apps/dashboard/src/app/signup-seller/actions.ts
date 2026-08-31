@@ -1,6 +1,7 @@
 "use server";
 
 import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
+import { isReservedStoreSubdomain } from "@ansaa/shared/store-domain";
 import { slugifyStoreName } from "@/lib/store-slug";
 import { trackEvent } from "@/lib/vercel-track-server";
 import { createAdminClient } from "@ansaa/shared/supabase/admin";
@@ -57,6 +58,9 @@ function validateSignupFields(fields: {
   const momoCheck = validatePhoneNumber(fields.momoPhone);
   if (!momoCheck.ok) return momoCheck.error;
   if (!fields.baseSlug) return "Store slug must use letters or numbers.";
+  if (isReservedStoreSubdomain(fields.baseSlug)) {
+    return "That store URL is reserved. Choose a different slug.";
+  }
   return null;
 }
 
@@ -65,6 +69,9 @@ export async function checkStoreSlugAvailable(
 ): Promise<{ slug: string; available: boolean; error?: string }> {
   const slug = slugifyStoreName(rawSlug);
   if (!slug) return { slug, available: false, error: "Store slug must use letters or numbers." };
+  if (isReservedStoreSubdomain(slug)) {
+    return { slug, available: false, error: "That store URL is reserved. Choose a different slug." };
+  }
 
   let supabase: SupabaseClient;
   try {
@@ -328,6 +335,13 @@ async function insertSellerRow(
   }
   if (isSlugTaken) {
     return { ok: false, error: "That store URL is taken. Go back and choose a different slug." };
+  }
+  if (
+    insertError.code === "23514" &&
+    (insertError.message.includes("sellers_store_slug_not_reserved") ||
+      insertError.message.includes("store_slug"))
+  ) {
+    return { ok: false, error: "That store URL is reserved. Choose a different slug." };
   }
 
   return { ok: false, error: formatPostgresError(insertError) };

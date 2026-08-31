@@ -1,6 +1,7 @@
 import { parseStorefrontContent } from "./storefront-content-schema";
 import {
   parsePricingTier,
+  parseSellerDomainType,
   parseSellerStatus,
   parseStorefrontTemplate,
   type Customer,
@@ -187,6 +188,8 @@ export function sellerToInsert(seller: Omit<Seller, "createdAt"> & { createdAt?:
     uid: seller.uid,
     business_name: seller.businessName,
     domain: seller.domain,
+    domain_type: seller.domainType,
+    domain_verified: seller.domainVerified,
     store_slug: seller.storeSlug,
     template: seller.template,
     email: seller.email,
@@ -208,6 +211,11 @@ export function sellerFromRow(row: unknown): Seller {
     uid: String(fields.uid ?? fields.id ?? ""),
     businessName: String(fields.business_name ?? ""),
     domain: String(fields.domain ?? ""),
+    domainType: parseSellerDomainType(fields.domain_type),
+    domainVerified:
+      fields.domain_verified == null
+        ? parseSellerDomainType(fields.domain_type) === "subdomain"
+        : Boolean(fields.domain_verified),
     storeSlug: String(fields.store_slug ?? ""),
     template: parseStorefrontTemplate(fields.template),
     email: String(fields.email ?? ""),
