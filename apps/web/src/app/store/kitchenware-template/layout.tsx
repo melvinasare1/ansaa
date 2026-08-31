@@ -1,8 +1,9 @@
 // Kitchenware template: a warm, editorial home/lifestyle storefront for
 // kitchenware and houseware sellers. Serif display + forest/cream palette.
 import { Cormorant_Garamond, Figtree } from "next/font/google";
-import { CartFeedbackProvider } from "@/components/store/kitchenware-template/CartFeedback";
+import { CartFeedbackProvider } from "@/components/store/cart-feedback";
 import { Header } from "@/components/store/kitchenware-template/Header";
+import { HOMEDINE_CHROME } from "@/components/store/pdp/chrome";
 import { DEFAULT_STORE_NAME } from "@/lib/store-name";
 import { storefrontBase } from "@/lib/store-path";
 import { sellerForStoreLayout } from "@/lib/storefront-resolve";
@@ -30,7 +31,7 @@ export default async function KitchenwareTemplateLayout({ children }: { children
       className={`${display.variable} ${sans.variable} min-h-screen bg-white text-[#2B4239]`}
       style={{ fontFamily: "var(--font-homedine-sans), ui-sans-serif, system-ui" }}
     >
-      <CartFeedbackProvider>
+      <CartFeedbackProvider toastClass={HOMEDINE_CHROME.cartToastClass}>
         <Header base={base} brandName={brandName} />
         <main>{children}</main>
       </CartFeedbackProvider>

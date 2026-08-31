@@ -5,7 +5,8 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { Facebook, Instagram, Twitter } from "lucide-react";
 import { storefrontContentValue } from "@ansaa/shared/storefront-content-schema";
 import { StoreSearchForm } from "@/components/store/StoreSearchForm";
-import { CartFeedbackProvider } from "@/components/store/template-a/CartFeedback";
+import { CartFeedbackProvider } from "@/components/store/cart-feedback";
+import { STYLECO_CHROME } from "@/components/store/pdp/chrome";
 import { STYLECO_CATEGORIES } from "@/components/store/template-a/categories";
 import { CartIconLink } from "@/components/store/template-a/CartIconLink";
 import { DEFAULT_STORE_NAME } from "@/lib/store-name";
@@ -32,7 +33,7 @@ export default async function TemplateALayout({ children }: { children: React.Re
       className={`${sans.variable} min-h-screen bg-white text-black`}
       style={{ fontFamily: "var(--font-styleco), ui-sans-serif, system-ui" }}
     >
-      <CartFeedbackProvider>
+      <CartFeedbackProvider toastClass={STYLECO_CHROME.cartToastClass}>
         <header className="border-b border-black/5 bg-white">
           <div className="mx-auto flex max-w-[1400px] items-center gap-5 px-5 py-4 md:gap-8 md:px-8">
             <Link
@@ -122,7 +123,15 @@ export default async function TemplateALayout({ children }: { children: React.Re
             </div>
 
             <p className="mt-12 border-t border-white/10 pt-6 text-[12px] text-white/40">
-              © {new Date().getFullYear()} {brandName}. All rights reserved.
+              © {new Date().getFullYear()} {brandName}. All rights reserved.{" "}
+              <a
+                href="https://ansaagh.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline-offset-2 hover:text-white/70 hover:underline"
+              >
+                Powered by Ansaa
+              </a>
             </p>
           </div>
         </footer>

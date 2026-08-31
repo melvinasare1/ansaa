@@ -13,6 +13,8 @@ import {
   Youtube,
 } from "lucide-react";
 import { StoreSearchForm } from "@/components/store/StoreSearchForm";
+import { CartFeedbackProvider } from "@/components/store/cart-feedback";
+import { STYLEHIVE_CHROME } from "@/components/store/pdp/chrome";
 import { CartLink } from "@/components/store/template-d/CartLink";
 import { DEFAULT_STORE_NAME } from "@/lib/store-name";
 import { storefrontBase } from "@/lib/store-path";
@@ -68,6 +70,7 @@ export default async function TemplateDLayout({ children }: { children: React.Re
       className={`${display.variable} ${body.variable} min-h-screen bg-[#F5F5F3] text-black`}
       style={{ fontFamily: "var(--font-stylehive-body), ui-sans-serif, system-ui" }}
     >
+      <CartFeedbackProvider toastClass={STYLEHIVE_CHROME.cartToastClass}>
       <header className="border-b border-black/5 bg-[#F5F5F3]">
         {/* Top row */}
         <div className="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-5 py-4 md:px-8">
@@ -204,13 +207,24 @@ export default async function TemplateDLayout({ children }: { children: React.Re
           </div>
 
           <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-[12px] text-white/40 md:flex-row md:items-center md:justify-between">
-            <p>Copyright © 2026 {brandName}. All Rights Reserved.</p>
+            <p>
+              Copyright © 2026 {brandName}. All Rights Reserved.{" "}
+              <a
+                href="https://ansaagh.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline-offset-2 hover:text-white/70 hover:underline"
+              >
+                Powered by Ansaa
+              </a>
+            </p>
             <a href="#" className="transition-colors hover:text-white/70">
               Privacy Policy
             </a>
           </div>
         </div>
       </footer>
+      </CartFeedbackProvider>
     </div>
   );
 }

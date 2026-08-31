@@ -9,6 +9,7 @@ import { imagesForSelection, PdpGallery, PdpQuantity, productFeatures } from "@/
 import { PdpReviews } from "@/components/store/pdp/PdpReviews";
 import { PdpVariantSelectors } from "@/components/store/pdp/PdpVariantSelectors";
 import { STYLEHIVE_CHROME } from "@/components/store/pdp/chrome";
+import { useAddToCartFeedback } from "@/components/store/cart-feedback";
 import { useCart } from "@/lib/cart-context";
 import { cartLineId } from "@/lib/checkout";
 import { fillFromId, swatchHex } from "@/lib/swatch";
@@ -26,6 +27,7 @@ export function ProductDetail({
   children?: ReactNode;
 }) {
   const { addItem } = useCart();
+  const { added, notifyAdded } = useAddToCartFeedback();
   const router = useRouter();
   const cartHref = "/store/template-d/cart";
   const sizes = product.sizes ?? [];
@@ -51,7 +53,8 @@ export function ProductDetail({
       color,
       quantity: qty,
     });
-    router.push(cartHref);
+    notifyAdded();
+    window.setTimeout(() => router.push(cartHref), 700);
   }
 
   return (
@@ -133,7 +136,7 @@ export function ProductDetail({
             onClick={handleBuy}
             className="mt-10 inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-black py-2.5 pl-5 pr-2.5 text-sm font-semibold text-white"
           >
-            Buy this product
+            {added ? "Added" : "Buy this product"}
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-black">
               <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.25} />
             </span>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ShoppingBag } from "lucide-react";
+import { Check, ShoppingBag } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { rideCartHrefFromPath } from "@/components/store/motorbike-template/demo-catalog";
 import { MotorbikePlaceholder } from "@/components/store/motorbike-template/placeholders";
@@ -10,6 +10,7 @@ import { PdpComparePrice, PdpFeaturesList, PdpShortDescription } from "@/compone
 import { PdpGallery, PdpQuantity, productFeatures } from "@/components/store/pdp/PdpGallery";
 import { PdpReviews } from "@/components/store/pdp/PdpReviews";
 import { RIDE_CHROME } from "@/components/store/pdp/chrome";
+import { useAddToCartFeedback } from "@/components/store/cart-feedback";
 import { useCart } from "@/lib/cart-context";
 import type { Product, StoreFaq } from "@ansaa/shared/types";
 
@@ -27,13 +28,13 @@ export function RideProductDetail({
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const { addItem, hydrated } = useCart();
-  const [added, setAdded] = useState(false);
+  const { added, notifyAdded } = useAddToCartFeedback();
   const [quantity, setQuantity] = useState(1);
   const features = productFeatures(product);
   const photos = product.images.filter(Boolean);
   const photo = photos[0] ?? "";
 
-  function handleAdd() {
+  function handleAdd(showFeedback = true) {
     if (!hydrated) return;
     const qty = Math.min(99, Math.max(1, Math.floor(quantity) || 1));
     addItem({
@@ -43,11 +44,11 @@ export function RideProductDetail({
       image: photo,
       quantity: qty,
     });
-    setAdded(true);
+    if (showFeedback) notifyAdded();
   }
 
   function handleBuy() {
-    handleAdd();
+    handleAdd(false);
     router.push(rideCartHrefFromPath(pathname));
   }
 
@@ -118,11 +119,15 @@ export function RideProductDetail({
             <button
               type="button"
               aria-label={added ? `${product.name} added to cart` : `Add ${product.name} to cart`}
-              onClick={handleAdd}
+              onClick={() => handleAdd()}
               disabled={!hydrated}
               className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[#141414] text-[#141414] transition-colors hover:bg-[#141414] hover:text-white disabled:cursor-wait disabled:opacity-60"
             >
-              <ShoppingBag className="h-5 w-5" strokeWidth={1.75} />
+              {added ? (
+                <Check className="h-5 w-5" strokeWidth={2.2} aria-hidden />
+              ) : (
+                <ShoppingBag className="h-5 w-5" strokeWidth={1.75} />
+              )}
             </button>
             <button
               type="button"

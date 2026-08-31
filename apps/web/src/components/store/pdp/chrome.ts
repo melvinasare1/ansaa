@@ -20,6 +20,7 @@ export type PdpChrome = {
   barFillClass: string;
   iconClass: string;
   verifiedClass: string;
+  cartToastClass: string;
 };
 
 export const STYLECO_CHROME: PdpChrome = {
@@ -49,6 +50,8 @@ export const STYLECO_CHROME: PdpChrome = {
   barFillClass: "h-full rounded-full bg-[#111111]",
   iconClass: "h-[18px] w-[18px] shrink-0 text-black/50",
   verifiedClass: "text-[#2F6B3A]",
+  cartToastClass:
+    "inline-flex items-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm font-medium text-white shadow-lg",
 };
 
 export const MARKET_CHROME: PdpChrome = {
@@ -80,6 +83,8 @@ export const MARKET_CHROME: PdpChrome = {
   barFillClass: "h-full bg-[#0B1220]",
   iconClass: "h-[18px] w-[18px] shrink-0 text-[#0B1220]",
   verifiedClass: "text-[#1447E6]",
+  cartToastClass:
+    "inline-flex items-center gap-2 border-2 border-[#0B1220] bg-[#0B1220] px-4 py-2.5 font-[family-name:var(--font-market)] text-xs font-extrabold uppercase text-white shadow-lg",
 };
 
 export const HOMEDINE_CHROME: PdpChrome = {
@@ -111,6 +116,8 @@ export const HOMEDINE_CHROME: PdpChrome = {
   barFillClass: "h-full rounded-full bg-[#2B4239]",
   iconClass: "h-[18px] w-[18px] shrink-0 text-[#2B4239]/45",
   verifiedClass: "text-[#3D6B4F]",
+  cartToastClass:
+    "inline-flex items-center gap-2 rounded-full bg-[#2B4239] px-4 py-2.5 text-sm font-medium text-[#F5F1E4] shadow-lg",
 };
 
 export const STYLEHIVE_CHROME: PdpChrome = {
@@ -142,6 +149,8 @@ export const STYLEHIVE_CHROME: PdpChrome = {
   barFillClass: "h-full rounded-full bg-black",
   iconClass: "h-[18px] w-[18px] shrink-0 text-black/40",
   verifiedClass: "text-[#2F6B3A]",
+  cartToastClass:
+    "inline-flex items-center gap-2 rounded-full bg-black px-4 py-2.5 text-sm font-semibold text-white shadow-lg [font-family:var(--font-stylehive-display),ui-sans-serif,system-ui]",
 };
 
 export const RIDE_CHROME: PdpChrome = {
@@ -173,4 +182,6 @@ export const RIDE_CHROME: PdpChrome = {
   barFillClass: "h-full rounded-full bg-[#141414]",
   iconClass: "h-[18px] w-[18px] shrink-0 text-[#141414]/45",
   verifiedClass: "text-[#2F6B3A]",
+  cartToastClass:
+    "inline-flex items-center gap-2 rounded-lg bg-[#141414] px-4 py-2.5 text-sm font-semibold text-white shadow-lg [font-family:var(--font-ride-display),ui-sans-serif,system-ui]",
 };

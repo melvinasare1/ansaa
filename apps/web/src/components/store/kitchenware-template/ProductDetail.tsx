@@ -8,7 +8,7 @@ import { imagesForSelection, PdpGallery, PdpQuantity, productFeatures } from "@/
 import { PdpReviews } from "@/components/store/pdp/PdpReviews";
 import { PdpVariantSelectors } from "@/components/store/pdp/PdpVariantSelectors";
 import { HOMEDINE_CHROME } from "@/components/store/pdp/chrome";
-import { useCartFeedback } from "@/components/store/kitchenware-template/CartFeedback";
+import { useAddToCartFeedback } from "@/components/store/cart-feedback";
 import { KITCHENWARE_TEMPLATE_BASE } from "@/components/store/kitchenware-template/demo-catalog";
 import { useCart } from "@/lib/cart-context";
 import { cartLineId } from "@/lib/checkout";
@@ -27,10 +27,9 @@ export function ProductDetail({
   children?: ReactNode;
 }) {
   const { addItem } = useCart();
-  const feedback = useCartFeedback();
+  const { added, notifyAdded } = useAddToCartFeedback();
   const router = useRouter();
   const cartHref = `${KITCHENWARE_TEMPLATE_BASE}/cart`;
-  const [added, setAdded] = useState(false);
   const sizes = product.sizes ?? [];
   const colors = product.colors ?? [];
   const features = productFeatures(product);
@@ -55,8 +54,7 @@ export function ProductDetail({
       color,
       quantity: qty,
     });
-    feedback?.notifyAdded();
-    setAdded(true);
+    notifyAdded();
     window.setTimeout(() => router.push(cartHref), 700);
   }
 

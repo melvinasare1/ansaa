@@ -3,6 +3,8 @@
 // availability matter more than editorial photography.
 import Link from "next/link";
 import { Archivo } from "next/font/google";
+import { CartFeedbackProvider } from "@/components/store/cart-feedback";
+import { MARKET_CHROME } from "@/components/store/pdp/chrome";
 import { CartLink } from "@/components/store/template-b/CartLink";
 import { DEFAULT_STORE_NAME } from "@/lib/store-name";
 import { storefrontBase } from "@/lib/store-path";
@@ -17,6 +19,7 @@ export default async function TemplateBLayout({ children }: { children: React.Re
 
   return (
     <div className={`${condensed.variable} min-h-screen bg-white text-[#0B1220]`}>
+      <CartFeedbackProvider toastClass={MARKET_CHROME.cartToastClass}>
       <header className="sticky top-0 z-10 border-b-2 border-[#0B1220] bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
           <Link
@@ -39,7 +42,17 @@ export default async function TemplateBLayout({ children }: { children: React.Re
       <main className="mx-auto max-w-6xl px-5 py-8">{children}</main>
       <footer className="border-t-2 border-[#0B1220] py-8 text-center text-xs font-semibold uppercase tracking-wide text-[#0B1220]/50">
         © {new Date().getFullYear()} {brandName}
+        {" · "}
+        <a
+          href="https://ansaagh.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline-offset-2 hover:text-[#0B1220]/80 hover:underline"
+        >
+          Powered by Ansaa
+        </a>
       </footer>
+      </CartFeedbackProvider>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { imagesForSelection, PdpGallery, PdpQuantity, productFeatures } from "@/
 import { PdpReviews } from "@/components/store/pdp/PdpReviews";
 import { PdpVariantSelectors } from "@/components/store/pdp/PdpVariantSelectors";
 import { MARKET_CHROME } from "@/components/store/pdp/chrome";
+import { useAddToCartFeedback } from "@/components/store/cart-feedback";
 import { useCart } from "@/lib/cart-context";
 import { cartLineId } from "@/lib/checkout";
 import { fillFromId, swatchHex } from "@/lib/swatch";
@@ -25,6 +26,7 @@ export function ProductDetail({
   children?: ReactNode;
 }) {
   const { addItem } = useCart();
+  const { added, notifyAdded } = useAddToCartFeedback();
   const router = useRouter();
   const cartHref = "/store/template-b/cart";
   const sizes = product.sizes ?? [];
@@ -50,7 +52,8 @@ export function ProductDetail({
       color,
       quantity: qty,
     });
-    router.push(cartHref);
+    notifyAdded();
+    window.setTimeout(() => router.push(cartHref), 700);
   }
 
   return (
@@ -136,7 +139,7 @@ export function ProductDetail({
             onClick={handleAdd}
             className="mt-6 w-full bg-[#1447E6] py-3 text-sm font-extrabold uppercase text-white transition hover:opacity-90"
           >
-            Add to cart
+            {added ? "Added" : "Add to cart"}
           </button>
           <p className="mt-3 text-xs text-[#0B1220]/40">Packed and dispatched with care</p>
         </div>

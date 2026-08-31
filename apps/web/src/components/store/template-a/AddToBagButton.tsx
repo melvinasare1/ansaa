@@ -1,23 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ShoppingBag } from "lucide-react";
-import { useCartFeedback } from "@/components/store/template-a/CartFeedback";
+import { useAddToCartFeedback } from "@/components/store/cart-feedback";
 import { useCart } from "@/lib/cart-context";
 
 function useAddToCart() {
   const router = useRouter();
   const { addItem, hydrated } = useCart();
-  const feedback = useCartFeedback();
-  const [added, setAdded] = useState(false);
-  const timeoutRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current != null) window.clearTimeout(timeoutRef.current);
-    };
-  }, []);
+  const { added, notifyAdded } = useAddToCartFeedback();
 
   function add(
     item: { productId: string; name: string; priceCedis: number; image: string },
@@ -29,10 +20,7 @@ function useAddToCart() {
       router.push(redirectTo);
       return;
     }
-    feedback?.notifyAdded();
-    setAdded(true);
-    if (timeoutRef.current != null) window.clearTimeout(timeoutRef.current);
-    timeoutRef.current = window.setTimeout(() => setAdded(false), 1600);
+    notifyAdded();
   }
 
   return { add, added, hydrated };

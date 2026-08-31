@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ShoppingBag, Star } from "lucide-react";
+import { Check, ShoppingBag, Star } from "lucide-react";
 import { MotorbikePlaceholder } from "@/components/store/motorbike-template/placeholders";
 import { rideCartHrefFromPath } from "@/components/store/motorbike-template/demo-catalog";
+import { useAddToCartFeedback } from "@/components/store/cart-feedback";
 import { useCart } from "@/lib/cart-context";
 import { formatCedis } from "@/lib/price";
 import { swatchHex } from "@/lib/swatch";
@@ -55,10 +56,11 @@ export function RideProductCard({
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const { addItem, hydrated } = useCart();
+  const { added, notifyAdded } = useAddToCartFeedback();
   const swatches = colors.slice(0, 4).map(swatchHex);
   const cartHref = rideCartHrefFromPath(pathname);
 
-  function addToCart() {
+  function addToCart(showFeedback = true) {
     if (!hydrated) return;
     addItem({
       productId,
@@ -67,10 +69,11 @@ export function RideProductCard({
       image,
       quantity: 1,
     });
+    if (showFeedback) notifyAdded();
   }
 
   function buyNow() {
-    addToCart();
+    addToCart(false);
     router.push(cartHref);
   }
 
@@ -97,12 +100,16 @@ export function RideProductCard({
         </Link>
         <button
           type="button"
-          aria-label={`Add ${name} to cart`}
-          onClick={addToCart}
+          aria-label={added ? `${name} added to cart` : `Add ${name} to cart`}
+          onClick={() => addToCart()}
           disabled={!hydrated}
           className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-[#FFFDFA] text-[#141414] shadow-[0_4px_12px_rgba(20,20,20,0.12)] transition-colors hover:bg-[#141414] hover:text-white disabled:cursor-wait disabled:opacity-60"
         >
-          <ShoppingBag className="h-4 w-4" strokeWidth={1.75} />
+          {added ? (
+            <Check className="h-4 w-4" strokeWidth={2.2} aria-hidden />
+          ) : (
+            <ShoppingBag className="h-4 w-4" strokeWidth={1.75} />
+          )}
         </button>
       </div>
       <Link href={href} className="block px-4 pt-4">

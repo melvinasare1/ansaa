@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ShoppingBag } from "lucide-react";
-import { useCartFeedback } from "@/components/store/kitchenware-template/CartFeedback";
+import { useAddToCartFeedback } from "@/components/store/cart-feedback";
 import { KITCHENWARE_TEMPLATE_BASE } from "@/components/store/kitchenware-template/demo-catalog";
 import { useCart } from "@/lib/cart-context";
 
@@ -33,15 +32,7 @@ export function AddToCartButton({
 }) {
   const router = useRouter();
   const { addItem, hydrated } = useCart();
-  const feedback = useCartFeedback();
-  const [added, setAdded] = useState(false);
-  const timeoutRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current != null) window.clearTimeout(timeoutRef.current);
-    };
-  }, []);
+  const { added, notifyAdded } = useAddToCartFeedback();
 
   function handleClick() {
     if (!hydrated) return;
@@ -50,10 +41,7 @@ export function AddToCartButton({
       router.push(redirectTo);
       return;
     }
-    feedback?.notifyAdded();
-    setAdded(true);
-    if (timeoutRef.current != null) window.clearTimeout(timeoutRef.current);
-    timeoutRef.current = window.setTimeout(() => setAdded(false), 1600);
+    notifyAdded();
   }
 
   const idleLabel = iconOnly ? (

@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { RideCartLink } from "@/components/store/motorbike-template/cart-link";
 import { RideMobileNav } from "@/components/store/motorbike-template/mobile-nav";
+import { CartFeedbackProvider } from "@/components/store/cart-feedback";
+import { RIDE_CHROME } from "@/components/store/pdp/chrome";
 import { getLiveRideStorefrontSeller } from "@/components/store/motorbike-template/catalog";
 import { storefrontBase } from "@/lib/store-path";
 import { sellerForStoreLayout } from "@/lib/storefront-resolve";
@@ -125,6 +127,7 @@ export default async function MotorbikeTemplateLayout({
       className={`${display.variable} ${body.variable} min-h-screen bg-[#FFFFFF] text-[#141414]`}
       style={{ fontFamily: "var(--font-ride-body), ui-sans-serif, system-ui" }}
     >
+      <CartFeedbackProvider toastClass={RIDE_CHROME.cartToastClass}>
       <header className="relative bg-[#141414] text-white">
         <div className="mx-auto flex max-w-[1400px] items-center gap-4 px-6 py-5 md:gap-8 md:px-10">
           <Link href={base} className="flex shrink-0 items-center gap-2.5 text-white">
@@ -239,7 +242,17 @@ export default async function MotorbikeTemplateLayout({
           </div>
 
           <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-[12px] text-white/40 md:flex-row md:items-center md:justify-between">
-            <p>© {new Date().getFullYear()} {brandName}. All rights reserved.</p>
+            <p>
+              © {new Date().getFullYear()} {brandName}. All rights reserved.{" "}
+              <a
+                href="https://ansaagh.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline-offset-2 hover:text-white/70 hover:underline"
+              >
+                Powered by Ansaa
+              </a>
+            </p>
             <div className="flex flex-wrap gap-x-6 gap-y-2">
               <a href="#" className="transition-colors hover:text-white/70">
                 Privacy Policy
@@ -251,6 +264,7 @@ export default async function MotorbikeTemplateLayout({
           </div>
         </div>
       </footer>
+      </CartFeedbackProvider>
     </div>
   );
 }
