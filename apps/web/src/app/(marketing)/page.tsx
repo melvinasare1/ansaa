@@ -74,6 +74,7 @@ const templates = [
     name: "Imports",
     description: "Blue catalogue layout, for grocery and everyday imported goods.",
     href: "/store/imports-template",
+    image: "/marketing/imports-preview.jpg",
   },
 ];
 

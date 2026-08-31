@@ -46,6 +46,7 @@ export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
     name: "Imports",
     description: "Blue catalogue layout, for grocery and everyday imported goods.",
     previewClass: "bg-gradient-to-br from-[#e8f1fa] via-white to-[#1266b5]",
+    previewImage: "/marketing/imports-preview.jpg",
   },
 ];
 
