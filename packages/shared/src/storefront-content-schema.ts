@@ -193,6 +193,36 @@ export const STOREFRONT_CONTENT_SCHEMA: Partial<
       "The supporting sentence shown directly beneath your main headline."
     ),
   ],
+  "imports-template": [
+    textField(
+      "heroHeadline",
+      "Main headline",
+      "e.g. Quality imports, delivered to your door",
+      "home",
+      "The large title at the top of your shop homepage."
+    ),
+    textareaField(
+      "heroSubtext",
+      "Line under the headline",
+      "e.g. Everyday imported goods for Ghanaian homes…",
+      "home",
+      "The supporting sentence shown directly beneath your main headline."
+    ),
+    imageField(
+      "heroImageUrl",
+      "Top banner photo",
+      "Upload a wide photo for the top of your shop",
+      "home",
+      "The wide photo visitors see behind your headline. Leave empty to use the default blue banner."
+    ),
+    imageField(
+      "logoUrl",
+      "Shop logo",
+      "Upload your logo",
+      "home",
+      "Your logo in the shop header."
+    ),
+  ],
   "motorbike-template": [
     imageField(
       "logoUrl",
@@ -483,6 +513,7 @@ export const STOREFRONT_CONTENT_PAGES: Partial<Record<StorefrontTemplate, readon
   "template-b": ["home", "product", "cart"],
   "kitchenware-template": ["home", "product", "cart"],
   "template-d": ["home", "product", "cart"],
+  "imports-template": ["home", "product", "cart"],
   "motorbike-template": [
     "header",
     "hero",

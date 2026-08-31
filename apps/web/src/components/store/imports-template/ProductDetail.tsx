@@ -1,0 +1,144 @@
+"use client";
+
+import { useState, type ReactNode } from "react";
+import { PdpFaqs } from "@/components/store/pdp/PdpFaqs";
+import { PdpComparePrice, PdpFeaturesList, PdpShortDescription } from "@/components/store/pdp/PdpFeaturesList";
+import { imagesForSelection, PdpGallery, PdpQuantity, productFeatures } from "@/components/store/pdp/PdpGallery";
+import { PdpReviews } from "@/components/store/pdp/PdpReviews";
+import { PdpVariantSelectors } from "@/components/store/pdp/PdpVariantSelectors";
+import { IMPORTS_CHROME } from "@/components/store/pdp/chrome";
+import { useAddToCartFeedback } from "@/components/store/cart-feedback";
+import { useCart } from "@/lib/cart-context";
+import { cartLineId } from "@/lib/checkout";
+import { fillFromId, swatchHex } from "@/lib/swatch";
+import type { Product, StoreFaq } from "@ansaa/shared/types";
+
+const ACCENT = IMPORTS_CHROME.accent;
+
+export function ProductDetail({
+  product,
+  faqs,
+  children,
+}: {
+  product: Product;
+  faqs: StoreFaq[];
+  children?: ReactNode;
+}) {
+  const { addItem } = useCart();
+  const { added, notifyAdded } = useAddToCartFeedback();
+  const sizes = product.sizes ?? [];
+  const colors = product.colors ?? [];
+  const features = productFeatures(product);
+  const [selectedSize, setSelectedSize] = useState(sizes[0] ?? "");
+  const [selectedColor, setSelectedColor] = useState(colors[0] ?? "");
+  const [quantity, setQuantity] = useState(1);
+
+  function handleAdd() {
+    if (added) return;
+    const size = selectedSize || undefined;
+    const color = selectedColor || undefined;
+    const variantLabel = [size, color].filter(Boolean).join(" / ");
+    const qty = Math.min(99, Math.max(1, Math.floor(quantity) || 1));
+    const photo = imagesForSelection(product, color, size)[0];
+
+    addItem({
+      productId: cartLineId(product.id, size, color),
+      name: variantLabel ? `${product.name} · ${variantLabel}` : product.name,
+      priceCedis: product.priceCedis,
+      image: photo || (color ? swatchHex(color) : fillFromId(product.id)),
+      size,
+      color,
+      quantity: qty,
+    });
+    notifyAdded();
+  }
+
+  return (
+    <div className="mx-auto max-w-[90rem] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-12">
+        <PdpGallery
+          images={imagesForSelection(product, selectedColor, selectedSize)}
+          alt={product.name}
+          accent={ACCENT}
+          aspectClass="aspect-square"
+          frameClass="rounded-lg bg-[#e8f1fa]"
+          thumbClass="relative flex aspect-square w-16 shrink-0 overflow-hidden rounded-md bg-[#e8f1fa] sm:w-20"
+        />
+        <div>
+          {product.category ? (
+            <p className="text-[0.7rem] font-medium tracking-[0.14em] text-[#66707e] uppercase">
+              {product.category}
+            </p>
+          ) : null}
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#1a1f2b] sm:text-3xl">
+            {product.name}
+          </h1>
+          <PdpShortDescription
+            text={product.shortDescription}
+            className="mt-4 max-w-xl text-[#66707e]"
+          />
+          {product.description ? (
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#66707e]">{product.description}</p>
+          ) : null}
+
+          <PdpComparePrice
+            priceCedis={product.priceCedis}
+            compareAtPriceCedis={product.compareAtPriceCedis}
+            wrapClassName="mt-4 flex flex-wrap items-baseline gap-3"
+            priceClassName="text-2xl font-bold text-[#1266b5]"
+            compareClassName="text-base text-[#66707e] line-through"
+          />
+
+          <PdpFeaturesList
+            features={features}
+            accent={ACCENT}
+            itemClassName="flex items-start gap-2 text-sm text-[#1a1f2b]"
+          />
+
+          <PdpVariantSelectors
+            sizes={sizes}
+            colors={colors}
+            selectedSize={selectedSize}
+            selectedColor={selectedColor}
+            onSelectSize={setSelectedSize}
+            onSelectColor={setSelectedColor}
+            sizeLabel="Size"
+            colorLabel="Colour"
+            labelClassName="text-sm font-medium text-[#1a1f2b]"
+            sizeSectionClassName="mt-6"
+            colorSectionClassName="mt-4"
+            sizeButtonClassName={(selected) =>
+              selected
+                ? "rounded-lg border border-[#1266b5] bg-[#1266b5] px-3 py-2 text-sm font-medium text-white"
+                : "rounded-lg border border-[#e4e8ef] bg-white px-3 py-2 text-sm font-medium text-[#1a1f2b] hover:border-[#1266b5]/40"
+            }
+            colorMode="swatch"
+            colorWrapClassName="mt-3 flex items-center gap-2.5"
+            swatchSelectedRing="0 0 0 2px #1266b5"
+          />
+
+          <div className="mt-6">
+            <p className="text-sm font-medium text-[#1a1f2b]">Quantity</p>
+            <PdpQuantity
+              value={quantity}
+              onChange={setQuantity}
+              wrapClass="mt-2 inline-flex items-center rounded-lg border border-[#e4e8ef] bg-white"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleAdd}
+            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#1266b5] text-sm font-medium text-white transition-colors hover:bg-[#0d4c88] sm:w-auto sm:px-6"
+          >
+            {added ? "Added" : "Add to cart"}
+          </button>
+        </div>
+      </div>
+
+      {children}
+      <PdpReviews productId={product.id} chrome={IMPORTS_CHROME} />
+      <PdpFaqs faqs={faqs} chrome={IMPORTS_CHROME} />
+    </div>
+  );
+}

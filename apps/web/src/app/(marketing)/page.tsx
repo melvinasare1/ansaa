@@ -8,7 +8,7 @@ const steps = [
   {
     n: "01",
     title: "Pick a template",
-    body: "Choose from five storefront templates and put your shop on your own domain. Your catalogue, your look, live in a few steps.",
+    body: "Choose from six storefront templates and put your shop on your own domain. Your catalogue, your look, live in a few steps.",
   },
   {
     n: "02",
@@ -29,7 +29,7 @@ const steps = [
 
 const websiteFeatures = [
   "Storefront on your own domain",
-  "Pick from 5 templates",
+  "Pick from 6 templates",
   "Admin dashboard for orders, products, and sales",
   "Manual MoMo payments. You mark orders paid, unpaid, or cancelled",
   "Email support",
@@ -48,6 +48,7 @@ const templates = [
     name: "Simple",
     description: "A simple, minimal ecom store — clean product pages and checkout.",
     href: "/store/template-a",
+    image: "/marketing/simple-preview.jpg",
   },
   {
     name: "Market",
@@ -68,6 +69,11 @@ const templates = [
     description: "Dark vehicle-retail layout, for motorbikes, bicycles, mopeds, and scooters.",
     href: RIDE_TEMPLATE_BASE,
     image: "/marketing/ride-preview.jpg",
+  },
+  {
+    name: "Imports",
+    description: "Blue catalogue layout, for grocery and everyday imported goods.",
+    href: "/store/imports-template",
   },
 ];
 

@@ -185,3 +185,34 @@ export const RIDE_CHROME: PdpChrome = {
   cartToastClass:
     "inline-flex items-center gap-2 rounded-lg bg-[#141414] px-4 py-2.5 text-sm font-semibold text-white shadow-lg [font-family:var(--font-ride-display),ui-sans-serif,system-ui]",
 };
+
+export const IMPORTS_CHROME: PdpChrome = {
+  accent: "#1266b5",
+  ink: "#1a1f2b",
+  sectionClass: "mt-16 scroll-mt-28 border-t border-[#e4e8ef] pt-12",
+  titleClass: "text-[28px] font-semibold leading-tight tracking-tight text-[#1a1f2b] md:text-[32px]",
+  questionClass: "text-[17px] font-semibold leading-snug text-[#1a1f2b]",
+  mutedClass: "text-sm text-[#66707e]",
+  strongClass: "font-semibold text-[#1a1f2b]",
+  bodyClass: "text-[15px] leading-relaxed text-[#66707e]",
+  dividerClass: "border-[#e4e8ef]",
+  addButtonClass:
+    "h-11 rounded-lg border border-[#e4e8ef] bg-white px-4 text-sm font-medium text-[#1a1f2b] hover:bg-[#e8f1fa]",
+  formClass: "mt-6 rounded-lg border border-[#e4e8ef] bg-[#f7f9fc] p-5",
+  fieldClass:
+    "mt-1.5 h-11 w-full rounded-lg border border-[#e4e8ef] bg-white px-4 text-sm text-[#1a1f2b] outline-none focus:border-[#1266b5]",
+  textareaClass:
+    "mt-1.5 w-full resize-y rounded-lg border border-[#e4e8ef] bg-white px-4 py-3 text-sm text-[#1a1f2b] outline-none focus:border-[#1266b5]",
+  submitClass:
+    "mt-5 flex h-11 w-full items-center justify-center rounded-lg bg-[#1266b5] text-sm font-medium text-white hover:bg-[#0d4c88] disabled:opacity-60",
+  errorClass: "mt-4 text-sm font-medium text-red-600",
+  successClass: "mt-4 text-sm font-medium text-emerald-700",
+  filterClass:
+    "h-10 min-w-0 rounded-lg border border-[#e4e8ef] bg-white px-4 text-sm text-[#1a1f2b] outline-none",
+  barTrackClass: "h-[5px] overflow-hidden rounded-full bg-[#e4e8ef]",
+  barFillClass: "h-full rounded-full bg-[#1266b5]",
+  iconClass: "h-[18px] w-[18px] shrink-0 text-[#66707e]",
+  verifiedClass: "text-[#1266b5]",
+  cartToastClass:
+    "inline-flex items-center gap-2 rounded-lg bg-[#1266b5] px-4 py-2.5 text-sm font-medium text-white shadow-lg",
+};

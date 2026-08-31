@@ -13,6 +13,7 @@ export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
     name: "Studio",
     description: "Minimal boutique layout, for fashion and beauty sellers.",
     previewClass: "bg-gradient-to-br from-zinc-100 via-white to-orange-100",
+    previewImage: "/marketing/simple-preview.jpg",
   },
   {
     id: "template-b",
@@ -40,6 +41,12 @@ export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
     previewClass: "bg-gradient-to-br from-neutral-950 via-neutral-800 to-orange-700",
     previewImage: "/marketing/ride-preview.jpg",
   },
+  {
+    id: "imports-template",
+    name: "Imports",
+    description: "Blue catalogue layout, for grocery and everyday imported goods.",
+    previewClass: "bg-gradient-to-br from-[#e8f1fa] via-white to-[#1266b5]",
+  },
 ];
 
 export const PRODUCT_CATEGORY_SUGGESTIONS = [
@@ -53,7 +60,7 @@ export const PRODUCT_CATEGORY_SUGGESTIONS = [
 
 export const WEBSITE_ADMIN_FEATURES = [
   "Storefront on your own domain",
-  "Pick from 5 templates",
+  "Pick from 6 templates",
   "Admin dashboard for orders, products, and sales",
   "Manual MoMo payments. You mark orders paid, unpaid, or cancelled",
   "Email support",

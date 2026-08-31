@@ -45,6 +45,7 @@ export const STOREFRONT_TEMPLATES = [
   "kitchenware-template",
   "template-d",
   "motorbike-template",
+  "imports-template",
 ] as const;
 
 export type StorefrontTemplate = (typeof STOREFRONT_TEMPLATES)[number];
