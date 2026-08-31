@@ -7,7 +7,7 @@ import { DashboardHeading, SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import type { AnsaaMomoDetails } from "@/lib/billing";
 import { SellerProvider } from "@/lib/seller-context";
-import type { TrialBannerState } from "@/lib/trial";
+import { useLiveTrial } from "@/lib/use-live-trial";
 import type { Seller, SellerUser } from "@ansaa/shared/types";
 
 export default function DashboardShell({
@@ -16,8 +16,8 @@ export default function DashboardShell({
   seller,
   sellerError,
   isAdmin,
-  trial,
-  showExpiryModal,
+  trialEndsAt,
+  sellerStatus,
   momo,
 }: {
   children: React.ReactNode;
@@ -25,10 +25,11 @@ export default function DashboardShell({
   seller: Seller | null;
   sellerError: string | null;
   isAdmin: boolean;
-  trial: TrialBannerState | null;
-  showExpiryModal: boolean;
+  trialEndsAt: number | null;
+  sellerStatus: string | null;
   momo: AnsaaMomoDetails;
 }) {
+  const { trial, showExpiryModal } = useLiveTrial(trialEndsAt, sellerStatus);
   const showSellerError = Boolean(sellerError) && !(isAdmin && !seller);
 
   return (

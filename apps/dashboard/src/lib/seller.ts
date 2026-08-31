@@ -50,6 +50,7 @@ export async function getDashboardSession(): Promise<{
   seller: Seller | null;
   sellerError: string | null;
 } | null> {
+  noStore();
   if (!isSupabaseConfigured()) return null;
 
   const supabase = await createClient();

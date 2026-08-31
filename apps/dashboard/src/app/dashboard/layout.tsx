@@ -3,7 +3,8 @@ import DashboardShell from "@/components/dashboard/DashboardShell";
 import { isAdminEmail } from "@/lib/admin";
 import { ansaaMomoDetails } from "@/lib/billing";
 import { getDashboardSession } from "@/lib/seller";
-import { trialBannerState, trialPaymentOverdue } from "@/lib/trial";
+
+export const dynamic = "force-dynamic";
 
 export default async function DashboardLayout({
   children,
@@ -15,18 +16,14 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const trial = trialBannerState(session.seller?.trialEndsAt);
-  const paid = session.seller?.status === "active";
-  const bannerTrial = trial?.expired && paid ? null : trial;
-
   return (
     <DashboardShell
       user={session.user}
       seller={session.seller}
       sellerError={session.sellerError}
       isAdmin={isAdminEmail(session.user.email)}
-      trial={bannerTrial}
-      showExpiryModal={trialPaymentOverdue(session.seller)}
+      trialEndsAt={session.seller?.trialEndsAt ?? null}
+      sellerStatus={session.seller?.status ?? null}
       momo={ansaaMomoDetails()}
     >
       {children}
