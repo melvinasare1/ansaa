@@ -222,6 +222,55 @@ export const STOREFRONT_CONTENT_SCHEMA: Partial<
       "home",
       "Your logo in the shop header."
     ),
+    textField(
+      "contactKicker",
+      "Contact page label",
+      "e.g. Get in touch",
+      "contact",
+      "The small text above the contact page headline."
+    ),
+    textField(
+      "contactHeadline",
+      "Contact page headline",
+      "e.g. Contact us",
+      "contact",
+      "The main title on your contact page."
+    ),
+    textareaField(
+      "contactSubtext",
+      "Contact page intro",
+      "Use {brandName} for your shop name. e.g. Questions about an order? Message {brandName}.",
+      "contact",
+      "The paragraph under the headline. Use {brandName} where your shop name should appear."
+    ),
+    textField(
+      "contactFormHeading",
+      "Message form title",
+      "e.g. Send a message",
+      "contact",
+      "The heading above the contact form."
+    ),
+    textareaField(
+      "contactFormIntro",
+      "Message form intro",
+      "e.g. Tell us what you need…",
+      "contact",
+      "Short instructions above the contact form fields."
+    ),
+    textField(
+      "contactWhatsappHeading",
+      "WhatsApp section title",
+      "e.g. Call or WhatsApp",
+      "contact",
+      "The heading above your WhatsApp / phone details."
+    ),
+    textareaField(
+      "contactWhatsappBody",
+      "WhatsApp section text",
+      "Use {brandName} for your shop name.",
+      "contact",
+      "Text beside your phone number. Use {brandName} where your shop name should appear."
+    ),
   ],
   "motorbike-template": [
     imageField(
@@ -513,7 +562,7 @@ export const STOREFRONT_CONTENT_PAGES: Partial<Record<StorefrontTemplate, readon
   "template-b": ["home", "product", "cart"],
   "kitchenware-template": ["home", "product", "cart"],
   "template-d": ["home", "product", "cart"],
-  "imports-template": ["home", "product", "cart"],
+  "imports-template": ["home", "product", "cart", "contact"],
   "motorbike-template": [
     "header",
     "hero",

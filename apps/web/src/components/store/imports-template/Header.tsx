@@ -40,6 +40,9 @@ export function Header({
           <Link href={`${base}/search`} className={navClass}>
             Shop
           </Link>
+          <Link href={`${base}/contact`} className={navClass}>
+            Contact
+          </Link>
         </nav>
 
         <div className="flex items-center justify-end gap-1 justify-self-end">
@@ -70,6 +73,9 @@ export function Header({
         </Link>
         <Link href={`${base}/search`} className={navClass}>
           Shop
+        </Link>
+        <Link href={`${base}/contact`} className={navClass}>
+          Contact
         </Link>
       </div>
       <div className="mx-auto block max-w-[90rem] px-4 pb-3 sm:px-6 md:hidden lg:px-8">

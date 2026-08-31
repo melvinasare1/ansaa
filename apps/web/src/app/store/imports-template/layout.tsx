@@ -58,6 +58,11 @@ export default async function ImportsTemplateLayout({ children }: { children: Re
                     Shop
                   </Link>
                 </li>
+                <li>
+                  <Link href={`${base}/contact`} className="text-white/85 hover:text-white hover:underline">
+                    Contact
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>

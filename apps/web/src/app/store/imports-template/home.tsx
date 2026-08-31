@@ -15,7 +15,7 @@ const DEFAULT_SUBTEXT =
 const TRUST = [
   {
     title: "Quality imported goods",
-    description: "Biscuits, tinned fish, tea, milk, tomatoes and more — selected for everyday use.",
+    description: "Drinks, frozen treats, sun care, and more — selected for everyday use.",
     icon: PackageCheck,
   },
   {
