@@ -23,7 +23,7 @@ export default async function DashboardLayout({
       sellerError={session.sellerError}
       isAdmin={isAdminEmail(session.user.email)}
       trialEndsAt={session.seller?.trialEndsAt ?? null}
-      sellerStatus={session.seller?.status ?? null}
+      subscriptionStatus={session.seller?.subscriptionStatus ?? null}
       momo={ansaaMomoDetails()}
     >
       {children}

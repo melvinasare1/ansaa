@@ -95,9 +95,11 @@ export function DashboardHeading() {
   if (pathname.startsWith("/dashboard/orders/") || pathname.startsWith("/dashboard/customers/")) {
     return null;
   }
-  const title = pathname.startsWith("/dashboard/admin")
-    ? "Platform overview"
-    : (titles[pathname] ?? "Dashboard");
+  const title = pathname.startsWith("/dashboard/admin/billing")
+    ? "Platform billing"
+    : pathname.startsWith("/dashboard/admin")
+      ? "Platform overview"
+      : (titles[pathname] ?? "Dashboard");
 
   return (
     <div className="px-4 pt-6 lg:px-6">

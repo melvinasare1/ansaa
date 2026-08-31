@@ -912,8 +912,8 @@ function PlanStep({
             Start with a {TRIAL_LENGTH_DAYS}-day free trial — no payment needed until it ends
           </span>
           <span className="mt-1 block text-xs text-muted-foreground">
-            Every new store starts on a free trial for now. After signup you can pay from your billing
-            page when you are ready — there is no separate pay-upfront option yet.
+            Every new store gets a full {TRIAL_LENGTH_DAYS}-day free trial. After signup you can pay
+            from your billing page when you are ready — there is no separate pay-upfront option yet.
           </span>
         </span>
       </label>
@@ -974,7 +974,7 @@ function ConfirmStep({
             label="Free trial"
             value={
               startFreeTrial
-                ? `${TRIAL_LENGTH_DAYS}-day trial — payment due after it ends`
+                ? `${TRIAL_LENGTH_DAYS}-day free trial — payment due after it ends`
                 : "No trial — payment required to activate"
             }
           />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { SubscriptionStatus } from "@ansaa/shared/types";
 import { trialBannerState, trialPaymentOverdue, type TrialBannerState } from "@/lib/trial";
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -8,7 +9,7 @@ const HOUR_MS = 60 * 60 * 1000;
 /** Recompute remaining trial days on the client so the count drops each calendar day. */
 export function useLiveTrial(
   trialEndsAt: number | null | undefined,
-  status: string | null | undefined
+  subscriptionStatus: SubscriptionStatus | null | undefined
 ): { trial: TrialBannerState | null; showExpiryModal: boolean } {
   const [now, setNow] = useState(() => Date.now());
 
@@ -25,13 +26,13 @@ export function useLiveTrial(
     };
   }, []);
 
-  const trial = trialBannerState(trialEndsAt, now);
-  const paid = status === "active";
+  const trial = trialBannerState(trialEndsAt, subscriptionStatus, now);
   return {
-    trial: trial?.expired && paid ? null : trial,
+    trial,
     showExpiryModal: trialPaymentOverdue(
-      trialEndsAt == null || !status ? null : { trialEndsAt, status },
-      now
+      subscriptionStatus == null
+        ? null
+        : { trialEndsAt: trialEndsAt ?? undefined, subscriptionStatus }
     ),
   };
 }

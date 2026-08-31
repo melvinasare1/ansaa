@@ -74,6 +74,7 @@ const seller = {
   pricing_tier: "website_admin",
   base_fee_cedis: 250,
   status: "active",
+  subscription_status: "active",
 };
 
 const SHIRT_IMAGES = [

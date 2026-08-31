@@ -6,6 +6,7 @@ import {
   parseStorefrontContent,
   type StorefrontContent,
 } from "@ansaa/shared/storefront-content-schema";
+import { createAdminClient } from "@ansaa/shared/supabase/admin";
 import { isSupabaseConfigured } from "@ansaa/shared/supabase/env";
 import { createClient } from "@ansaa/shared/supabase/server";
 import type { Seller, SellerUser } from "@ansaa/shared/types";
@@ -24,6 +25,37 @@ export async function fetchSellerForAuthUser(
   if (byUid.data) return sellerFromRow(byUid.data);
 
   return null;
+}
+
+/**
+ * Flip trialing → overdue when trial_ends_at has passed.
+ * Billing columns are service-role only (see sellers_protect_billing_columns).
+ */
+export async function reconcileSubscriptionStatus(seller: Seller): Promise<Seller> {
+  const trialEnded =
+    seller.trialEndsAt != null &&
+    Number.isFinite(seller.trialEndsAt) &&
+    seller.trialEndsAt <= Date.now();
+  if (seller.subscriptionStatus !== "trialing" || !trialEnded) {
+    return seller;
+  }
+
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("sellers")
+      .update({ subscription_status: "overdue" })
+      .eq("id", seller.id)
+      .eq("subscription_status", "trialing");
+    if (error) {
+      console.error("Failed to reconcile subscription_status", error);
+      return { ...seller, subscriptionStatus: "overdue" };
+    }
+  } catch (err) {
+    console.error("Failed to reconcile subscription_status", err);
+  }
+
+  return { ...seller, subscriptionStatus: "overdue" };
 }
 
 /** Fresh store_content for the editor — do not rely on layout-cached seller context. */
@@ -60,7 +92,10 @@ export async function getDashboardSession(): Promise<{
 
   if (!user) return null;
 
-  const seller = await fetchSellerForAuthUser(supabase, user.id);
+  let seller = await fetchSellerForAuthUser(supabase, user.id);
+  if (seller) {
+    seller = await reconcileSubscriptionStatus(seller);
+  }
   return {
     user: { uid: user.id, email: user.email ?? null },
     seller,

@@ -1,4 +1,4 @@
--- 14-day free trial, started when a seller completes onboarding.
+-- 30-day free trial, started when a seller completes onboarding.
 -- Null means no trial (e.g. admin-created accounts that skip onboarding).
 
 alter table public.sellers

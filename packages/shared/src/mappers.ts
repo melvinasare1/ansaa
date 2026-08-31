@@ -4,6 +4,7 @@ import {
   parseSellerDomainType,
   parseSellerStatus,
   parseStorefrontTemplate,
+  parseSubscriptionStatus,
   type Customer,
   type Order,
   type OrderItem,
@@ -201,6 +202,7 @@ export function sellerToInsert(seller: Omit<Seller, "createdAt"> & { createdAt?:
     created_at: new Date(seller.createdAt ?? Date.now()).toISOString(),
     trial_ends_at:
       seller.trialEndsAt != null ? new Date(seller.trialEndsAt).toISOString() : null,
+    subscription_status: seller.subscriptionStatus,
   };
 }
 
@@ -226,6 +228,8 @@ export function sellerFromRow(row: unknown): Seller {
     status: parseSellerStatus(fields.status),
     createdAt: epochMs(fields.created_at),
     trialEndsAt: optionalEpochMs(fields.trial_ends_at),
+    subscriptionStatus: parseSubscriptionStatus(fields.subscription_status),
+    lastPaymentConfirmedAt: optionalEpochMs(fields.last_payment_confirmed_at),
     billingReference: String(fields.billing_reference ?? "").trim() || undefined,
     idDocumentUrl: String(fields.id_document_url ?? "") || undefined,
     profilePhotoUrl: String(fields.profile_photo_url ?? "") || undefined,

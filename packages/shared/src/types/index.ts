@@ -28,6 +28,17 @@ export function parseSellerStatus(value: unknown): SellerStatus {
     : "onboarding";
 }
 
+/** Billing only — separate from storefront `status` (onboarding/active/paused/offboarded). */
+export const SUBSCRIPTION_STATUSES = ["trialing", "active", "overdue"] as const;
+
+export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
+
+export function parseSubscriptionStatus(value: unknown): SubscriptionStatus {
+  return SUBSCRIPTION_STATUSES.includes(value as SubscriptionStatus)
+    ? (value as SubscriptionStatus)
+    : "trialing";
+}
+
 export {
   parseSellerDomainType,
   SELLER_DOMAIN_TYPES,
@@ -83,6 +94,13 @@ export interface Seller {
   createdAt: number;
   /** Epoch ms when the 30-day free trial ends. Unset for accounts that skip onboarding. */
   trialEndsAt?: number;
+  /**
+   * Billing state. Independent of storefront `status`.
+   * trialing while trial runs; overdue after trial with no confirmed payment; active once paid.
+   */
+  subscriptionStatus: SubscriptionStatus;
+  /** Epoch ms when an admin last confirmed a MoMo subscription payment. */
+  lastPaymentConfirmedAt?: number;
   /** Permanent 6-digit MoMo payment reference. Assigned on insert, never regenerated. */
   billingReference?: string;
   /** Private storage object path in the id-verification bucket, not a public URL. */

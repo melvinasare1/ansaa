@@ -17,7 +17,7 @@ export default function DashboardShell({
   sellerError,
   isAdmin,
   trialEndsAt,
-  sellerStatus,
+  subscriptionStatus,
   momo,
 }: {
   children: React.ReactNode;
@@ -26,10 +26,10 @@ export default function DashboardShell({
   sellerError: string | null;
   isAdmin: boolean;
   trialEndsAt: number | null;
-  sellerStatus: string | null;
+  subscriptionStatus: Seller["subscriptionStatus"] | null;
   momo: AnsaaMomoDetails;
 }) {
-  const { trial, showExpiryModal } = useLiveTrial(trialEndsAt, sellerStatus);
+  const { trial, showExpiryModal } = useLiveTrial(trialEndsAt, subscriptionStatus);
   const showSellerError = Boolean(sellerError) && !(isAdmin && !seller);
 
   return (

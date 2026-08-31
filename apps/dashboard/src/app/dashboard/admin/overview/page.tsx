@@ -62,15 +62,15 @@ export default async function AdminOverviewPage({
           icon: Building2Icon,
         },
         {
-          label: "On free trial",
+          label: "On 30-day free trial",
           value: overview.onTrial.toLocaleString("en-GH"),
-          note: "trial_ends_at is still in the future",
+          note: "subscription_status = trialing",
           icon: ClockIcon,
         },
         {
           label: "Trial ended, not paying",
           value: overview.trialExpiredUnpaid.toLocaleString("en-GH"),
-          note: "trial_ends_at passed and status is not active",
+          note: "subscription_status = overdue",
           icon: TimerOffIcon,
         },
         {
@@ -82,7 +82,7 @@ export default async function AdminOverviewPage({
         {
           label: "Monthly recurring revenue",
           value: formatOrderMoney(overview.mrrCedis),
-          note: "base_fee_cedis of active sellers not still on trial",
+          note: "base_fee_cedis where subscription_status = active",
           icon: WalletIcon,
         },
       ]
@@ -168,8 +168,18 @@ export default async function AdminOverviewPage({
                   {overview.conversion.ended.toLocaleString("en-GH")} trials ended
                 </p>
                 <p className="mt-4 rounded-lg bg-mist px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-                  {overview.conversion.dataGap}
+                  Converted = subscription_status active after the trial window. Not converted =
+                  overdue. Mark payments on{" "}
+                  <Link href="/dashboard/admin/billing" className="underline underline-offset-2">
+                    Platform billing
+                  </Link>
+                  .
                 </p>
+                {overview.conversion.dataGap ? (
+                  <p className="mt-2 rounded-lg bg-mist px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+                    {overview.conversion.dataGap}
+                  </p>
+                ) : null}
               </section>
             </div>
 

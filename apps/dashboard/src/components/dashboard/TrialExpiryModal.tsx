@@ -52,7 +52,7 @@ export default function TrialExpiryModal({
             </button>
           </Dialog.Close>
           <Dialog.Title className="font-display text-xl font-semibold text-ink-950">
-            Your free trial has ended
+            Your 30-day free trial has ended
           </Dialog.Title>
           <Dialog.Description className="mt-2 text-sm leading-relaxed text-ink-700">
             Payment is required to continue. Send this month&apos;s fee by Mobile Money and include

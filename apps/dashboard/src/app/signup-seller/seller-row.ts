@@ -29,6 +29,7 @@ export function newSellerInsertRow(input: {
     status: "onboarding",
     createdAt: Date.now(),
     trialEndsAt: trialEndsAtFromNow(),
+    subscriptionStatus: "trialing",
     hasBusinessRegistration: false,
     returnPolicy: "",
     storeContent: {},

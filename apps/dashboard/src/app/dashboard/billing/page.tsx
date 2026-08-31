@@ -1,7 +1,13 @@
 import { redirect } from "next/navigation";
 import { ansaaMomoDetails, PLAN_LABELS, SELLER_STATUS_LABELS } from "@/lib/billing";
 import { getDashboardSession } from "@/lib/seller";
-import { PRICING_TIER_BASE_FEE_CEDIS } from "@ansaa/shared/types";
+import { PRICING_TIER_BASE_FEE_CEDIS, type SubscriptionStatus } from "@ansaa/shared/types";
+
+const SUBSCRIPTION_STATUS_LABELS: Record<SubscriptionStatus, string> = {
+  trialing: "30-day free trial",
+  active: "Paid — active",
+  overdue: "30-day free trial ended — payment due",
+};
 
 export default async function BillingPage() {
   const session = await getDashboardSession();
@@ -30,8 +36,16 @@ export default async function BillingPage() {
           <BillingRow label="Plan" value={planName} />
           <BillingRow label="Price" value={priceLabel} />
           <BillingRow
-            label="Status"
+            label="Storefront status"
             value={seller ? SELLER_STATUS_LABELS[seller.status] : "Not set"}
+          />
+          <BillingRow
+            label="Subscription"
+            value={
+              seller
+                ? SUBSCRIPTION_STATUS_LABELS[seller.subscriptionStatus]
+                : "Not set"
+            }
           />
         </dl>
       </section>
@@ -67,8 +81,8 @@ export default async function BillingPage() {
       </section>
 
       <p className="mt-6 text-sm text-ink-700/60">
-        Your account will be marked active once we confirm the payment on our end. There is no
-        self-serve &ldquo;I&apos;ve paid&rdquo; button yet.
+        Your subscription is marked paid once we confirm the MoMo payment against your reference.
+        There is no self-serve &ldquo;I&apos;ve paid&rdquo; button yet.
       </p>
     </div>
   );

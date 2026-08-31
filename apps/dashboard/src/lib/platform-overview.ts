@@ -3,10 +3,12 @@ import {
   parsePricingTier,
   parseSellerStatus,
   parseStorefrontTemplate,
+  parseSubscriptionStatus,
   STOREFRONT_TEMPLATES,
   type PricingTier,
   type SellerStatus,
   type StorefrontTemplate,
+  type SubscriptionStatus,
 } from "@ansaa/shared/types";
 import { PLAN_LABELS } from "@/lib/billing";
 import { TRIAL_LENGTH_DAYS } from "@/lib/trial";
@@ -45,7 +47,7 @@ export type PlatformOverview = {
     converted: number;
     notConverted: number;
     rate: number | null;
-    dataGap: string;
+    dataGap: string | null;
   };
   signupSeries: Array<{ date: string; signups: number }>;
   signupWindowDays: SignupWindowDays;
@@ -62,9 +64,11 @@ type SellerSnapshot = {
   pricingTier: PricingTier;
   baseFeeCedis: number;
   status: SellerStatus;
+  subscriptionStatus: SubscriptionStatus;
   createdAt: number;
   trialEndsAt: number | null;
   verificationSubmittedAt: number | null;
+  lastPaymentConfirmedAt: number | null;
 };
 
 function parseIsoMs(value: unknown): number | null {
@@ -78,17 +82,8 @@ function percent(part: number, whole: number): number | null {
   return Math.round((part / whole) * 1000) / 10;
 }
 
-function isOnTrial(seller: SellerSnapshot, now: number): boolean {
-  return seller.trialEndsAt != null && seller.trialEndsAt > now;
-}
-
-function trialHasEnded(seller: SellerSnapshot, now: number): boolean {
-  return seller.trialEndsAt != null && seller.trialEndsAt <= now;
-}
-
-/** Paying is inferred as operationally active after the trial window. */
-function isPaying(seller: SellerSnapshot, now: number): boolean {
-  return seller.status === "active" && !isOnTrial(seller, now);
+function isPaying(seller: SellerSnapshot): boolean {
+  return seller.subscriptionStatus === "active";
 }
 
 function formatDay(ms: number): string {
@@ -101,22 +96,25 @@ export function computePlatformOverview(
   signupWindowDays: SignupWindowDays
 ): PlatformOverview {
   const activeBusinesses = sellers.filter((seller) => seller.status === "active").length;
-  const onTrial = sellers.filter((seller) => isOnTrial(seller, now)).length;
+  const onTrial = sellers.filter((seller) => seller.subscriptionStatus === "trialing").length;
   const trialExpiredUnpaid = sellers.filter(
-    (seller) => trialHasEnded(seller, now) && seller.status !== "active"
+    (seller) => seller.subscriptionStatus === "overdue"
   ).length;
   const pendingReview = sellers.filter(
     (seller) => seller.status === "onboarding" && seller.verificationSubmittedAt != null
   ).length;
 
-  const paying = sellers.filter((seller) => isPaying(seller, now));
-  const mrrCedis = paying.reduce((sum, seller) => sum + (Number.isFinite(seller.baseFeeCedis) ? seller.baseFeeCedis : 0), 0);
+  const paying = sellers.filter((seller) => isPaying(seller));
+  const mrrCedis = paying.reduce(
+    (sum, seller) => sum + (Number.isFinite(seller.baseFeeCedis) ? seller.baseFeeCedis : 0),
+    0
+  );
 
   const totalSellers = sellers.length;
   const tiers: PlatformOverview["tiers"] = (["website_admin", "fulfilment"] as const).map((id) => {
     const members = sellers.filter((seller) => seller.pricingTier === id);
     const revenueCedis = members
-      .filter((seller) => isPaying(seller, now))
+      .filter((seller) => isPaying(seller))
       .reduce((sum, seller) => sum + seller.baseFeeCedis, 0);
     return {
       id,
@@ -133,8 +131,14 @@ export function computePlatformOverview(
     count: sellers.filter((seller) => seller.status === "active" && seller.template === id).length,
   }));
 
-  const endedTrials = sellers.filter((seller) => trialHasEnded(seller, now));
-  const converted = endedTrials.filter((seller) => seller.status === "active").length;
+  // Trials that have ended for billing purposes: overdue or paid after a trial window.
+  const endedTrials = sellers.filter(
+    (seller) =>
+      seller.subscriptionStatus === "overdue" ||
+      (seller.subscriptionStatus === "active" &&
+        (seller.trialEndsAt == null || seller.trialEndsAt <= now))
+  );
+  const converted = endedTrials.filter((seller) => seller.subscriptionStatus === "active").length;
   const notConverted = endedTrials.length - converted;
 
   const todayUtc = new Date();
@@ -146,7 +150,8 @@ export function computePlatformOverview(
   }
   const byDay = new Map(signupSeries.map((point) => [point.date, point]));
   for (const seller of sellers) {
-    if (seller.createdAt < todayUtc.getTime() - (signupWindowDays - 1) * MS_PER_DAY || seller.createdAt > now) continue;
+    if (seller.createdAt < todayUtc.getTime() - (signupWindowDays - 1) * MS_PER_DAY || seller.createdAt > now)
+      continue;
     const key = formatDay(seller.createdAt);
     const point = byDay.get(key);
     if (point) point.signups += 1;
@@ -175,6 +180,13 @@ export function computePlatformOverview(
         detail: name,
       });
     }
+    if (seller.lastPaymentConfirmedAt != null) {
+      activity.push({
+        at: seller.lastPaymentConfirmedAt,
+        title: "Subscription payment confirmed",
+        detail: name,
+      });
+    }
   }
   activity.sort((a, b) => b.at - a.at);
 
@@ -191,8 +203,7 @@ export function computePlatformOverview(
       converted,
       notConverted,
       rate: percent(converted, endedTrials.length),
-      dataGap:
-        "Paid vs approved is inferred from status = active after trial_ends_at. There is no subscription_status field yet, so an approved seller who never paid still looks converted.",
+      dataGap: null,
     },
     signupSeries,
     signupWindowDays,
@@ -205,10 +216,17 @@ export async function loadPlatformOverview(
   signupWindowDays: SignupWindowDays
 ): Promise<PlatformOverview> {
   const supabase = createAdminClient();
+
+  await supabase
+    .from("sellers")
+    .update({ subscription_status: "overdue" })
+    .eq("subscription_status", "trialing")
+    .lte("trial_ends_at", new Date().toISOString());
+
   const { data, error } = await supabase
     .from("sellers")
     .select(
-      "id, business_name, store_slug, email, template, pricing_tier, base_fee_cedis, status, created_at, trial_ends_at, verification_submitted_at"
+      "id, business_name, store_slug, email, template, pricing_tier, base_fee_cedis, status, subscription_status, created_at, trial_ends_at, verification_submitted_at, last_payment_confirmed_at"
     )
     .order("created_at", { ascending: false });
 
@@ -225,9 +243,11 @@ export async function loadPlatformOverview(
     pricingTier: parsePricingTier(row.pricing_tier),
     baseFeeCedis: Number(row.base_fee_cedis ?? 0),
     status: parseSellerStatus(row.status),
+    subscriptionStatus: parseSubscriptionStatus(row.subscription_status),
     createdAt: parseIsoMs(row.created_at) ?? 0,
     trialEndsAt: parseIsoMs(row.trial_ends_at),
     verificationSubmittedAt: parseIsoMs(row.verification_submitted_at),
+    lastPaymentConfirmedAt: parseIsoMs(row.last_payment_confirmed_at),
   }));
 
   return computePlatformOverview(sellers, Date.now(), signupWindowDays);
