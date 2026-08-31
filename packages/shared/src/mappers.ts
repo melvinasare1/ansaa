@@ -187,7 +187,7 @@ export function sellerToInsert(seller: Omit<Seller, "createdAt"> & { createdAt?:
     id: seller.id,
     uid: seller.uid,
     business_name: seller.businessName,
-    domain: seller.domain,
+    domain: seller.domain?.trim() ? seller.domain.trim().toLowerCase() : null,
     domain_type: seller.domainType,
     domain_verified: seller.domainVerified,
     store_slug: seller.storeSlug,
@@ -210,12 +210,12 @@ export function sellerFromRow(row: unknown): Seller {
     id: String(fields.id ?? ""),
     uid: String(fields.uid ?? fields.id ?? ""),
     businessName: String(fields.business_name ?? ""),
-    domain: String(fields.domain ?? ""),
+    domain:
+      typeof fields.domain === "string" && fields.domain.trim()
+        ? fields.domain.trim().toLowerCase()
+        : null,
     domainType: parseSellerDomainType(fields.domain_type),
-    domainVerified:
-      fields.domain_verified == null
-        ? parseSellerDomainType(fields.domain_type) === "subdomain"
-        : Boolean(fields.domain_verified),
+    domainVerified: Boolean(fields.domain_verified),
     storeSlug: String(fields.store_slug ?? ""),
     template: parseStorefrontTemplate(fields.template),
     email: String(fields.email ?? ""),

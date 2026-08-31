@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import {
-  isReservedStoreSubdomain,
-  STOREFRONT_ROOT_DOMAIN,
+  isPlatformPassThroughHost,
+  normalizeStoreHost,
 } from "@ansaa/shared/store-domain";
 import { parseStorefrontTemplate } from "@ansaa/shared/types";
 
-const APEX_HOSTS = new Set([STOREFRONT_ROOT_DOMAIN, `www.${STOREFRONT_ROOT_DOMAIN}`]);
-
 function hostnameOf(request: NextRequest): string {
   const host = request.headers.get("host") ?? request.nextUrl.hostname;
-  return host.split(":")[0]?.toLowerCase() ?? "";
+  return normalizeStoreHost(host);
 }
 
 function withPathnameHeader(request: NextRequest, pathname: string) {
@@ -25,30 +23,33 @@ function passThrough(request: NextRequest) {
   });
 }
 
-function sellerSubdomain(hostname: string): string | null {
-  const suffix = `.${STOREFRONT_ROOT_DOMAIN}`;
-  if (!hostname.endsWith(suffix)) return null;
-  const subdomain = hostname.slice(0, -suffix.length);
-  if (!subdomain || subdomain.includes(".")) return null;
-  return subdomain;
-}
-
 function shouldSkipSellerRewrite(pathname: string): boolean {
   return (
     pathname.startsWith("/api/") ||
     pathname.startsWith("/_next/") ||
-    pathname.startsWith("/store/")
+    pathname.startsWith("/store/") ||
+    pathname.startsWith("/__host-not-found")
   );
 }
 
-async function lookupSellerTemplate(storeSlug: string): Promise<string | null> {
+function hostNotFound(request: NextRequest) {
+  const notFoundUrl = request.nextUrl.clone();
+  notFoundUrl.pathname = "/__host-not-found";
+  return NextResponse.rewrite(notFoundUrl, {
+    request: { headers: withPathnameHeader(request, "/__host-not-found") },
+  });
+}
+
+async function lookupSellerByExactDomain(
+  hostname: string
+): Promise<{ template: string; store_slug: string } | null> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
+  if (!url || !key || !hostname) return null;
 
   const endpoint = new URL("/rest/v1/sellers", url);
-  endpoint.searchParams.set("select", "template,store_slug");
-  endpoint.searchParams.set("store_slug", `eq.${storeSlug}`);
+  endpoint.searchParams.set("select", "template,store_slug,domain");
+  endpoint.searchParams.set("domain", `eq.${hostname}`);
   endpoint.searchParams.set("limit", "1");
 
   const response = await fetch(endpoint, {
@@ -59,39 +60,33 @@ async function lookupSellerTemplate(storeSlug: string): Promise<string | null> {
   });
   if (!response.ok) return null;
 
-  const rows = (await response.json()) as Array<{ template?: unknown }>;
-  const template = rows[0]?.template;
-  return typeof template === "string" && template ? template : null;
+  const rows = (await response.json()) as Array<{
+    template?: unknown;
+    store_slug?: unknown;
+  }>;
+  const row = rows[0];
+  const template = row?.template;
+  const storeSlug = row?.store_slug;
+  if (typeof template !== "string" || !template) return null;
+  if (typeof storeSlug !== "string" || !storeSlug) return null;
+  return { template, store_slug: storeSlug };
 }
 
 export async function middleware(request: NextRequest) {
   const hostname = hostnameOf(request);
-
-  if (APEX_HOSTS.has(hostname) || !hostname.endsWith(`.${STOREFRONT_ROOT_DOMAIN}`)) {
-    return passThrough(request);
-  }
-
-  const storeSlug = sellerSubdomain(hostname);
-  if (!storeSlug || isReservedStoreSubdomain(storeSlug)) {
-    return passThrough(request);
-  }
-
   const pathname = request.nextUrl.pathname;
-  if (shouldSkipSellerRewrite(pathname)) {
+
+  if (isPlatformPassThroughHost(hostname) || shouldSkipSellerRewrite(pathname)) {
     return passThrough(request);
   }
 
-  const template = await lookupSellerTemplate(storeSlug);
-  if (!template) {
-    const notFoundUrl = request.nextUrl.clone();
-    notFoundUrl.pathname = "/__host-not-found";
-    return NextResponse.rewrite(notFoundUrl, {
-      request: { headers: withPathnameHeader(request, "/__host-not-found") },
-    });
+  const seller = await lookupSellerByExactDomain(hostname);
+  if (!seller) {
+    return hostNotFound(request);
   }
 
   const rest = pathname === "/" ? "" : pathname;
-  const rewritePath = `/store/${parseStorefrontTemplate(template)}/${storeSlug}${rest}`;
+  const rewritePath = `/store/${parseStorefrontTemplate(seller.template)}/${seller.store_slug}${rest}`;
   const rewriteUrl = request.nextUrl.clone();
   rewriteUrl.pathname = rewritePath;
 

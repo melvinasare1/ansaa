@@ -1,4 +1,4 @@
-/** Apex host for Ansaa-owned seller storefronts. */
+/** Apex host for Ansaa marketing (apps/web landing pages). */
 export const STOREFRONT_ROOT_DOMAIN = "ansaagh.com";
 
 /**
@@ -27,14 +27,52 @@ export function isReservedStoreSubdomain(value: string): boolean {
   return RESERVED_STORE_SUBDOMAIN_SET.has(value.trim().toLowerCase());
 }
 
-/** Host buyers use: `{store_slug}.ansaagh.com`. */
+/** Normalize a Host header or sellers.domain value (no port, lowercase). */
+export function normalizeStoreHost(value: string): string {
+  return value.split(":")[0]?.trim().toLowerCase().replace(/\.$/, "") ?? "";
+}
+
+export function isMarketingApexHost(hostname: string): boolean {
+  const host = normalizeStoreHost(hostname);
+  return host === STOREFRONT_ROOT_DOMAIN || host === `www.${STOREFRONT_ROOT_DOMAIN}`;
+}
+
+/**
+ * Hosts that belong to the Ansaa apps themselves (marketing, local dev,
+ * Vercel previews) — not a seller storefront. Exact seller-domain lookup
+ * must not run on these.
+ */
+export function isPlatformPassThroughHost(hostname: string): boolean {
+  const host = normalizeStoreHost(hostname);
+  if (!host) return true;
+  if (isMarketingApexHost(host)) return true;
+  if (host === "localhost" || host === "127.0.0.1") return true;
+  if (host.endsWith(".vercel.app")) return true;
+  return false;
+}
+
+/**
+ * Exact connected host stored on the seller, or null when none is connected.
+ * Empty strings and marketing apex values are treated as not connected.
+ */
+export function connectedStoreHost(domain: string | null | undefined): string | null {
+  const host = normalizeStoreHost(domain ?? "");
+  if (!host || isMarketingApexHost(host)) return null;
+  return host;
+}
+
+export function storefrontInternalPath(template: string, storeSlug: string): string {
+  return `/store/${template}/${storeSlug}`;
+}
+
+/** Host buyers use once an Ansaa temp subdomain is actually connected. */
 export function storefrontHost(storeSlug: string): string {
   return `${storeSlug}.${STOREFRONT_ROOT_DOMAIN}`;
 }
 
-/** Public HTTPS storefront URL. */
-export function publicStorefrontUrl(storeSlug: string): string {
-  return `https://${storefrontHost(storeSlug)}`;
+/** Public HTTPS URL for an exact connected host. */
+export function publicStorefrontUrlFromHost(host: string): string {
+  return `https://${normalizeStoreHost(host)}`;
 }
 
 export const SELLER_DOMAIN_TYPES = ["subdomain", "custom"] as const;

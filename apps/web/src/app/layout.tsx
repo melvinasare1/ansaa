@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { GaPageViews } from "@/components/analytics/GaPageViews";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { getGaMeasurementId } from "@/lib/ga";
 import "./globals.css";
 
 const display = Space_Grotesk({
@@ -32,11 +36,21 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const gaMeasurementId = getGaMeasurementId();
+
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body className="font-body">
         {children}
         <Analytics />
+        {gaMeasurementId ? (
+          <>
+            <GoogleAnalytics measurementId={gaMeasurementId} />
+            <Suspense fallback={null}>
+              <GaPageViews />
+            </Suspense>
+          </>
+        ) : null}
       </body>
     </html>
   );

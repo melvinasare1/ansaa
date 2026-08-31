@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { trackGaEvent } from "@/lib/ga";
 
 const categories = [
   "Fashion & accessories",
@@ -35,6 +36,10 @@ export default function SignupPage() {
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error("Something went wrong. Try again.");
+      trackGaEvent("generate_lead", {
+        method: "signup_form",
+        product_category: String(payload.productCategory ?? ""),
+      });
       setSubmitted(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");

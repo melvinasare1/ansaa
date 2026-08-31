@@ -217,7 +217,7 @@ export function StorefrontEditor({
                 rel="noopener noreferrer"
                 className="rounded-lg border border-wire px-4 py-2 text-sm font-medium text-ink-950 hover:border-signal"
               >
-                View your live store
+                View store
               </a>
             ) : null}
           </div>

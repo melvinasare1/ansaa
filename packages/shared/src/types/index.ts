@@ -64,12 +64,13 @@ export interface Seller {
   id: string;
   uid: string; // Intended auth uid of the seller who owns this tenant
   businessName: string;
-  domain: string; // e.g. "{store_slug}.ansaagh.com" for Ansaa subdomains
-  /** How `domain` is provisioned. `custom` is reserved; not implemented yet. */
+  /** Exact connected host (custom or a provisioned ansaagh.com subdomain). Null until connected. */
+  domain: string | null;
+  /** How `domain` is provisioned when set. Unused while domain is null. */
   domainType: SellerDomainType;
-  /** True for Ansaa-owned subdomains; custom domains stay unverified until that flow exists. */
+  /** True once the stored host is actually pointed at apps/web. */
   domainVerified: boolean;
-  storeSlug: string; // also the ansaagh.com subdomain; path routing stays /store/{template}/{slug}
+  storeSlug: string;
   template: StorefrontTemplate;
   email: string;
   /** Contact mobile number. */

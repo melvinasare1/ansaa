@@ -1,7 +1,7 @@
 import { Check } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { sellerOnboardingHref } from "@/components/marketing/nav";
+import { TemplatePreviewCta } from "@/components/marketing/TemplatePreviewCta";
 import { RIDE_TEMPLATE_BASE } from "@/components/store/motorbike-template/demo-catalog";
 
 const steps = [
@@ -221,21 +221,7 @@ export default function LandingPage() {
               <p className="mt-2 flex-1 text-sm leading-relaxed text-ink-700">
                 {template.description}
               </p>
-              {template.href ? (
-                <Link
-                  href={template.href}
-                  className="mt-5 self-start rounded-full border border-navy px-4 py-1.5 text-sm font-medium text-navy transition hover:bg-navy hover:text-white"
-                >
-                  Preview
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  className="mt-5 self-start rounded-full border border-navy px-4 py-1.5 text-sm font-medium text-navy transition hover:bg-navy hover:text-white"
-                >
-                  Preview
-                </button>
-              )}
+              <TemplatePreviewCta templateName={template.name} href={template.href} />
             </article>
           ))}
         </div>

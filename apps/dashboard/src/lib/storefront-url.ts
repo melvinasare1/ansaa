@@ -1,14 +1,40 @@
-import { publicStorefrontUrl } from "@ansaa/shared/store-domain";
+import {
+  connectedStoreHost,
+  publicStorefrontUrlFromHost,
+  storefrontInternalPath,
+} from "@ansaa/shared/store-domain";
+import { getWebUrl } from "@ansaa/shared/supabase/env";
 import type { Seller } from "@ansaa/shared/types";
 
-/** Public live-store URL for a seller, or null if slug is missing. */
-export function storefrontUrl(seller: Seller | null): string | null {
-  if (!seller?.storeSlug) return null;
-  return publicStorefrontUrl(seller.storeSlug);
+export function hasConnectedStoreDomain(seller: Seller | null): boolean {
+  return Boolean(connectedStoreHost(seller?.domain));
 }
 
-/** Internal path-based storefront URL (previews and local /store routing). */
+/** Internal path-based storefront (preview / testing). */
 export function storefrontPathUrl(seller: Seller | null): string | null {
   if (!seller?.template || !seller.storeSlug) return null;
-  return `/store/${seller.template}/${seller.storeSlug}`;
+  return `${getWebUrl()}${storefrontInternalPath(seller.template, seller.storeSlug)}`;
+}
+
+/** Live connected host when set; otherwise the preview storefront URL. */
+export function storefrontUrl(seller: Seller | null): string | null {
+  const host = connectedStoreHost(seller?.domain);
+  if (host) return publicStorefrontUrlFromHost(host);
+  return storefrontPathUrl(seller);
+}
+
+/**
+ * Namecheap affiliate URL for the Settings Domain CTA.
+ * Empty or invalid values hide the button — never link to a broken href.
+ */
+export function namecheapAffiliateUrl(): string | null {
+  const raw = process.env.NEXT_PUBLIC_NAMECHEAP_AFFILIATE_URL?.trim() ?? "";
+  if (!raw) return null;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+    return parsed.href;
+  } catch {
+    return null;
+  }
 }
