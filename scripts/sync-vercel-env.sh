@@ -57,9 +57,6 @@ set_env NEXT_PUBLIC_WEB_URL "http://localhost:3000" 0 development
 set_env NEXT_PUBLIC_DASHBOARD_URL "http://localhost:3001" 0 development
 
 # Optional — set when present locally
-if [[ -n "${NEXT_PUBLIC_GA_MEASUREMENT_ID:-}" ]]; then
-  set_env NEXT_PUBLIC_GA_MEASUREMENT_ID "$NEXT_PUBLIC_GA_MEASUREMENT_ID" 0 production preview development
-fi
 if [[ -n "${NEXT_PUBLIC_NAMECHEAP_AFFILIATE_URL:-}" ]]; then
   set_env NEXT_PUBLIC_NAMECHEAP_AFFILIATE_URL "$NEXT_PUBLIC_NAMECHEAP_AFFILIATE_URL" 0 production preview development
 fi

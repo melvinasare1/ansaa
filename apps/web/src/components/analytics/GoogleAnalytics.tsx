@@ -1,10 +1,11 @@
 import Script from "next/script";
+import { GA_MEASUREMENT_ID } from "@/lib/ga";
 
-export function GoogleAnalytics({ measurementId }: { measurementId: string }) {
+export function GoogleAnalytics() {
   return (
     <>
       <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
         strategy="afterInteractive"
       />
       <Script id="ga4-init" strategy="afterInteractive">
@@ -13,7 +14,7 @@ export function GoogleAnalytics({ measurementId }: { measurementId: string }) {
           function gtag(){dataLayer.push(arguments);}
           window.gtag = gtag;
           gtag('js', new Date());
-          gtag('config', '${measurementId}', { send_page_view: false });
+          gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
         `}
       </Script>
     </>
