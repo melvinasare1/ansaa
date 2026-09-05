@@ -2,7 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { AddToCartIconButton } from "@/components/store/hair-beauty-template/AddToCartButton";
+import { AddToCartIconButton, BuyNowButton } from "@/components/store/hair-beauty-template/AddToCartButton";
+import {
+  axesFromVariants,
+  initialSelectedVariants,
+  usesGenericVariantAxes,
+  variantDisplaySuffix,
+} from "@/components/store/pdp/variant-selection";
+import { cartLineId } from "@/lib/checkout";
 import { formatCedis } from "@/lib/price";
 import type { Product } from "@ansaa/shared/types";
 
@@ -11,12 +18,37 @@ function salePercent(priceCedis: number, compareAtPriceCedis?: number): number |
   return Math.round(((compareAtPriceCedis - priceCedis) / compareAtPriceCedis) * 100);
 }
 
-function hasOptions(product: Product): boolean {
-  return Boolean(
-    (product.sizes?.length ?? 0) > 0 ||
-      (product.colors?.length ?? 0) > 0 ||
-      (product.variants?.length ?? 0) > 0
-  );
+/** Match PDP defaults so card quick-add includes first size/color/variant values. */
+function defaultCartLine(product: Product): {
+  productId: string;
+  name: string;
+  size?: string;
+  color?: string;
+  selectedVariants?: Record<string, string>;
+} {
+  const sizes = product.sizes ?? [];
+  const colors = product.colors ?? [];
+  const useGeneric = usesGenericVariantAxes(product.variants);
+
+  if (useGeneric) {
+    const selectedVariants = initialSelectedVariants(axesFromVariants(product.variants));
+    const suffix = variantDisplaySuffix({ selectedVariants });
+    return {
+      productId: cartLineId(product.id, { selectedVariants }),
+      name: suffix ? `${product.name} · ${suffix}` : product.name,
+      selectedVariants,
+    };
+  }
+
+  const size = sizes[0] || undefined;
+  const color = colors[0] || undefined;
+  const suffix = variantDisplaySuffix({ size, color });
+  return {
+    productId: cartLineId(product.id, { size, color }),
+    name: suffix ? `${product.name} · ${suffix}` : product.name,
+    size,
+    color,
+  };
 }
 
 export function ProductCard({
@@ -31,6 +63,7 @@ export function ProductCard({
   const discount = salePercent(product.priceCedis, product.compareAtPriceCedis);
   const showCompare =
     product.compareAtPriceCedis != null && product.compareAtPriceCedis > product.priceCedis;
+  const line = defaultCartLine(product);
 
   return (
     <article className="group h-full">
@@ -58,14 +91,15 @@ export function ProductCard({
             </span>
           ) : null}
         </Link>
-        {hasOptions(product) ? null : (
-          <AddToCartIconButton
-            productId={product.id}
-            name={product.name}
-            priceCedis={product.priceCedis}
-            image={photo}
-          />
-        )}
+        <AddToCartIconButton
+          productId={line.productId}
+          name={line.name}
+          priceCedis={product.priceCedis}
+          image={photo}
+          size={line.size}
+          color={line.color}
+          selectedVariants={line.selectedVariants}
+        />
       </div>
       <Link
         href={href}
@@ -91,6 +125,16 @@ export function ProductCard({
           ) : null}
         </div>
       </Link>
+      <BuyNowButton
+        productId={line.productId}
+        name={line.name}
+        priceCedis={product.priceCedis}
+        image={photo}
+        cartHref={`${productBase}/cart`}
+        size={line.size}
+        color={line.color}
+        selectedVariants={line.selectedVariants}
+      />
     </article>
   );
 }
