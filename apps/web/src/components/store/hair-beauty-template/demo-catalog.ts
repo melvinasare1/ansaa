@@ -2,7 +2,7 @@ import type { Product, ProductVariant } from "@ansaa/shared/types";
 
 export const HAIR_BEAUTY_TEMPLATE_BASE = "/store/hair-beauty-template";
 
-const HERO = "/store/hair-beauty-template/hero.jpg";
+const IMG = "/store/hair-beauty-template/products";
 
 export type HairDemoProduct = {
   id: string;
@@ -12,13 +12,83 @@ export type HairDemoProduct = {
   compareAtPriceCedis?: number;
   shortDescription?: string;
   category: string;
-  image: string;
+  /** First image is the card / primary gallery shot. */
+  images: string[];
   createdAt: number;
   features?: string[];
   variants?: ProductVariant[];
 };
 
 export const HAIR_DEMO_PRODUCTS: HairDemoProduct[] = [
+  {
+    id: "demo-body-wave-glueless-wig",
+    name: "Body Wave Glueless Lace Front Wig",
+    description:
+      "Glueless body wave lace front with a melted hairline and breathable cap. Pre-plucked, ready to wear, and styled with soft volume for everyday glam.",
+    shortDescription: "Glueless body wave. Natural hairline, breathable cap.",
+    priceCedis: 1350,
+    compareAtPriceCedis: 1580,
+    category: "Wigs",
+    images: [
+      `${IMG}/body-wave-lace-1.jpg`,
+      `${IMG}/body-wave-lace-2.jpg`,
+      `${IMG}/body-wave-cap.webp`,
+    ],
+    createdAt: 8,
+    features: ["Glueless wear-and-go", "13×4 lace", "Breathable adjustable cap"],
+  },
+  {
+    id: "demo-kinky-curly-wig",
+    name: "Kinky Curly Full Lace Wig",
+    description:
+      "Full-density kinky curly unit with soft stretch and bounce. Holds curl definition after wash and air-dry — no heat required.",
+    shortDescription: "Full-density curls with lasting definition.",
+    priceCedis: 1100,
+    compareAtPriceCedis: 1280,
+    category: "Wigs",
+    images: [
+      `${IMG}/kinky-curly-1.webp`,
+      `${IMG}/kinky-curly-2.jpg`,
+      `${IMG}/kinky-curly-3.webp`,
+    ],
+    createdAt: 7,
+    features: ["High density", "Heat-friendly", "Wash & go"],
+  },
+  {
+    id: "demo-highlight-curly-wig",
+    name: "Honey Highlight Curly Lace Front Wig",
+    description:
+      "Voluminous curly lace front with honey-blonde and caramel highlights. Pre-plucked hairline for a seamless blend — piano colour that catches the light.",
+    shortDescription: "Curly lace front with honey caramel highlights.",
+    priceCedis: 1480,
+    compareAtPriceCedis: 1720,
+    category: "Wigs",
+    images: [
+      `${IMG}/highlight-curly-1.webp`,
+      `${IMG}/highlight-curly-2.jpg`,
+      `${IMG}/highlight-curly-3.jpg`,
+    ],
+    createdAt: 6,
+    features: ["Piano highlights", "Pre-plucked lace", "Defined curls"],
+  },
+  {
+    id: "demo-deep-wave-wig",
+    name: "Deep Wave Wear-Go Half Wig",
+    description:
+      "3-in-1 deep wave half wig — style it down, half-up, or with braided edges. Glueless invisible hairline for protective, vacation-ready looks.",
+    shortDescription: "3-in-1 deep wave. Glueless, versatile styling.",
+    priceCedis: 980,
+    compareAtPriceCedis: 1180,
+    category: "Wigs",
+    images: [
+      `${IMG}/deep-wave-1.jpg`,
+      `${IMG}/deep-wave-2.jpg`,
+      `${IMG}/deep-wave-3.webp`,
+      `${IMG}/deep-wave-4.webp`,
+    ],
+    createdAt: 5,
+    features: ["3-in-1 styles", "Glueless half wig", "Invisible hairline"],
+  },
   {
     id: "demo-silk-straight-bundle",
     name: "Silk Straight Bundle Set",
@@ -28,8 +98,8 @@ export const HAIR_DEMO_PRODUCTS: HairDemoProduct[] = [
     priceCedis: 850,
     compareAtPriceCedis: 980,
     category: "Bundles",
-    image: HERO,
-    createdAt: 6,
+    images: [`${IMG}/body-wave-lace-2.jpg`, `${IMG}/body-wave-lace-1.jpg`],
+    createdAt: 4,
     features: ["100% human hair", "Double weft", "Low shedding"],
     variants: [
       {
@@ -53,18 +123,6 @@ export const HAIR_DEMO_PRODUCTS: HairDemoProduct[] = [
     ],
   },
   {
-    id: "demo-lace-front-wig",
-    name: "13×4 Lace Front Wig",
-    description:
-      "Pre-plucked lace front wig with a natural hairline. Lightweight cap, breathable, and ready to style for everyday glam or special occasions.",
-    shortDescription: "Natural hairline lace front. Ready to wear.",
-    priceCedis: 1250,
-    category: "Wigs",
-    image: HERO,
-    createdAt: 5,
-    features: ["13×4 lace", "Pre-plucked", "Adjustable straps"],
-  },
-  {
     id: "demo-body-wave-closure",
     name: "Body Wave 4×4 Closure",
     description:
@@ -73,21 +131,9 @@ export const HAIR_DEMO_PRODUCTS: HairDemoProduct[] = [
     priceCedis: 320,
     compareAtPriceCedis: 380,
     category: "Closures",
-    image: HERO,
-    createdAt: 4,
-    features: ["4×4 lace", "Medium brown", "Bleach-friendly knots"],
-  },
-  {
-    id: "demo-kinky-curly-wig",
-    name: "Kinky Curly Full Wig",
-    description:
-      "Full-density kinky curly unit with soft stretch and bounce. Holds curl definition after wash and air-dry — no heat required.",
-    shortDescription: "Full-density curls with lasting definition.",
-    priceCedis: 1100,
-    category: "Wigs",
-    image: HERO,
+    images: [`${IMG}/body-wave-cap.webp`, `${IMG}/body-wave-lace-1.jpg`],
     createdAt: 3,
-    features: ["High density", "Heat-friendly", "Wash & go"],
+    features: ["4×4 lace", "Medium brown", "Bleach-friendly knots"],
   },
   {
     id: "demo-clip-in-extensions",
@@ -97,7 +143,7 @@ export const HAIR_DEMO_PRODUCTS: HairDemoProduct[] = [
     shortDescription: "Seven-piece clip-ins for instant volume.",
     priceCedis: 480,
     category: "Extensions",
-    image: HERO,
+    images: [`${IMG}/highlight-curly-3.jpg`, `${IMG}/highlight-curly-2.jpg`],
     createdAt: 2,
     features: ["7 pieces", "Secure clips", "Reusable"],
   },
@@ -110,7 +156,7 @@ export const HAIR_DEMO_PRODUCTS: HairDemoProduct[] = [
     priceCedis: 1450,
     compareAtPriceCedis: 1650,
     category: "Bundles",
-    image: HERO,
+    images: [`${IMG}/deep-wave-2.jpg`, `${IMG}/kinky-curly-1.webp`],
     createdAt: 1,
     features: ["13×4 frontal", "2 bundles", "Colour-matched"],
   },
@@ -146,7 +192,7 @@ export function hairDemoToProduct(item: HairDemoProduct): Product {
     shortDescription: item.shortDescription,
     priceCedis: item.priceCedis,
     compareAtPriceCedis: item.compareAtPriceCedis,
-    images: [item.image],
+    images: item.images,
     stockQuantity: 16,
     sku: item.id.replace(/-/g, "").toUpperCase(),
     category: item.category,
