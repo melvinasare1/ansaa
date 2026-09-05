@@ -7,10 +7,10 @@ import { PdpComparePrice, PdpFeaturesList, PdpShortDescription } from "@/compone
 import { imagesForSelection, PdpGallery, PdpQuantity, productFeatures } from "@/components/store/pdp/PdpGallery";
 import { PdpReviews } from "@/components/store/pdp/PdpReviews";
 import { PdpVariantSelectors } from "@/components/store/pdp/PdpVariantSelectors";
+import { useProductVariantSelection } from "@/components/store/pdp/use-product-variant-selection";
 import { IMPORTS_CHROME } from "@/components/store/pdp/chrome";
 import { useAddToCartFeedback } from "@/components/store/cart-feedback";
 import { useCart } from "@/lib/cart-context";
-import { cartLineId } from "@/lib/checkout";
 import { fillFromId, swatchHex } from "@/lib/swatch";
 import { sellerSlugFromPath, storefrontBase } from "@/lib/store-path";
 import type { Product, StoreFaq } from "@ansaa/shared/types";
@@ -31,27 +31,37 @@ export function ProductDetail({
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const cartHref = `${storefrontBase("imports-template", sellerSlugFromPath(pathname, "imports-template"))}/cart`;
-  const sizes = product.sizes ?? [];
-  const colors = product.colors ?? [];
   const features = productFeatures(product);
-  const [selectedSize, setSelectedSize] = useState(sizes[0] ?? "");
-  const [selectedColor, setSelectedColor] = useState(colors[0] ?? "");
+  const {
+    sizes,
+    colors,
+    selectedSize,
+    setSelectedSize,
+    selectedColor,
+    setSelectedColor,
+    selectedVariants,
+    onSelectVariant,
+    selection,
+    lineId,
+    cartName,
+    galleryColor,
+    gallerySize,
+  } = useProductVariantSelection(product);
   const [quantity, setQuantity] = useState(1);
 
   function addToBag() {
-    const size = selectedSize || undefined;
-    const color = selectedColor || undefined;
-    const variantLabel = [size, color].filter(Boolean).join(" / ");
     const qty = Math.min(99, Math.max(1, Math.floor(quantity) || 1));
-    const photo = imagesForSelection(product, color, size)[0];
+    const photo = imagesForSelection(product, galleryColor, gallerySize)[0];
+    const color = selection.color;
 
     addItem({
-      productId: cartLineId(product.id, size, color),
-      name: variantLabel ? `${product.name} · ${variantLabel}` : product.name,
+      productId: lineId,
+      name: cartName,
       priceCedis: product.priceCedis,
       image: photo || (color ? swatchHex(color) : fillFromId(product.id)),
-      size,
-      color,
+      size: selection.size,
+      color: selection.color,
+      selectedVariants: selection.selectedVariants,
       quantity: qty,
     });
   }
@@ -71,7 +81,7 @@ export function ProductDetail({
     <div className="mx-auto max-w-[90rem] px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
       <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-12">
         <PdpGallery
-          images={imagesForSelection(product, selectedColor, selectedSize)}
+          images={imagesForSelection(product, galleryColor, gallerySize)}
           alt={product.name}
           accent={ACCENT}
           aspectClass="aspect-square"
@@ -116,6 +126,9 @@ export function ProductDetail({
             selectedColor={selectedColor}
             onSelectSize={setSelectedSize}
             onSelectColor={setSelectedColor}
+            variants={product.variants}
+            selectedVariants={selectedVariants}
+            onSelectVariant={onSelectVariant}
             sizeLabel="Size"
             colorLabel="Colour"
             labelClassName="text-sm font-medium text-[#1a1f2b]"

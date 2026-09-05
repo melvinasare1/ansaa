@@ -10,6 +10,7 @@ import { ProductReviews } from "@/components/store/template-a/ProductReviews";
 import { PdpComparePrice, PdpFeaturesList, PdpShortDescription } from "@/components/store/pdp/PdpFeaturesList";
 import { imagesForSelection } from "@/components/store/pdp/PdpGallery";
 import { PdpVariantSelectors } from "@/components/store/pdp/PdpVariantSelectors";
+import { useProductVariantSelection } from "@/components/store/pdp/use-product-variant-selection";
 import { useAddToCartFeedback } from "@/components/store/cart-feedback";
 import { useCart } from "@/lib/cart-context";
 import { fillFromId, swatchHex } from "@/lib/swatch";
@@ -34,11 +35,6 @@ function galleryFor(product: Product, color: string, size: string): GalleryItem[
     }));
   }
   return [{ kind: "swatch", fill: fillFromId(product.id) }];
-}
-
-function cartLineId(productId: string, size?: string, color?: string) {
-  if (!size && !color) return productId;
-  return `${productId}:${size ?? ""}:${color ?? ""}`;
 }
 
 function GalleryThumbs({
@@ -94,18 +90,29 @@ export function ProductDetail({
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const cartHref = `${storefrontBase("template-a", sellerSlugFromPath(pathname, "template-a"))}/cart`;
-  const sizes = product.sizes ?? [];
-  const colors = product.colors ?? [];
   const features = (product.features ?? []).map((item) => item.trim()).filter(Boolean);
+  const {
+    sizes,
+    colors,
+    selectedSize,
+    setSelectedSize,
+    selectedColor,
+    setSelectedColor,
+    selectedVariants,
+    onSelectVariant,
+    selection,
+    lineId,
+    cartName,
+    galleryColor,
+    gallerySize,
+  } = useProductVariantSelection(product);
 
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(sizes[0] ?? "");
-  const [selectedColor, setSelectedColor] = useState(colors[0] ?? "");
   const [quantity, setQuantity] = useState(1);
 
   const gallery = useMemo(
-    () => galleryFor(product, selectedColor, selectedSize),
-    [product, selectedColor, selectedSize]
+    () => galleryFor(product, galleryColor ?? "", gallerySize ?? ""),
+    [product, galleryColor, gallerySize]
   );
   const galleryKey = gallery
     .map((item) => (item.kind === "image" ? item.src : item.fill))
@@ -118,10 +125,8 @@ export function ProductDetail({
   const main = gallery[Math.min(selectedImage, Math.max(gallery.length - 1, 0))] ?? gallery[0];
 
   function addToBag() {
-    const size = selectedSize || undefined;
-    const color = selectedColor || undefined;
-    const variantLabel = [size, color].filter(Boolean).join(" / ");
     const qty = Math.min(99, Math.max(1, Math.floor(quantity) || 1));
+    const color = selection.color;
     const cartImage =
       main?.kind === "image"
         ? main.src
@@ -130,12 +135,13 @@ export function ProductDetail({
           : fillFromId(product.id);
 
     addItem({
-      productId: cartLineId(product.id, size, color),
-      name: variantLabel ? `${product.name} · ${variantLabel}` : product.name,
+      productId: lineId,
+      name: cartName,
       priceCedis: product.priceCedis,
       image: cartImage,
-      size,
-      color,
+      size: selection.size,
+      color: selection.color,
+      selectedVariants: selection.selectedVariants,
       quantity: qty,
     });
   }
@@ -245,6 +251,9 @@ export function ProductDetail({
           selectedColor={selectedColor}
           onSelectSize={setSelectedSize}
           onSelectColor={setSelectedColor}
+          variants={product.variants}
+          selectedVariants={selectedVariants}
+          onSelectVariant={onSelectVariant}
           sizeLabel="Select Size"
           colorLabel="Colors Available"
           labelClassName="text-[15px] font-bold"

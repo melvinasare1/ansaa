@@ -1,8 +1,15 @@
 import type { OrderItem } from "@ansaa/shared/types";
+import { variantDisplaySuffix } from "@/components/store/pdp/variant-selection";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PRODUCT_UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+export type CartVariantSelection = {
+  size?: string;
+  color?: string;
+  selectedVariants?: Record<string, string>;
+};
 
 export type CheckoutItemInput = {
   productId: string;
@@ -10,6 +17,7 @@ export type CheckoutItemInput = {
   quantity: number;
   size?: string;
   color?: string;
+  selectedVariants?: Record<string, string>;
 };
 
 export type CheckoutBody = {
@@ -54,29 +62,77 @@ function trim(value: unknown, max: number): string {
   return String(value ?? "").trim().slice(0, max);
 }
 
+function parseSelectedVariants(value: unknown): Record<string, string> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const entries: Record<string, string> = {};
+  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+    const name = trim(key, 80);
+    const selected = trim(raw, 80);
+    if (!name || !selected) continue;
+    entries[name] = selected;
+  }
+  return Object.keys(entries).length > 0 ? entries : undefined;
+}
+
+function encodeVariantPair(name: string, value: string): string {
+  return `${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
+}
+
+function selectionFingerprint(selection: CartVariantSelection): string {
+  const selected = selection.selectedVariants;
+  if (selected && Object.keys(selected).length > 0) {
+    return Object.entries(selected)
+      .filter(([, value]) => Boolean(value?.trim()))
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, value]) => encodeVariantPair(name.trim(), value.trim()))
+      .join("|");
+  }
+  if (!selection.size && !selection.color) return "";
+  return `${selection.size ?? ""}:${selection.color ?? ""}`;
+}
+
 export function productIdFromCartLine(lineId: string): string {
   const match = lineId.trim().match(PRODUCT_UUID_RE);
   return match?.[0] ?? "";
 }
 
-export function cartLineId(productId: string, size?: string, color?: string) {
-  if (!size && !color) return productId;
-  return `${productId}:${size ?? ""}:${color ?? ""}`;
+/**
+ * Composite cart line key. Legacy size/color products keep the
+ * `uuid:size:color` form. Multi-axis selections use sorted
+ * `uuid:name=value|name=value` so distinct combinations do not collide.
+ */
+export function cartLineId(
+  productId: string,
+  sizeOrSelection?: string | CartVariantSelection,
+  color?: string
+): string {
+  const selection: CartVariantSelection =
+    sizeOrSelection && typeof sizeOrSelection === "object"
+      ? sizeOrSelection
+      : { size: sizeOrSelection, color };
+
+  const fingerprint = selectionFingerprint(selection);
+  if (!fingerprint) return productId;
+  return `${productId}:${fingerprint}`;
 }
 
-export function checkoutItemsPayload(items: Array<{
-  productId: string;
-  name: string;
-  quantity: number;
-  size?: string;
-  color?: string;
-}>): CheckoutItemInput[] {
+export function checkoutItemsPayload(
+  items: Array<{
+    productId: string;
+    name: string;
+    quantity: number;
+    size?: string;
+    color?: string;
+    selectedVariants?: Record<string, string>;
+  }>
+): CheckoutItemInput[] {
   return items.map((item) => ({
     productId: item.productId,
     name: item.name,
     quantity: item.quantity,
     size: item.size,
     color: item.color,
+    selectedVariants: item.selectedVariants,
   }));
 }
 
@@ -149,6 +205,7 @@ export function parseCheckoutBody(raw: unknown): { ok: true; data: ParsedCheckou
       quantity,
       size: trim(fields.size, 40) || undefined,
       color: trim(fields.color, 40) || undefined,
+      selectedVariants: parseSelectedVariants(fields.selectedVariants),
     });
   }
 
@@ -204,8 +261,12 @@ export function orderItemsFromCatalog(
         error: "One or more items are no longer available. Refresh the page and try again.",
       };
     }
-    const variant = [line.size, line.color].filter(Boolean).join(" / ");
-    const name = variant ? `${product.name} · ${variant}` : product.name;
+    const suffix = variantDisplaySuffix({
+      size: line.size,
+      color: line.color,
+      selectedVariants: line.selectedVariants,
+    });
+    const name = suffix ? `${product.name} · ${suffix}` : product.name;
     items.push({
       productId: line.productId,
       name,
@@ -213,6 +274,7 @@ export function orderItemsFromCatalog(
       quantity: line.quantity,
       size: line.size,
       color: line.color,
+      selectedVariants: line.selectedVariants,
     });
     subtotalCedis += product.priceCedis * line.quantity;
   }

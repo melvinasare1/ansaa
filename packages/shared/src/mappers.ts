@@ -270,6 +270,7 @@ function orderItemFromUnknown(value: unknown): OrderItem | null {
   const priceCedis = Number(fields.priceCedis ?? fields.price_cedis ?? fields.price ?? 0);
   const size = String(fields.size ?? "").trim();
   const color = String(fields.color ?? "").trim();
+  const selectedVariants = selectedVariantsFromUnknown(fields.selectedVariants);
   return {
     productId,
     name: name || "Item",
@@ -277,7 +278,20 @@ function orderItemFromUnknown(value: unknown): OrderItem | null {
     quantity: Number.isFinite(quantity) ? quantity : 0,
     size: size || undefined,
     color: color || undefined,
+    selectedVariants,
   };
+}
+
+function selectedVariantsFromUnknown(value: unknown): Record<string, string> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const entries: Record<string, string> = {};
+  for (const [key, raw] of Object.entries(value as Record<string, unknown>)) {
+    const name = String(key ?? "").trim();
+    const selected = String(raw ?? "").trim();
+    if (!name || !selected) continue;
+    entries[name] = selected;
+  }
+  return Object.keys(entries).length > 0 ? entries : undefined;
 }
 
 /** Map a customers row (snake_case) to the Customer type (camelCase). */

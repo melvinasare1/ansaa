@@ -61,18 +61,30 @@ export function emptyManualVariant(): DraftVariant {
   };
 }
 
+function isStorefrontSizeAxis(name: string): boolean {
+  return name.trim().toLowerCase() === "size";
+}
+
+function isStorefrontColorAxis(name: string): boolean {
+  const label = name.trim().toLowerCase();
+  return label === "color" || label === "colour";
+}
+
+/**
+ * Derive the legacy sizes[] / colors[] columns for storefronts that still
+ * read those fields. Only axes literally named Size / Color / Colour are
+ * copied — every other axis stays exclusively in variants[].
+ */
 export function storefrontSizesAndColors(variants: DraftVariant[]): {
   sizes: string[];
   colors: string[];
 } {
-  const colorRow = variants.find((row) => /colou?r/i.test(row.name));
-  const sizeRow = variants.find((row) => /size/i.test(row.name));
-  const colors = uniqueLabels(colorRow?.values ?? []);
-  const sizes = uniqueLabels(sizeRow?.values ?? []);
-  if (colors.length > 0) return { sizes, colors };
-
-  const fallback = variants.find((row) => row.id !== sizeRow?.id && row.values.length > 0);
-  return { sizes, colors: uniqueLabels(fallback?.values ?? []) };
+  const colorRow = variants.find((row) => isStorefrontColorAxis(row.name));
+  const sizeRow = variants.find((row) => isStorefrontSizeAxis(row.name));
+  return {
+    sizes: uniqueLabels(sizeRow?.values ?? []),
+    colors: uniqueLabels(colorRow?.values ?? []),
+  };
 }
 
 function variantValues(row: ProductVariant): string[] {

@@ -183,3 +183,36 @@ export const IMPORTS_CHROME: PdpChrome = {
   cartToastClass:
     "inline-flex items-center gap-2 rounded-lg bg-[#1266b5] px-4 py-2.5 text-sm font-medium text-white shadow-lg",
 };
+
+export const HAIR_BEAUTY_CHROME: PdpChrome = {
+  accent: "#8a8165",
+  ink: "#4f4a3d",
+  sectionClass: "mt-16 scroll-mt-28 border-t border-[#d9cfc3] pt-12",
+  titleClass:
+    "text-[30px] font-medium leading-tight tracking-tight text-[#4f4a3d] [font-family:var(--font-hair-display),ui-serif,Georgia] md:text-[36px]",
+  questionClass:
+    "text-[17px] font-medium leading-snug text-[#4f4a3d] [font-family:var(--font-hair-display),ui-serif,Georgia]",
+  mutedClass: "text-sm text-[#4f4a3d]/55",
+  strongClass: "font-semibold text-[#4f4a3d]",
+  bodyClass: "text-[15px] leading-relaxed text-[#4f4a3d]/70",
+  dividerClass: "border-[#d9cfc3]",
+  addButtonClass:
+    "h-11 rounded-full border border-[#c4b896] bg-[#f7f1df] px-4 text-sm font-medium text-[#4f4a3d] hover:bg-white",
+  formClass: "mt-6 rounded-2xl border border-[#d9cfc3] bg-[#faf7f2] p-5",
+  fieldClass:
+    "mt-1.5 h-11 w-full rounded-full border border-[#d9cfc3] bg-white px-4 text-sm text-[#4f4a3d] outline-none focus:border-[#8a8165]",
+  textareaClass:
+    "mt-1.5 w-full resize-y rounded-2xl border border-[#d9cfc3] bg-white px-4 py-3 text-sm text-[#4f4a3d] outline-none focus:border-[#8a8165]",
+  submitClass:
+    "mt-5 flex h-11 w-full items-center justify-center rounded-full bg-[#8a8165] text-sm font-medium text-[#f7f1df] hover:bg-[#91886d] disabled:opacity-60",
+  errorClass: "mt-4 text-sm font-medium text-red-700",
+  successClass: "mt-4 text-sm font-medium text-emerald-800",
+  filterClass:
+    "h-10 min-w-0 rounded-full border border-[#d9cfc3] bg-white px-4 text-sm text-[#4f4a3d] outline-none",
+  barTrackClass: "h-[5px] overflow-hidden rounded-full bg-[#c4b896]/35",
+  barFillClass: "h-full rounded-full bg-[#8a8165]",
+  iconClass: "h-[18px] w-[18px] shrink-0 text-[#8a8165]",
+  verifiedClass: "text-[#8a8165]",
+  cartToastClass:
+    "inline-flex items-center gap-2 rounded-full bg-[#8a8165] px-4 py-2.5 text-sm font-medium text-[#f7f1df] shadow-lg",
+};

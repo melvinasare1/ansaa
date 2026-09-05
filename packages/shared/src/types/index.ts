@@ -56,6 +56,7 @@ export const STOREFRONT_TEMPLATES = [
   "kitchenware-template",
   "motorbike-template",
   "imports-template",
+  "hair-beauty-template",
 ] as const;
 
 export type StorefrontTemplate = (typeof STOREFRONT_TEMPLATES)[number];
@@ -225,6 +226,8 @@ export interface OrderItem {
   quantity: number;
   size?: string;
   color?: string;
+  /** Buyer selections for multi-axis variants (axis name → value). */
+  selectedVariants?: Record<string, string>;
 }
 
 export interface Order {

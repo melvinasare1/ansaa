@@ -1,7 +1,12 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
+import type { ProductVariant } from "@ansaa/shared/types";
 import { isLightSwatch, swatchHex } from "@/lib/swatch";
+import {
+  axesFromVariants,
+  usesGenericVariantAxes,
+} from "@/components/store/pdp/variant-selection";
 
 export function PdpVariantSelectors({
   sizes,
@@ -10,6 +15,9 @@ export function PdpVariantSelectors({
   selectedColor,
   onSelectSize,
   onSelectColor,
+  variants,
+  selectedVariants,
+  onSelectVariant,
   sizeLabel,
   colorLabel,
   labelClassName,
@@ -34,6 +42,10 @@ export function PdpVariantSelectors({
   selectedColor: string;
   onSelectSize: (size: string) => void;
   onSelectColor: (color: string) => void;
+  /** When present with non-Size/Color axes, render one group per axis. */
+  variants?: ProductVariant[];
+  selectedVariants?: Record<string, string>;
+  onSelectVariant?: (axisName: string, value: string) => void;
   sizeLabel: string;
   colorLabel: string;
   labelClassName: string;
@@ -52,6 +64,52 @@ export function PdpVariantSelectors({
   swatchSelectedRing?: string;
   swatchLightBorder?: boolean;
 }) {
+  const axes = axesFromVariants(variants);
+  const useGeneric = usesGenericVariantAxes(variants);
+
+  if (useGeneric) {
+    return (
+      <>
+        {axes.map((axis, index) => {
+          const selected = selectedVariants?.[axis.name] ?? "";
+          return (
+            <div
+              key={axis.name}
+              className={index === 0 ? sizeSectionClassName : colorSectionClassName}
+            >
+              <p className={labelClassName}>{axis.name}</p>
+              <div className={sizeOuterClassName ?? sizeRowClassName ?? "mt-3 flex flex-wrap gap-2"}>
+                <div
+                  className={
+                    sizeOuterClassName
+                      ? sizeRowClassName ?? "flex min-w-0 flex-1 flex-wrap gap-2"
+                      : "contents"
+                  }
+                >
+                  {axis.values.map((value) => {
+                    const isSelected = value === selected;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        aria-pressed={isSelected}
+                        onClick={() => onSelectVariant?.(axis.name, value)}
+                        className={sizeButtonClassName(isSelected)}
+                        style={sizeButtonStyle?.(isSelected)}
+                      >
+                        {value}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </>
+    );
+  }
+
   return (
     <>
       {sizes.length > 0 ? (

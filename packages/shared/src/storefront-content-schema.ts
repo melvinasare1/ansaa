@@ -191,6 +191,36 @@ export const STOREFRONT_CONTENT_SCHEMA: Partial<
       "The supporting sentence shown directly beneath your main headline."
     ),
   ],
+  "hair-beauty-template": [
+    textField(
+      "heroHeadline",
+      "Main headline",
+      "e.g. Luxury Hair Crafted For Every Crown",
+      "home",
+      "The large title at the top of your shop homepage."
+    ),
+    textareaField(
+      "heroSubtext",
+      "Line under the headline",
+      "e.g. Premium quality wigs and bundles designed to elevate your natural beauty.",
+      "home",
+      "The supporting sentence shown directly beneath your main headline."
+    ),
+    imageField(
+      "heroImageUrl",
+      "Top banner photo",
+      "Upload a wide photo for the top of your shop",
+      "home",
+      "The wide photo visitors see on your homepage hero. Leave empty to use the default."
+    ),
+    imageField(
+      "logoUrl",
+      "Shop logo",
+      "Upload your logo",
+      "home",
+      "Your logo in the shop header."
+    ),
+  ],
   "imports-template": [
     textField(
       "heroHeadline",
@@ -560,6 +590,7 @@ export const STOREFRONT_CONTENT_PAGES: Partial<Record<StorefrontTemplate, readon
   "sneaker-template": ["home", "product", "cart"],
   "kitchenware-template": ["home", "product", "cart"],
   "imports-template": ["home", "product", "cart", "contact"],
+  "hair-beauty-template": ["home", "product", "cart", "contact"],
   "motorbike-template": [
     "header",
     "hero",

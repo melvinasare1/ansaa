@@ -8,7 +8,7 @@ const steps = [
   {
     n: "01",
     title: "Pick a template",
-    body: "Choose from five storefront templates and put your shop on your own domain. Your catalogue, your look, live in a few steps.",
+    body: "Choose from six storefront templates and put your shop on your own domain. Your catalogue, your look, live in a few steps.",
   },
   {
     n: "02",
@@ -29,7 +29,7 @@ const steps = [
 
 const websiteFeatures = [
   "Storefront on your own domain",
-  "Pick from 5 templates",
+  "Pick from 6 templates",
   "Admin dashboard for orders, products, and sales",
   "Manual MoMo payments. You mark orders paid, unpaid, or cancelled",
   "Email support",
@@ -73,6 +73,12 @@ const templates = [
     description: "Blue catalogue layout, for grocery and everyday imported goods.",
     href: "/store/imports-template",
     image: "/marketing/imports-preview.jpg",
+  },
+  {
+    name: "Hair & Beauty",
+    description: "Warm luxury layout, for wigs, bundles, and hair retailers.",
+    href: "/store/hair-beauty-template",
+    image: "/marketing/hair-beauty-preview.jpg",
   },
 ];
 

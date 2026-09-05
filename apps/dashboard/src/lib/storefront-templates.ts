@@ -43,6 +43,13 @@ export const STOREFRONT_TEMPLATE_OPTIONS: Array<{
     previewClass: "bg-gradient-to-br from-[#e8f1fa] via-white to-[#1266b5]",
     previewImage: "/marketing/imports-preview.jpg",
   },
+  {
+    id: "hair-beauty-template",
+    name: "Hair & Beauty",
+    description: "Warm luxury layout, for wigs, bundles, and hair retailers.",
+    previewClass: "bg-gradient-to-br from-[#f7f1df] via-[#c4b896] to-[#8a8165]",
+    previewImage: "/marketing/hair-beauty-preview.jpg",
+  },
 ];
 
 export const PRODUCT_CATEGORY_SUGGESTIONS = [
@@ -56,7 +63,7 @@ export const PRODUCT_CATEGORY_SUGGESTIONS = [
 
 export const WEBSITE_ADMIN_FEATURES = [
   "Storefront on your own domain",
-  "Pick from 5 templates",
+  "Pick from 6 templates",
   "Admin dashboard for orders, products, and sales",
   "Manual MoMo payments. You mark orders paid, unpaid, or cancelled",
   "Email support",
