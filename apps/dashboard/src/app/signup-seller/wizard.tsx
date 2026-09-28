@@ -26,7 +26,7 @@ import {
 } from "@/lib/phone";
 import { TRIAL_LENGTH_DAYS } from "@/lib/trial";
 import { cn } from "@/lib/utils";
-import { storefrontInternalPath } from "@ansaa/shared/store-domain";
+import { storefrontPublicPath } from "@ansaa/shared/store-domain";
 import { getWebUrl } from "@ansaa/shared/supabase/env";
 import {
   PRICING_TIER_BASE_FEE_CEDIS,
@@ -103,8 +103,8 @@ function persistDraft(draft: Draft) {
   }
 }
 
-function previewStoreUrl(template: StorefrontTemplate, slug: string) {
-  return `${getWebUrl()}${storefrontInternalPath(template, slug || "your-store")}`;
+function previewStoreUrl(slug: string) {
+  return `${getWebUrl()}${storefrontPublicPath(slug || "your-store")}`;
 }
 
 export default function SellerOnboardingWizard({ mode }: { mode: WizardMode }) {
@@ -731,7 +731,7 @@ function BusinessStep({
                 : "text-muted-foreground"
           )}
         >
-          {slugHint} Preview: {previewStoreUrl(draft.template, draft.storeSlug)}
+          {slugHint} Preview: {previewStoreUrl(draft.storeSlug)}
         </span>
       </label>
 
@@ -803,7 +803,7 @@ function BusinessStep({
       <div>
         <span className="text-sm font-medium">Store preview</span>
         <p className="mt-1.5 rounded-lg border border-dashed border-black/12 bg-mist px-4 py-2.5 font-mono text-sm text-ink-700">
-          {previewStoreUrl(draft.template, draft.storeSlug)}
+          {previewStoreUrl(draft.storeSlug)}
         </p>
         <span className="mt-1.5 block text-xs text-muted-foreground">
           Use this path to test your shop. Your public domain is connected manually by Ansaa — we will be in touch; this is not self-serve yet.
@@ -968,7 +968,7 @@ function ConfirmStep({
           <Row label="Template" value={templateLabel(draft.template)} />
           <Row label="Business name" value={draft.businessName || "Not set"} />
           <Row label="Product category" value={draft.productCategory || "Not set"} />
-          <Row label="Preview URL" value={previewStoreUrl(draft.template, draft.storeSlug)} />
+          <Row label="Preview URL" value={previewStoreUrl(draft.storeSlug)} />
           <Row label="Plan" value={planLabel} />
           <Row
             label="Free trial"

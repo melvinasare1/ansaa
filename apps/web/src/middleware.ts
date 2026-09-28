@@ -4,7 +4,9 @@ import {
   isPlatformPassThroughHost,
   normalizeStoreHost,
 } from "@ansaa/shared/store-domain";
-import { parseStorefrontTemplate } from "@ansaa/shared/types";
+import { parseStorefrontTemplate, STOREFRONT_TEMPLATES } from "@ansaa/shared/types";
+
+const TEMPLATE_SEGMENTS = new Set<string>(STOREFRONT_TEMPLATES);
 
 function hostnameOf(request: NextRequest): string {
   const host = request.headers.get("host") ?? request.nextUrl.hostname;
@@ -40,16 +42,31 @@ function hostNotFound(request: NextRequest) {
   });
 }
 
-async function lookupSellerByExactDomain(
-  hostname: string
-): Promise<{ template: string; store_slug: string } | null> {
+type SellerRoute = { template: string; store_slug: string };
+
+/** `/store/{slug}/...` when `{slug}` is not a template demo route. */
+function publicStorePath(pathname: string): { slug: string; rest: string } | null {
+  if (!pathname.startsWith("/store/")) return null;
+  const after = pathname.slice("/store/".length);
+  if (!after) return null;
+  const slash = after.indexOf("/");
+  const raw = slash === -1 ? after : after.slice(0, slash);
+  const slug = raw.toLowerCase();
+  if (!slug || TEMPLATE_SEGMENTS.has(slug)) return null;
+  return { slug, rest: slash === -1 ? "" : after.slice(slash) };
+}
+
+async function lookupSeller(
+  column: "domain" | "store_slug",
+  value: string
+): Promise<SellerRoute | null> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key || !hostname) return null;
+  if (!url || !key || !value) return null;
 
   const endpoint = new URL("/rest/v1/sellers", url);
   endpoint.searchParams.set("select", "template,store_slug,domain");
-  endpoint.searchParams.set("domain", `eq.${hostname}`);
+  endpoint.searchParams.set(column, `eq.${value}`);
   endpoint.searchParams.set("limit", "1");
 
   const response = await fetch(endpoint, {
@@ -72,27 +89,39 @@ async function lookupSellerByExactDomain(
   return { template, store_slug: storeSlug };
 }
 
+function rewriteStorefront(request: NextRequest, rewritePath: string) {
+  const rewriteUrl = request.nextUrl.clone();
+  rewriteUrl.pathname = rewritePath;
+  return NextResponse.rewrite(rewriteUrl, {
+    request: { headers: withPathnameHeader(request, rewritePath) },
+  });
+}
+
 export async function middleware(request: NextRequest) {
   const hostname = hostnameOf(request);
   const pathname = request.nextUrl.pathname;
+
+  const publicStore = publicStorePath(pathname);
+  if (publicStore && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(publicStore.slug)) {
+    const seller = await lookupSeller("store_slug", publicStore.slug);
+    if (seller) {
+      const rewritePath = `/store/${parseStorefrontTemplate(seller.template)}/${seller.store_slug}${publicStore.rest}`;
+      return rewriteStorefront(request, rewritePath);
+    }
+  }
 
   if (isPlatformPassThroughHost(hostname) || shouldSkipSellerRewrite(pathname)) {
     return passThrough(request);
   }
 
-  const seller = await lookupSellerByExactDomain(hostname);
+  const seller = await lookupSeller("domain", hostname);
   if (!seller) {
     return hostNotFound(request);
   }
 
   const rest = pathname === "/" ? "" : pathname;
   const rewritePath = `/store/${parseStorefrontTemplate(seller.template)}/${seller.store_slug}${rest}`;
-  const rewriteUrl = request.nextUrl.clone();
-  rewriteUrl.pathname = rewritePath;
-
-  return NextResponse.rewrite(rewriteUrl, {
-    request: { headers: withPathnameHeader(request, rewritePath) },
-  });
+  return rewriteStorefront(request, rewritePath);
 }
 
 export const config = {

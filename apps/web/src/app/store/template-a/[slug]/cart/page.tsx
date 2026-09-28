@@ -1,10 +1,14 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
+import { storefrontPublicPath } from "@ansaa/shared/store-domain";
 import { TemplateACartView } from "@/app/store/template-a/cart-view";
+import { sellerSlugFromLocation } from "@/lib/store-path";
 
 export default function TemplateASellerCartPage() {
+  const pathname = usePathname() ?? "";
   const params = useParams();
-  const slug = typeof params.slug === "string" ? params.slug : "";
-  return <TemplateACartView storeSlug={slug} shopHref={`/store/template-a/${slug}`} />;
+  const paramSlug = typeof params.slug === "string" ? params.slug : "";
+  const slug = sellerSlugFromLocation(pathname, "template-a", paramSlug);
+  return <TemplateACartView storeSlug={slug} shopHref={storefrontPublicPath(slug)} />;
 }

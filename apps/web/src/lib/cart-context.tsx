@@ -54,7 +54,7 @@ function storageKey(sellerId: string) {
   return `cart:${sellerId}`;
 }
 
-const RESERVED_STORE_SEGMENTS = new Set(["product", "cart", "search", "blog"]);
+const RESERVED_STORE_SEGMENTS = new Set(["product", "cart", "search", "blog", "contact"]);
 
 function sellerIdFromPath(pathname: string): string {
   const match = pathname.match(/^\/store\/([^/]+)(?:\/([^/]+))?/);

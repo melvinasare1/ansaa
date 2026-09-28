@@ -2,9 +2,9 @@
 
 import { usePathname } from "next/navigation";
 import { NotFoundView } from "@/components/NotFoundView";
+import { storeHomeHref } from "@/lib/store-path";
 
 export function StoreNotFoundView() {
   const pathname = usePathname();
-  const match = pathname.match(/^(\/store\/[^/]+\/[^/]+)/);
-  return <NotFoundView homeHref={match?.[1] ?? "/"} />;
+  return <NotFoundView homeHref={storeHomeHref(pathname)} />;
 }

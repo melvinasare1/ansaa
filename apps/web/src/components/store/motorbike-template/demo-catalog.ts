@@ -1,5 +1,7 @@
 import type { Product, ProductCondition } from "@ansaa/shared/types";
 
+import { sellerSlugFromPath, storefrontBase } from "@/lib/store-path";
+
 export const RIDE_TEMPLATE_BASE = "/store/motorbike-template";
 
 export type RideDemoProduct = {
@@ -281,7 +283,7 @@ export function rideDemoToProduct(item: RideDemoProduct): Product {
 }
 
 export function rideStoreBase(sellerSlug?: string): string {
-  return sellerSlug ? `${RIDE_TEMPLATE_BASE}/${sellerSlug}` : RIDE_TEMPLATE_BASE;
+  return storefrontBase("motorbike-template", sellerSlug);
 }
 
 export function rideProductPath(productId: string, sellerSlug?: string): string {
@@ -292,11 +294,6 @@ export function rideCartPath(sellerSlug?: string): string {
   return `${rideStoreBase(sellerSlug)}/cart`;
 }
 
-const RESERVED_PATH_SEGMENTS = new Set(["search", "blog", "product", "cart", "contact"]);
-
 export function rideCartHrefFromPath(pathname: string): string {
-  const match = pathname.match(/^\/store\/motorbike-template\/([^/]+)/);
-  const segment = match?.[1] ?? "";
-  if (segment && !RESERVED_PATH_SEGMENTS.has(segment)) return rideCartPath(segment);
-  return rideCartPath();
+  return rideCartPath(sellerSlugFromPath(pathname, "motorbike-template"));
 }

@@ -61,8 +61,14 @@ export function connectedStoreHost(domain: string | null | undefined): string | 
   return host;
 }
 
+/** Internal App Router path. Buyers should not see this. */
 export function storefrontInternalPath(template: string, storeSlug: string): string {
   return `/store/${template}/${storeSlug}`;
+}
+
+/** Public storefront path on the marketing host: /store/{slug}. */
+export function storefrontPublicPath(storeSlug: string): string {
+  return `/store/${storeSlug}`;
 }
 
 /** Host buyers use once an Ansaa temp subdomain is actually connected. */

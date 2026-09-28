@@ -1,10 +1,14 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
+import { storefrontPublicPath } from "@ansaa/shared/store-domain";
 import { HairCartView } from "@/app/store/hair-beauty-template/cart-view";
+import { sellerSlugFromLocation } from "@/lib/store-path";
 
 export default function HairBeautySellerCartPage() {
+  const pathname = usePathname() ?? "";
   const params = useParams();
-  const slug = typeof params.slug === "string" ? params.slug : "";
-  return <HairCartView storeSlug={slug} shopHref={`/store/hair-beauty-template/${slug}`} />;
+  const paramSlug = typeof params.slug === "string" ? params.slug : "";
+  const slug = sellerSlugFromLocation(pathname, "hair-beauty-template", paramSlug);
+  return <HairCartView storeSlug={slug} shopHref={storefrontPublicPath(slug)} />;
 }

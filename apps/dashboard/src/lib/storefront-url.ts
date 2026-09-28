@@ -1,7 +1,7 @@
 import {
   connectedStoreHost,
   publicStorefrontUrlFromHost,
-  storefrontInternalPath,
+  storefrontPublicPath,
 } from "@ansaa/shared/store-domain";
 import { getWebUrl } from "@ansaa/shared/supabase/env";
 import type { Seller } from "@ansaa/shared/types";
@@ -10,10 +10,10 @@ export function hasConnectedStoreDomain(seller: Seller | null): boolean {
   return Boolean(connectedStoreHost(seller?.domain));
 }
 
-/** Internal path-based storefront (preview / testing). */
+/** Public path storefront: /store/{slug}. */
 export function storefrontPathUrl(seller: Seller | null): string | null {
-  if (!seller?.template || !seller.storeSlug) return null;
-  return `${getWebUrl()}${storefrontInternalPath(seller.template, seller.storeSlug)}`;
+  if (!seller?.storeSlug) return null;
+  return `${getWebUrl()}${storefrontPublicPath(seller.storeSlug)}`;
 }
 
 /** Live connected host when set; otherwise the preview storefront URL. */
