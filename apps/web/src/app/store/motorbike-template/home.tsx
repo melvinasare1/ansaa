@@ -115,6 +115,15 @@ export async function MotorbikeHome({ storeSlug }: { storeSlug?: string } = {}) 
           href: `${base}/blog/${post.id}`,
         }));
 
+  // Demo product IDs only exist in the template preview. Seller stores link the
+  // banners to their own category listings and hide the demo prices.
+  const promoHref = storeSlug
+    ? `${base}/search?category=motorbikes`
+    : rideProductPath("demo-motorbike-1");
+  const darkBannerHref = storeSlug
+    ? `${base}/search?category=bicycles`
+    : rideProductPath("demo-bicycle-1");
+
   const heroHeadline = rideText(content, "heroHeadline");
   const heroSubtext = rideText(content, "heroSubtext");
   const heroImage = rideText(content, "heroImage");
@@ -282,15 +291,17 @@ export async function MotorbikeHome({ storeSlug }: { storeSlug?: string } = {}) 
               <p className="mt-1.5 text-[13px] font-semibold uppercase tracking-[0.14em]" style={{ color: ORANGE }}>
                 {promoKicker}
               </p>
-              <p className="mt-2 text-[22px] font-semibold" style={{ color: ORANGE }}>
-                {formatCedis(18900)}
-              </p>
+              {storeSlug ? null : (
+                <p className="mt-2 text-[22px] font-semibold" style={{ color: ORANGE }}>
+                  {formatCedis(18900)}
+                </p>
+              )}
               <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-white/70 md:text-[15px]">
                 {promoBody}
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3.5">
                 <Link
-                  href={rideProductPath("demo-motorbike-1", storeSlug)}
+                  href={promoHref}
                   className="inline-flex items-center rounded-lg px-7 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
                   style={{ backgroundColor: ORANGE }}
                 >
@@ -306,7 +317,7 @@ export async function MotorbikeHome({ storeSlug }: { storeSlug?: string } = {}) 
               </div>
             </div>
             <Link
-              href={rideProductPath("demo-motorbike-1", storeSlug)}
+              href={promoHref}
               className="relative flex min-h-[280px] items-center justify-center px-4 py-6 md:min-h-[420px] md:px-6 md:py-8"
             >
               <Image
@@ -421,7 +432,7 @@ export async function MotorbikeHome({ storeSlug }: { storeSlug?: string } = {}) 
         <div className="mx-auto max-w-[1400px] px-6 md:px-10">
           <div className="relative grid overflow-hidden rounded-[28px] bg-[#141414] md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.9fr)]">
             <Link
-              href={rideProductPath("demo-bicycle-1", storeSlug)}
+              href={darkBannerHref}
               className="relative flex min-h-[280px] items-center justify-center px-6 py-8 md:min-h-[400px] md:px-8 md:py-10"
             >
               <Image
@@ -452,14 +463,16 @@ export async function MotorbikeHome({ storeSlug }: { storeSlug?: string } = {}) 
               >
                 {darkBannerHeadline}
               </h2>
-              <p className="mt-2 text-[16px] font-medium text-white/55">
-                From {formatCedis(9450)}
-              </p>
+              {storeSlug ? null : (
+                <p className="mt-2 text-[16px] font-medium text-white/55">
+                  From {formatCedis(9450)}
+                </p>
+              )}
               <p className="mt-4 max-w-sm text-[14px] leading-relaxed text-white/70 md:text-[15px]">
                 {darkBannerBody}
               </p>
               <Link
-                href={rideProductPath("demo-bicycle-1", storeSlug)}
+                href={darkBannerHref}
                 className="mt-8 inline-flex w-fit items-center rounded-lg bg-white px-8 py-3 text-sm font-semibold text-[#141414] transition-opacity hover:opacity-90"
               >
                 Buy Now
